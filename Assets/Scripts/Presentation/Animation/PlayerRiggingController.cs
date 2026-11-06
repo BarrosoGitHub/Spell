@@ -1,0 +1,502 @@
+using UnityEngine.Animations.Rigging;
+using UnityEngine;
+using System;
+
+public class PlayerRiggingController : MonoBehaviour
+{
+    public PlayerActionsSO playerActionsSO;
+    [Header("Targets")]
+    public Transform AimTarget;
+    public Transform LArmTarget;
+    public Transform RArmTarget;
+    public Transform LLegTarget;
+    public Transform RLegTarget;
+
+    [Header("Rigs")]
+    [SerializeField] private Rig armsRig;
+    [SerializeField] private Rig aimRig;
+
+    [Header("Shooting Aim")]
+    [SerializeField, Min(0f)] private float shootingPoseHoldTime = 0.2f;
+    [SerializeField, Min(0.01f)] private float shootingPoseReleaseTime = 0.12f;
+    [Tooltip("Rotation from the shot direction to the right hand's local axes.")]
+    [SerializeField] private Vector3 shootingHandRotationOffset = new Vector3(0f, 90f, 0f);
+
+    private CombatHandler shootingCombatHandler;
+    private bool shootingPoseActive;
+    private Vector3 shootingDirection;
+    private float shootingPoseUntil, shootingArmReach;
+    private float previousArmWeight, previousArmsRigWeight;
+    private float previousPositionWeight, previousRotationWeight;
+    private Vector3 previousTargetPosition;
+    private Quaternion previousTargetRotation;
+
+    [Header("Constraints")]
+    [SerializeField] private MultiAimConstraint HeadConstraint;
+    [SerializeField] private MultiAimConstraint ChestConstraint;
+    [SerializeField] private TwoBoneIKConstraint LArmBoneIK;
+    [SerializeField] private TwoBoneIKConstraint RArmBoneIK;
+    [SerializeField] private TwoBoneIKConstraint LLegBoneIK;
+    [SerializeField] private TwoBoneIKConstraint RLegBoneIK;
+
+ 
+
+    Animator animator;
+  
+    public PlayerController playerController;
+
+    
+    void Start()
+    {
+        animator = GetComponent<Animator>();
+
+        SetOnEnterState();
+        SetOnUpdateState();
+        SetOnStateVariationUpdate();
+    }
+
+    private void OnEnable()
+    {
+        if (!playerController)
+            playerController = GetComponent<PlayerController>();
+        shootingCombatHandler = playerController ? playerController.GetComponent<CombatHandler>() : null;
+        if (playerController)
+            playerController.OnActionInstancePerformed += ReleaseShootingPoseForAction;
+    }
+
+    private void OnDisable()
+    {
+        if (playerController)
+            playerController.OnActionInstancePerformed -= ReleaseShootingPoseForAction;
+        RestoreShootingPose();
+    }
+
+    private void ReleaseShootingPoseForAction(ActionInstance action)
+    {
+        // Release before the action's entry handler places the hands on a hold.
+        RestoreShootingPose();
+    }
+
+    private void AimShootingArm(Vector3 origin, Vector3 end)
+    {
+        // Climbing actions own both hand targets and must not be overridden.
+        if (!CanAimShootingArm()) return;
+        Vector3 direction = end - origin;
+        if (direction.sqrMagnitude <= Mathf.Epsilon) return;
+
+        if (!shootingPoseActive)
+        {
+            var data = RArmBoneIK.data;
+            if (!data.root || !data.mid || !data.tip) return;
+            shootingArmReach = (Vector3.Distance(data.root.position, data.mid.position)
+                + Vector3.Distance(data.mid.position, data.tip.position)) * 0.95f;
+            previousArmWeight = RArmBoneIK.weight;
+            previousArmsRigWeight = armsRig ? armsRig.weight : 0f;
+            previousPositionWeight = data.targetPositionWeight;
+            previousRotationWeight = data.targetRotationWeight;
+            previousTargetPosition = RArmTarget.localPosition;
+            previousTargetRotation = RArmTarget.localRotation;
+            data.targetPositionWeight = 1f;
+            data.targetRotationWeight = 1f;
+            RArmBoneIK.data = data;
+            shootingPoseActive = true;
+        }
+
+        shootingDirection = direction.normalized;
+        shootingPoseUntil = Time.time + shootingPoseHoldTime;
+        UpdateShootingPose();
+    }
+
+    private bool CanAimShootingArm()
+    {
+        return playerController && RArmTarget && RArmBoneIK
+            && playerController.entity != null && playerController.entity.CurrentHealth > 0f
+            && playerController.State == playerController.movingState
+            && playerController.CurrentActionInstance == null;
+    }
+
+    private void Update()
+    {
+        if (!shootingPoseActive) return;
+        if (!CanAimShootingArm())
+        {
+            // State/action handlers may already have placed the targets for climbing.
+            RestoreShootingPose(false);
+            return;
+        }
+        if (!shootingCombatHandler || !shootingCombatHandler.EquippedWeapon)
+            shootingPoseUntil = Mathf.Min(shootingPoseUntil, Time.time);
+        UpdateShootingPose();
+    }
+
+    private void UpdateShootingPose()
+    {
+        float blend = 1f - Mathf.Clamp01((Time.time - shootingPoseUntil) / shootingPoseReleaseTime);
+        if (blend <= 0f)
+        {
+            RestoreShootingPose();
+            return;
+        }
+        RArmTarget.position = RArmBoneIK.data.root.position + shootingDirection * shootingArmReach;
+        Vector3 up = Mathf.Abs(Vector3.Dot(shootingDirection, Vector3.up)) > 0.99f
+            ? Vector3.forward : Vector3.up;
+        RArmTarget.rotation = Quaternion.LookRotation(shootingDirection, up)
+            * Quaternion.Euler(shootingHandRotationOffset);
+        RArmBoneIK.weight = Mathf.Lerp(previousArmWeight, 1f, blend);
+        if (armsRig) armsRig.weight = Mathf.Lerp(previousArmsRigWeight, 1f, blend);
+    }
+
+    private void RestoreShootingPose(bool restoreTarget = true)
+    {
+        if (!shootingPoseActive) return;
+        shootingPoseActive = false;
+        if (RArmBoneIK)
+        {
+            RArmBoneIK.weight = previousArmWeight;
+            var data = RArmBoneIK.data;
+            data.targetPositionWeight = previousPositionWeight;
+            data.targetRotationWeight = previousRotationWeight;
+            RArmBoneIK.data = data;
+        }
+        if (armsRig) armsRig.weight = previousArmsRigWeight;
+        if (restoreTarget && RArmTarget)
+        {
+            RArmTarget.localPosition = previousTargetPosition;
+            RArmTarget.localRotation = previousTargetRotation;
+        }
+    }
+
+    private void SetOnEnterState()
+    {
+        playerController.movingState.OnEnterState += () =>
+        {
+
+            SetRigWeight(LArmBoneIK, 0, 0.1f);
+            SetRigWeight(RArmBoneIK, 0, 0.1f);
+            SetRigWeight(LLegBoneIK, 0, 0.1f);
+            SetRigWeight(RLegBoneIK, 0, 0.1f);
+
+            LArmTarget.SetParent(null);
+            RArmTarget.SetParent(null);
+
+        };
+        playerController.hangingState.OnEnterState += () =>
+        {
+            LArmTarget.SetParent(playerController.closestHold.transform);
+            RArmTarget.SetParent(playerController.closestHold.transform);
+        };
+
+        //Grab
+        playerController.ActionInstances[0].preparing.OnEnterState += () =>
+        {
+            UpdateHandMask(true, 0.1f);
+            UpdateHandMask(false, 0.1f);
+
+            UpdateGrabIK(0f);
+            SetRigWeight(armsRig, 1f, 0f);
+
+            Delay(() => SetRigWeight(LArmBoneIK, 1, 0.1f), 0.1f);
+            Delay(() => SetRigWeight(RArmBoneIK, 1, 0.1f), 0.1f);
+            Delay(() => SetRigWeight(LLegBoneIK, 1, 0.1f), 0.025f);
+            Delay(() => SetRigWeight(RLegBoneIK, 1, 0.1f), 0.025f);
+
+            // if (!playerController.StateVariation)
+            // {
+            //     Delay(() => SetRigWeight(LLegBoneIK, 1, 0.17f), 0.1f);
+            //     Delay(() => SetRigWeight(RLegBoneIK, 1, 0.175f), 0.15f);
+            // }
+
+        };
+        //Climb up
+        playerController.ActionInstances[1].preparing.OnEnterState += () =>
+        {
+            float executingTime = playerController.ActionInstances[1].actionStats.executingTime;
+
+            Delay(() => SetRigWeight(LArmBoneIK, 0, 0.2f), executingTime * 0.4f);
+            Delay(() => SetRigWeight(RArmBoneIK, 0, 0.2f), executingTime * 0.4f);
+            Delay(() => SetRigWeight(LLegBoneIK, 0, 0.1f), executingTime * 0.2f);
+            Delay(() => SetRigWeight(RLegBoneIK, 0, 0.1f), executingTime * 0.025f);
+
+        };
+
+        playerController.ActionInstances[2].preparing.OnEnterState += () =>
+        {
+            // Delay(() => SetRigWeight(LArmBoneIK, 0, 0.1f), 0.3f);
+            // Delay(() => SetRigWeight(RArmBoneIK, 0, 0.1f), 0.3f);
+            // SetRigWeight(LLegBoneIK, 0, 0.1f);
+            // SetRigWeight(RLegBoneIK, 0, 0.1f);
+        };
+        //Climb Jump
+        playerController.ActionInstances[3].preparing.OnEnterState += () =>
+        {
+            float preparingTime = playerController.ActionInstances[3].actionStats.preparingTime;
+
+            Delay(() => UpdateHandMask(true, preparingTime * 0.125f), preparingTime * 0.475f);
+            Delay(() => UpdateHandMask(false, preparingTime * 0.125f), preparingTime * 0.475f);
+
+            Delay(() => SetRigWeight(LArmBoneIK, 0.75f, preparingTime * 0.1f), preparingTime * 0.45f);
+            Delay(() => SetRigWeight(RArmBoneIK, 0.75f, preparingTime * 0.1f), preparingTime * 0.45f);
+            Delay(() => SetRigWeight(LArmBoneIK, 1, preparingTime * 0.075f), preparingTime * 0.6f);
+            Delay(() => SetRigWeight(RArmBoneIK, 1, preparingTime * 0.075f), preparingTime * 0.6f);
+
+            // Delay(() => SetRigWeight(LLegBoneIK, 0.1f, preparingTime * 0.125f), preparingTime * 0.45f);
+            // Delay(() => SetRigWeight(RLegBoneIK, 0.1f, preparingTime * 0.125f), preparingTime * 0.45f);
+
+            // // if (!playerController.StateVariation)
+            // {
+            //     Delay(() => SetRigWeight(RLegBoneIK, 1, preparingTime * 0.175f), preparingTime * 0.6f);
+            //     Delay(() => SetRigWeight(LLegBoneIK, 1, preparingTime * 0.175f), preparingTime * 0.6f);
+            // }
+            // // else
+            // {
+            //     print("here");
+            //     Delay(() => SetRigWeight(LLegBoneIK, 0, preparingTime * 0.175f), preparingTime * 0.65f);
+            //     Delay(() => SetRigWeight(RLegBoneIK, 0, preparingTime * 0.175f), preparingTime * 0.65f);
+            // }
+
+            Delay(() => UpdateGrabIK(preparingTime * 0.15f), preparingTime * 0.5f);
+            SetRigWeight(aimRig, 0.85f, preparingTime * 0.2f);
+            Delay(() => SetRigWeight(aimRig, 0, preparingTime * 0.2f), preparingTime * 0.75f);
+            AimTarget.gameObject.InterpolatePosition(playerController.closestHold.transform.position + Vector3.up * 0.5f, preparingTime * 0.25f).SetEase(Ease.Linear);
+        };
+    }
+
+    private void SetOnUpdateState()
+    {
+        playerController.hangingState.OnFixedUpdate += () =>
+        {
+            // HangingFootIK();
+        };
+    }
+
+    private void SetOnStateVariationUpdate()
+    {
+        playerController.hangingState.OnStateVariationChanged += (value) =>
+        {
+            if (!value)
+            {
+                SetRigWeight(RLegBoneIK, 1, 0.175f);
+                SetRigWeight(LLegBoneIK, 1, 0.175f);
+            }
+            else
+            {
+                SetRigWeight(LLegBoneIK, 0, 0.175f);
+                SetRigWeight(RLegBoneIK, 0, 0.175f);
+            }
+        };
+    }
+
+    // private void ClimbJumpIK(float moveTime)
+    // {
+    //     float wallJumpTime = 1;
+    //     Vector3 wallNormal = CalculationHelper.GetSurfaceNormalFromHold(playerController.closestHold.transform);
+    //     Ray refRay = new(playerController.closestHold.transform.position + Vector3.up * 0.05f, playerController.closestHold.transform.forward);
+    //     RaycastHit LArmHit = new(), RArmHit = new();
+
+    //     if (Physics.Raycast(refRay, out RaycastHit refHit, 1, groundMask))
+    //     {
+    //         Vector3 referencePos = playerController.closestHold.transform.position + refHit.normal * 0.05f + playerController.closestHold.transform.forward * 0.01f;
+
+    //         Vector3 referenceRight = Vector3.Cross(refHit.normal, playerController.closestHold.transform.forward);
+
+    //         Ray LArmRay = new(referencePos - referenceRight * 0.05f, -refHit.normal);
+    //         Ray RArmRay = new(referencePos + referenceRight * 0.05f, -refHit.normal);
+
+    //         Debug.DrawRay(referencePos - referenceRight * 0.05f, -refHit.normal, Color.red, 5f);
+    //         Debug.DrawRay(referencePos, Vector3.up, Color.blue, 5f);
+
+    //         if (Physics.Raycast(LArmRay, out LArmHit, 1, groundMask))
+    //         {
+    //             Vector3 LArmPos = LArmHit.point - refHit.normal * 0.1f - playerController.transform.forward * 0.01f - referenceRight * 0.1f;
+    //             LArmTarget.gameObject.InterpolatePosition(LArmPos, moveTime);
+
+    //             LArmTarget.rotation = Quaternion.LookRotation(-wallNormal) * Quaternion.Euler(0, 90, 0);
+    //         }
+
+    //         if (Physics.Raycast(RArmRay, out RArmHit, 1, groundMask))
+    //         {
+    //             Vector3 RArmPos = RArmHit.point - refHit.normal * 0.1f - playerController.transform.forward * 0.01f + referenceRight * 0.1f;
+    //             RArmTarget.gameObject.InterpolatePosition(RArmPos, moveTime).SetEase(Ease.Linear);
+
+    //             RArmTarget.rotation = Quaternion.LookRotation(wallNormal) * Quaternion.Euler(0, 90, 0);
+    //         }
+    //     }
+
+
+
+    //     Vector3 LLegPos = Vector3.zero;
+    //     Vector3 RLegPos = Vector3.zero;
+    //     float footSeparation = 0.1f;
+
+    //     Vector3 wallParallelVector = Vector3.Cross(wallNormal, Vector3.up);
+
+    //     Ray LLegRay = new(playerController.closestHold.transform.position + Vector3.down + wallNormal * 0.1f - wallParallelVector * footSeparation, -wallNormal);
+    //     Ray RLegRay = new(playerController.closestHold.transform.position + Vector3.down + wallNormal * 0.1f + wallParallelVector * footSeparation, -wallNormal);
+
+    //     if (Physics.Raycast(LLegRay, out RaycastHit LLegHit, 1, groundMask))
+    //     {
+    //         LLegPos = new Vector3(LLegHit.point.x, RArmHit.point.y - 1f, LLegHit.point.z) + wallNormal * 0.18f;
+
+    //         Debug.DrawRay(LLegHit.point, -wallNormal, Color.red, 25);
+    //     }
+    //     if (Physics.Raycast(RLegRay, out RaycastHit RLegHit, groundMask))
+    //     {
+    //         RLegPos = new Vector3(RLegHit.point.x, LArmHit.point.y - 1f, RLegHit.point.z) + wallNormal * 0.18f;
+    //     }
+    //     LLegTarget.gameObject.InterpolatePosition(LLegPos, moveTime).SetEase(Ease.Linear);
+    //     RLegTarget.gameObject.InterpolatePosition(RLegPos, moveTime).SetEase(Ease.Linear);
+
+    //     LLegTarget.rotation = Quaternion.LookRotation(-wallNormal) * Quaternion.Euler(90, 0, 0);
+    //     RLegTarget.rotation = Quaternion.LookRotation(-wallNormal) * Quaternion.Euler(90, 0, 0);
+    // }
+
+    private void UpdateHandMask(bool left, float blendTime)
+    {
+        int layer = left ? 1 : 2;
+        float weight = 0;
+
+        playerController.gameObject.ToFloat(() => weight, x => weight = x, 0.75f, blendTime)
+        .OnUpdate(() =>
+        {
+            animator.SetLayerWeight(layer, weight);
+        })
+        .OnComplete(() =>
+        {
+            playerController.gameObject.ToFloat(() => weight, x => weight = x, 0, blendTime)
+            .OnUpdate(() =>
+            {
+                animator.SetLayerWeight(layer, weight);
+            });
+        });
+    }
+
+
+    private void UpdateGrabIK(float blendTime)
+    {
+        Vector3 wallNormal = CalculationHelper.GetSurfaceNormalFromHold(playerController.closestHold.transform);
+        Vector3 referenceRight = Vector3.Cross(-wallNormal, playerController.closestHold.transform.forward);
+
+        Vector3 LArmPos = playerController.closestHold.transform.position - Vector3.up * 0.1f - referenceRight * 0.135f;
+        Vector3 RArmPos = playerController.closestHold.transform.position - Vector3.up * 0.1f + referenceRight * 0.135f;
+
+        LArmTarget.gameObject.InterpolatePosition(LArmPos, blendTime);
+        RArmTarget.gameObject.InterpolatePosition(RArmPos, blendTime);
+
+        LArmTarget.transform.rotation = Quaternion.LookRotation(-wallNormal) * Quaternion.Euler(0, 90, 0);
+        RArmTarget.transform.rotation = Quaternion.LookRotation(-wallNormal) * Quaternion.Euler(0, -90, 0);
+
+        Vector3 LLegPos = playerController.closestHold.transform.position + Vector3.down + wallNormal * 0.18f - referenceRight * 0.2f;
+        Vector3 RLegPos = playerController.closestHold.transform.position + Vector3.down + wallNormal * 0.18f + referenceRight * 0.2f;
+        
+        LLegTarget.gameObject.InterpolatePosition(LLegPos, blendTime).SetEase(Ease.Linear);
+        RLegTarget.gameObject.InterpolatePosition(RLegPos, blendTime).SetEase(Ease.Linear);
+
+        LLegTarget.rotation = Quaternion.LookRotation(-wallNormal) * Quaternion.Euler(90, 0, 0);
+        RLegTarget.rotation = Quaternion.LookRotation(-wallNormal) * Quaternion.Euler(90, 0, 0);
+
+        // Ray refRay = new(playerController.closestHold.transform.position + Vector3.up * 0.05f, playerController.closestHold.transform.forward);
+
+        // if (Physics.Raycast(refRay, out RaycastHit refHit, 1, groundMask))
+        // {
+        //     Vector3 referencePos = playerController.closestHold.transform.position + refHit.normal * 0.05f + playerController.closestHold.transform.forward * 0.01f;
+        //     Vector3 referenceRight = Vector3.Cross(refHit.normal, playerController.closestHold.transform.forward);
+
+        //     // Debug.DrawRay(playerController.closestHold.transform.position, playerController.closestHold.transform.forward * 0.2f, Color.yellow, 10);
+        //     // Debug.DrawRay(playerController.closestHold.transform.position, refHit.normal * 0.2f, Color.blue, 10);
+        //     // Debug.DrawRay(playerController.closestHold.transform.position, referenceRight * 0.15f, Color.red, 10);
+        //     // Debug.DrawRay(playerController.closestHold.transform.position, -referenceRight * 0.15f, Color.green, 10);
+
+        //     Ray LArmRay = new(referencePos - referenceRight * 0.05f, -refHit.normal);
+        //     Ray RArmRay = new(referencePos + referenceRight * 0.05f, -refHit.normal);
+
+        //     if (Physics.Raycast(LArmRay, out RaycastHit LArmHit, 1, groundMask))
+        //     {
+        //         LArmTarget.transform.position = LArmHit.point - refHit.normal * 0.1f - playerController.transform.forward * 0.01f - referenceRight * 0.1f;
+        //         LArmTarget.rotation = Quaternion.LookRotation(-wallNormal) * Quaternion.Euler(0, 90, 0);
+        //     }
+        //     else
+        //     {
+
+        //     }
+
+        //     if (Physics.Raycast(RArmRay, out RaycastHit RArmHit, 1, groundMask))
+        //     {
+        //         RArmTarget.transform.position = RArmHit.point - refHit.normal * 0.1f - playerController.transform.forward * 0.01f + referenceRight * 0.1f;
+        //         RArmTarget.rotation = Quaternion.LookRotation(wallNormal) * Quaternion.Euler(0, 90, 0);
+        //     }
+        // }
+
+        // Vector3 LLegPos = Vector3.zero;
+        // Vector3 RLegPos = Vector3.zero;
+        // float footSeparation = 0.1f;
+
+        // Vector3 wallParallelVector = Vector3.Cross(wallNormal, Vector3.up);
+
+        // Ray LLegRay = new(playerController.closestHold.transform.position + Vector3.down + wallNormal * 0.1f - wallParallelVector * footSeparation, -wallNormal);
+        // Ray RLegRay = new(playerController.closestHold.transform.position + Vector3.down + wallNormal * 0.1f + wallParallelVector * footSeparation, -wallNormal);
+
+        // if (Physics.Raycast(LLegRay, out LLegHit, groundMask))
+        // {
+        //     LLegPos = new Vector3(LLegHit.point.x, RArmTarget.position.y - 1f, LLegHit.point.z) + wallNormal * 0.18f;
+        // }
+        // if (Physics.Raycast(RLegRay, out RaycastHit RLegHit, groundMask))
+        // {
+        //     RLegPos = new Vector3(RLegHit.point.x, LArmTarget.position.y - 1f, RLegHit.point.z) + wallNormal * 0.18f;
+        // }
+
+        // LLegTarget.position = LLegPos;
+        // RLegTarget.position = RLegPos;
+
+        // LLegTarget.rotation = Quaternion.LookRotation(-wallNormal) * Quaternion.Euler(90, 0, 0);
+        // RLegTarget.rotation = Quaternion.LookRotation(-wallNormal) * Quaternion.Euler(90, 0, 0);
+    }
+
+    // private void HangingFootIK()
+    // {
+    //     Vector3 wallNormal = CalculationHelper.GetSurfaceNormalFromHold(playerController.closestHold.transform);
+    //     Ray refRay = new(playerController.closestHold.transform.position + Vector3.up * 0.05f, playerController.closestHold.transform.forward);
+
+    //     float footSeparation = 0.1f;
+
+    //     Vector3 wallParallelVector = Vector3.Cross(wallNormal, Vector3.up);
+
+    //     Ray LLegRay = new(playerController.closestHold.transform.position + Vector3.down + wallNormal * 0.1f - wallParallelVector * footSeparation, -wallNormal);
+    //     Ray RLegRay = new(playerController.closestHold.transform.position + Vector3.down + wallNormal * 0.1f + wallParallelVector * footSeparation, -wallNormal);
+
+    //     if (Physics.Raycast(LLegRay, out LLegHit, 0.5f, groundMask))
+    //     {
+    //         LeftFootOnWall = true;
+    //     }
+    //     else
+    //     {
+    //         LeftFootOnWall = false;
+    //     }
+    //     if (Physics.Raycast(RLegRay, out RaycastHit RLegHit, groundMask))
+    //     {
+
+    //     }
+
+
+    //     // LLegTarget.rotation = Quaternion.LookRotation(-wallNormal) * Quaternion.Euler(90, 0, 0);
+    //     // RLegTarget.rotation = Quaternion.LookRotation(-wallNormal) * Quaternion.Euler(90, 0, 0);
+    // }
+
+    private void SetRigWeight(Rig rig, float weight, float time)
+    {
+        if (!rig) return;
+        playerController.gameObject.ToFloat(() => rig.weight, x => rig.weight = x, weight, time).SetEase(Ease.Linear);
+    }
+
+    private void SetRigWeight(TwoBoneIKConstraint constraint, float weight, float time)
+    {
+        if (!constraint) return;
+        playerController.gameObject.ToFloat(() => constraint.weight, x => constraint.weight = x, weight, time).SetEase(Ease.Linear);
+    }
+
+    public void Delay(Action action, float amount)
+    {
+        Sequence sequence = new();
+        sequence.AppendInterval(amount).AppendCallback(() => action());
+        StartCoroutine(sequence.ExecuteActions());
+    }
+}

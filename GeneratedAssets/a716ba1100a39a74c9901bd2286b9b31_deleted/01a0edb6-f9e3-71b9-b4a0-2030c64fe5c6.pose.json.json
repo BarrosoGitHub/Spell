@@ -1,0 +1,12 @@
+{
+    "asset": "a716ba1100a39a74c9901bd2286b9b31",
+    "fileName": "01a0edb6-f9e3-71b9-b4a0-2030c64fe5c6.pose.json",
+    "prompt": "Sprinting ",
+    "negativePrompt": "",
+    "model": "unity-text-to-motion",
+    "modelName": "Text to Motion",
+    "customSeed": 1251340826,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "isTrimmed": false
+}

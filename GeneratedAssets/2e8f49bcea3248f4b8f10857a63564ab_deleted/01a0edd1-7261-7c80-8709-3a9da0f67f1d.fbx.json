@@ -1,0 +1,12 @@
+{
+  "asset": "2e8f49bcea3248f4b8f10857a63564ab",
+  "fileName": "01a0edd1-7261-7c80-8709-3a9da0f67f1d.fbx",
+  "prompt": "From cat grab, to climb up a ledge, has to be parkour style",
+  "negativePrompt": "",
+  "model": "uthana-text-to-motion-3",
+  "modelName": "Uthana Text to Motion 3.0",
+  "customSeed": 367099814,
+  "w3CTraceId": "",
+  "feedback": -1,
+  "isTrimmed": false
+}

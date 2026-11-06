@@ -1,0 +1,12 @@
+{
+    "asset": "acef155f258008d48b83b8b8e2c5e886",
+    "fileName": "01a0eda0-70b8-70b1-affd-53291e0832ec.pose.json",
+    "prompt": "Jump very high, high effort, and falling a long fall",
+    "negativePrompt": "",
+    "model": "unity-text-to-motion",
+    "modelName": "Text to Motion",
+    "customSeed": 1244868609,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "isTrimmed": false
+}

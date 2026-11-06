@@ -1,0 +1,12 @@
+{
+    "asset": "beac5a3b694844f46806b9d4f1c8d383",
+    "fileName": "01a0edcb-c444-704f-b866-26140c84ac0f.pose.json",
+    "prompt": "Jump, long jump to fall",
+    "negativePrompt": "",
+    "model": "unity-text-to-motion",
+    "modelName": "Text to Motion",
+    "customSeed": 2006615590,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "isTrimmed": false
+}

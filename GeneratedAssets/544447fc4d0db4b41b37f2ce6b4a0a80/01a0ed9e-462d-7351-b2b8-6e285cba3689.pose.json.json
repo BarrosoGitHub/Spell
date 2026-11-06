@@ -1,0 +1,12 @@
+{
+    "asset": "544447fc4d0db4b41b37f2ce6b4a0a80",
+    "fileName": "01a0ed9e-462d-7351-b2b8-6e285cba3689.pose.json",
+    "prompt": "Jumping forward, jump high, real effort",
+    "negativePrompt": "",
+    "model": "unity-text-to-motion",
+    "modelName": "Text to Motion",
+    "customSeed": 719876924,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "isTrimmed": false
+}

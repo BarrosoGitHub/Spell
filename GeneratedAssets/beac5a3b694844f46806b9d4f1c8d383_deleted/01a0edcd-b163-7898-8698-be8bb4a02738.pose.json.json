@@ -1,0 +1,12 @@
+{
+    "asset": "beac5a3b694844f46806b9d4f1c8d383",
+    "fileName": "01a0edcd-b163-7898-8698-be8bb4a02738.pose.json",
+    "prompt": "from catgrab, parkour, climb up",
+    "negativePrompt": "",
+    "model": "unity-text-to-motion",
+    "modelName": "Text to Motion",
+    "customSeed": 0,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "isTrimmed": false
+}

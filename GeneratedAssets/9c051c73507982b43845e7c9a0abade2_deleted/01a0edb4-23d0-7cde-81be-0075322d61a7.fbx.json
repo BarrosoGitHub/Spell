@@ -1,0 +1,12 @@
+{
+    "asset": "9c051c73507982b43845e7c9a0abade2",
+    "fileName": "01a0edb4-23d0-7cde-81be-0075322d61a7.fbx",
+    "prompt": "falling, continuosly in the air",
+    "negativePrompt": "",
+    "model": "uthana-text-to-motion-3",
+    "modelName": "Uthana Text to Motion 3.0",
+    "customSeed": 2033859295,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "isTrimmed": false
+}

@@ -1,0 +1,12 @@
+{
+    "asset": "beac5a3b694844f46806b9d4f1c8d383",
+    "fileName": "01a0edcc-83e7-79d8-9982-8b239e54c465.pose.json",
+    "prompt": "mantle parkour",
+    "negativePrompt": "",
+    "model": "unity-text-to-motion",
+    "modelName": "Text to Motion",
+    "customSeed": 1927078882,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "isTrimmed": false
+}

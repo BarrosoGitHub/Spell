@@ -1,0 +1,12 @@
+{
+    "asset": "9c051c73507982b43845e7c9a0abade2",
+    "fileName": "01a0edb1-9391-77c8-9029-1295d30aa8db.pose.json",
+    "prompt": "falling",
+    "negativePrompt": "",
+    "model": "unity-text-to-motion",
+    "modelName": "Text to Motion",
+    "customSeed": 1895347505,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "isTrimmed": false
+}

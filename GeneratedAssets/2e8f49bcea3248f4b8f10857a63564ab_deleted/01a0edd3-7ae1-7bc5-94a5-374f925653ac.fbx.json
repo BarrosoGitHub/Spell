@@ -1,0 +1,12 @@
+{
+  "asset": "2e8f49bcea3248f4b8f10857a63564ab",
+  "fileName": "01a0edd3-7ae1-7bc5-94a5-374f925653ac.fbx",
+  "prompt": "From cat grab, to climb up a ledge, has to be parkour style, quick and athletic",
+  "negativePrompt": "",
+  "model": "uthana-video-to-motion",
+  "modelName": "Uthana Video to Motion",
+  "customSeed": 203510977,
+  "w3CTraceId": "",
+  "feedback": -1,
+  "isTrimmed": false
+}

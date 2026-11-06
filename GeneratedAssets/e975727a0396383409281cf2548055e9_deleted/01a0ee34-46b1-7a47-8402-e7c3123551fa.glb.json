@@ -1,0 +1,23 @@
+{
+    "asset": "e975727a0396383409281cf2548055e9",
+    "fileName": "01a0ee34-46b1-7a47-8402-e7c3123551fa.glb",
+    "prompt": "I want a 3d model humanoid of an evil futuristic robot",
+    "negativePrompt": "",
+    "model": "model3d-tripo3-1",
+    "modelName": "Tripo 3.1",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "promptImageReferenceGuid": "0e793f3107368c14f88147050495436f",
+    "modelReferenceGuid": "",
+    "multiviewFrontGuid": "",
+    "multiviewBackGuid": "",
+    "multiviewLeftGuid": "",
+    "multiviewRightGuid": "",
+    "multiviewTopGuid": "",
+    "multiviewBottomGuid": "",
+    "multiviewLeftFrontGuid": "",
+    "multiviewRightFrontGuid": "",
+    "faceLimit": -1
+}

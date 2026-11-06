@@ -1,0 +1,12 @@
+{
+    "asset": "0f37871b379f3934db869612ed50523f",
+    "fileName": "01a0edd5-49d1-79d7-9c7f-a491dcffd942.fbx",
+    "prompt": "",
+    "negativePrompt": "",
+    "model": "uthana-video-to-motion",
+    "modelName": "Uthana Video to Motion",
+    "customSeed": 711409340,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "isTrimmed": false
+}

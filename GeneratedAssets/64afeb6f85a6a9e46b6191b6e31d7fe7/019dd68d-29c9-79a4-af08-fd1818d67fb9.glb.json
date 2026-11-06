@@ -1,0 +1,12 @@
+{
+    "asset": "64afeb6f85a6a9e46b6191b6e31d7fe7",
+    "fileName": "019dd68d-29c9-79a4-af08-fd1818d67fb9.glb",
+    "prompt": "draw just 1 character",
+    "negativePrompt": "",
+    "model": "f923f4af-999c-47c7-b9bf-b8952ffe003e",
+    "modelName": "Rodin Hyper 3D",
+    "customSeed": -1,
+    "w3CTraceId": "0a361fa995c904b9f00f6aa38d32e66e",
+    "feedback": 0,
+    "refinementMode": "Generation"
+}

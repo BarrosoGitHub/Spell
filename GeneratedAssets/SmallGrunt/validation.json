@@ -1,0 +1,23 @@
+{
+  "meshes": 1,
+  "bones": 11,
+  "triangles": 5310,
+  "dimensions_m": [
+    0.8090000152587891,
+    0.32499977946281433,
+    1.4020800590515137
+  ],
+  "actions": [
+    "SmallGrunt_Rig|SmallGrunt_Rig|Attack",
+    "SmallGrunt_Rig|SmallGrunt_Rig|Idle",
+    "SmallGrunt_Rig|SmallGrunt_Rig|Walk"
+  ],
+  "materials": [
+    "Frame_Carbon.001",
+    "Machined_Steel.001",
+    "Energy_Orange.001",
+    "Connectors_Bronze.001",
+    "Armor_Titanium.001",
+    "Armor_Edge.001"
+  ]
+}

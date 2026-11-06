@@ -1,0 +1,12 @@
+{
+    "asset": "92797b5a67bde3a478e1b78924af7bd5",
+    "fileName": "019dd681-2dfa-7664-ad45-930002621800.glb",
+    "prompt": "",
+    "negativePrompt": "",
+    "model": "05e5b649-f94c-4ec6-852c-2a9c4a0af3ab",
+    "modelName": "Hunyuan 3D 3.0 (Pro)",
+    "customSeed": -1,
+    "w3CTraceId": "5c0cccdec56d04b8c2c0679be7f29414",
+    "feedback": 0,
+    "refinementMode": "Generation"
+}
