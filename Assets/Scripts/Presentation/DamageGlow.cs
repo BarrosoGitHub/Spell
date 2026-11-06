@@ -23,7 +23,7 @@ public sealed class DamageGlow : MonoBehaviour
     }
 
     private RendererMaterials[] cachedMaterials;
-    private InteractionManager interactionManager;
+    private EntityManager entityManager;
     private bool glowing;
     private float glowEndTime;
 
@@ -80,8 +80,8 @@ public sealed class DamageGlow : MonoBehaviour
     private void OnEnable()
     {
         if (controller == null) return;
-        interactionManager = InteractionManager.Instance;
-        interactionManager.OnInteractionReceived += HandleInteractionReceived;
+        entityManager = EntityManager.Instance;
+        entityManager.OnInteractionReceived += HandleInteractionReceived;
     }
 
     private void HandleInteractionReceived(Controller target, Controller source, InteractionContext context)
@@ -120,9 +120,9 @@ public sealed class DamageGlow : MonoBehaviour
 
     private void OnDisable()
     {
-        if (interactionManager != null)
-            interactionManager.OnInteractionReceived -= HandleInteractionReceived;
-        interactionManager = null;
+        if (entityManager != null)
+            entityManager.OnInteractionReceived -= HandleInteractionReceived;
+        entityManager = null;
         RestoreMaterials();
     }
 

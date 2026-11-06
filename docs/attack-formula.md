@@ -38,7 +38,7 @@ its displayed shape matches the hit area.
 ## Stat-based damage
 
 Enemy hits go through `Controller.AttackController()` →
-`InteractionManager.TryProcessInteraction()` → `Entity.Attack()`.
+`EntityManager.TryProcessInteraction()` → `EntityManager.Attack()` → `EntityManager.CalculateDamage()`. `EntityManager.TakeDamage()` applies defense and clamps damage to zero. `Entity.TakeDamage()` receives the final amount and updates health.
 
 ```text
 baseHit = attacker.BaseDamage * (1 + attacker.BaseDamagePerc)
@@ -65,7 +65,7 @@ The default stats created by `Controller.Awake()` are 5 health, 1 base damage,
 0.76 defense, 0 critical chance, and a critical multiplier of 1. With no additional
 stats, a hit against another default entity deals approximately 0.24 damage.
 
-`TakeDamage()` returns damage after defense, even if it exceeds remaining health;
+`EntityManager.TakeDamage()` returns damage after defense, even if it exceeds remaining health;
 health itself is clamped to zero. Health changes and death use the entity's existing
 callbacks, and the interaction result reports the damage and critical flag.
 
@@ -85,6 +85,6 @@ reactions are handled separately from this health damage calculation.
 
 - [EnemyController](../Assets/Scripts/Gameplay/Actors/Enemies/EnemyController.cs): available actions and selection.
 - [AttackDirectional](../Assets/Scripts/Gameplay/Actions/Attacking/AttackDirectional.cs): timing setup and hit area.
-- [Entity](../Assets/Scripts/Gameplay/Actors/Entities/Entity.cs): critical roll, damage, defense, and health.
+- [Entity](../Assets/Scripts/Gameplay/Actors/Entities/Entity.cs): final damage application, health, and death notifications.
 - [Stats](../Assets/Scripts/Gameplay/Actors/Entities/Stats.cs): stat fields and additive equipment aggregation.
-- [InteractionManager](../Assets/Scripts/Gameplay/Interaction/InteractionManager.cs): stat damage versus override damage.
+- [EntityManager](../Assets/Scripts/Gameplay/Interaction/EntityManager.cs): stat damage calculation, critical rolls, defense mitigation, and override damage.

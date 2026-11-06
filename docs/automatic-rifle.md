@@ -32,7 +32,7 @@ Accepted shots automatically emit a moving gold particle rendered as a stretched
 
 The visual tracer ends at the same nearest raycast hit used by damage. Hits on scenery (colliders with no parent Controller) produce an outward spark burst and fading dust when the tracer reaches the surface. Misses and character hits do not create wall effects. Impact particles are offset along the surface normal and simulate in world space.
 
-Damage remains hitscan and is applied immediately through Controller.AttackController and InteractionManager. Tracer travel delays only the visuals. This is not a physics projectile, and moving geometry is not re-tested during visual travel.
+Damage remains hitscan and is applied immediately through Controller.AttackController and EntityManager. Tracer travel delays only the visuals. This is not a physics projectile, and moving geometry is not re-tested during visual travel.
 
 BulletShotEffects maintains a scene-local pool capped at 128 simultaneous effects. Tracers can finish after a weapon is unequipped. Effects and their pool are destroyed with the scene. Existing raycast targeting allocates RaycastAll results once per accepted shot. The simple weapon cooldown permits at most one shot per frame.
 

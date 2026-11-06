@@ -42,6 +42,7 @@ See [attack formula](attack-formula.md), [automatic rifle details](automatic-rif
 ## Health and physical reactions
 
 - Entity health, damage, healing, and death events.
+- `EntityManager` processes interactions. `Entity` handles level thresholds, XP reset, and `OnLevelUp` notifications; kill-XP awards are not wired.
 - Combat stats including defense and critical-hit properties.
 - Consciousness damage, unconscious states, and get-up actions.
 - Humanoid hitboxes that forward bullet impulses to a physical ragdoll system.

@@ -10,6 +10,7 @@ public class Entity
 
     public Action<float> OnHealthChanged;
     public Action OnEntityDied;
+
     public event Action OnLevelUp;
 
     private float currentExperience;
@@ -36,7 +37,6 @@ public class Entity
             {
                 currentHealth = 0;
                 OnEntityDied?.Invoke();
-                
             }
             else
             {
@@ -113,39 +113,10 @@ public class Entity
         }
     }
 
-    private DamageResult CalculateDamage()
-    {
-        float damage = stats.BaseDamage * (1 + stats.BaseDamagePerc);
-
-        bool isCritical = UnityEngine.Random.Range(0f, 100f) <= stats.CriticalChance;
-
-        if (isCritical)
-            damage *= stats.CriticalDamage;
-
-        return new DamageResult
-        {
-            Damage = damage,
-            IsCritical = isCritical
-        };
-    }
-
-    public DamageResult Attack(Entity target)
-    {
-        DamageResult result = CalculateDamage();
-        float mitigated = target.TakeDamage(result.Damage);
-        return new DamageResult { Damage = mitigated, IsCritical = result.IsCritical };
-    }
-
     public float TakeDamage(float amount)
     {
-        float mitigated = amount - (stats.Defense * (1 + stats.DefensePerc));
-        mitigated = Mathf.Max(0, mitigated);
-
-        CurrentHealth -= mitigated;
-
-        
-
-        return mitigated;
+        CurrentHealth -= amount;
+        return amount;
     }
 
     public void Heal(float amount)

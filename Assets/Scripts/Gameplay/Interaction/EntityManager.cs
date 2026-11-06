@@ -1,21 +1,21 @@
 using System;
 using UnityEngine;
 
-public class InteractionManager : MonoBehaviour
+public class EntityManager : MonoBehaviour
 {
     public Action<Controller, Controller, InteractionContext> OnInteractionProcessed;
     public Action<Controller, Controller, InteractionContext> OnInteractionReceived;
 
-    private static InteractionManager instance;
+    private static EntityManager instance;
 
-    public static InteractionManager Instance
+    public static EntityManager Instance
     {
         get
         {
             if (instance == null)
             {
-                GameObject managerObject = new GameObject(nameof(InteractionManager));
-                instance = managerObject.AddComponent<InteractionManager>();
+                GameObject managerObject = new GameObject(nameof(EntityManager));
+                instance = managerObject.AddComponent<EntityManager>();
                 DontDestroyOnLoad(managerObject);
             }
 
@@ -53,8 +53,8 @@ public class InteractionManager : MonoBehaviour
         {
             case InteractionType.Attack:
                 DamageResult damageResult = context.DamageOverride.HasValue
-                    ? new DamageResult { Damage = target.entity.TakeDamage(Mathf.Max(0f, context.DamageOverride.Value)), IsCritical = false }
-                    : source.entity.Attack(target.entity);
+                    ? new DamageResult { Damage = TakeDamage(target.entity, Mathf.Max(0f, context.DamageOverride.Value)), IsCritical = false }
+                    : Attack(source.entity, target.entity);
                 result = new InteractionContext
                 {
                     Type = InteractionType.Attack,
@@ -75,6 +75,36 @@ public class InteractionManager : MonoBehaviour
             default:
                 return false;
         }
+    }
+
+    private DamageResult CalculateDamage(Entity source)
+    {
+        float damage = source.stats.BaseDamage * (1 + source.stats.BaseDamagePerc);
+
+        bool isCritical = UnityEngine.Random.Range(0f, 100f) <= source.stats.CriticalChance;
+
+        if (isCritical)
+            damage *= source.stats.CriticalDamage;
+
+        return new DamageResult
+        {
+            Damage = damage,
+            IsCritical = isCritical
+        };
+    }
+
+    private DamageResult Attack(Entity source, Entity target)
+    {
+        DamageResult result = CalculateDamage(source);
+        float mitigated = TakeDamage(target, result.Damage);
+        return new DamageResult { Damage = mitigated, IsCritical = result.IsCritical };
+    }
+
+    private float TakeDamage(Entity target, float amount)
+    {
+        float mitigated = amount - (target.stats.Defense * (1 + target.stats.DefensePerc));
+        mitigated = Mathf.Max(0, mitigated);
+        return target.TakeDamage(mitigated);
     }
 
     private void EmitInteractionEvents(Controller source, Controller target, InteractionContext result)

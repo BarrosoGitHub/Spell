@@ -161,7 +161,7 @@ public abstract class Controller : MonoBehaviour
 
     private void Interact(Controller other, InteractionContext ctx)
     {
-        if (!InteractionManager.Instance.TryProcessInteraction(this, other, ctx, out _))
+        if (!EntityManager.Instance.TryProcessInteraction(this, other, ctx, out _))
         {
             return;
         }
