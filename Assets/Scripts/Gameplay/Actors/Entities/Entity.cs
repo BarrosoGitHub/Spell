@@ -9,46 +9,16 @@ public class Entity
     private List<Equipment> equipmentList;
 
     public Action<float> OnHealthChanged;
-    public Action OnEntityDied;
+    public Action<Entity> OnEntityDied;
 
     public event Action OnLevelUp;
 
     private float currentExperience;
-    public float CurrentExperience => currentExperience;
 
     public float LevelUpExperience => stats.Level * 2f;
 
     private float currentHealth;
-    public float CurrentHealth
-    {
-        get
-        {
-            return currentHealth;
-        }
-        set
-        {
-            float previousHealth = currentHealth;
-
-            if (value > stats.MaxHealth)
-            {
-                currentHealth = stats.MaxHealth;
-            }
-            else if (value <= 0)
-            {
-                currentHealth = 0;
-                OnEntityDied?.Invoke();
-            }
-            else
-            {
-                currentHealth = value;
-            }
-
-            if (previousHealth != currentHealth)
-            {
-                OnHealthChanged?.Invoke(currentHealth);
-            }
-        }
-    }
+    public float CurrentHealth => currentHealth;
 
     public Entity(Stats baseStats, List<Equipment> equipmentList = null)
     {
@@ -113,14 +83,29 @@ public class Entity
         }
     }
 
-    public float TakeDamage(float amount)
+    public float AddCurrentHealth(float amount, Entity source)
     {
-        CurrentHealth -= amount;
-        return amount;
-    }
+        float previousHealth = currentHealth;
+        float value = currentHealth + amount;
 
-    public void Heal(float amount)
-    {
-        CurrentHealth += amount;
+        if (value > stats.MaxHealth)
+        {
+            currentHealth = stats.MaxHealth;
+        }
+        else if (value <= 0f)
+        {
+            currentHealth = 0f;
+            if (previousHealth > 0f)
+                OnEntityDied?.Invoke(source);
+        }
+        else
+        {
+            currentHealth = value;
+        }
+
+        if (previousHealth != currentHealth)
+            OnHealthChanged?.Invoke(currentHealth);
+
+        return amount;
     }
 }

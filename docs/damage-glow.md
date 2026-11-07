@@ -1,6 +1,6 @@
 # Damage glow
 
-`DamageGlow` listens to `EntityManager.OnInteractionReceived` while enabled.
+`DamageGlow` listens to `EntityManager.OnInteraction` while enabled. Arguments are `(source, target, context)`; the glow filters by target. It unsubscribes when disabled.
 Only an Attack interaction for its configured Controller with positive post-defense
 damage triggers the effect. Healing, zero damage, and other targets are ignored.
 

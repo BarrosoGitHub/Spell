@@ -81,10 +81,10 @@ public sealed class DamageGlow : MonoBehaviour
     {
         if (controller == null) return;
         entityManager = EntityManager.Instance;
-        entityManager.OnInteractionReceived += HandleInteractionReceived;
+        entityManager.OnInteraction += HandleInteraction;
     }
 
-    private void HandleInteractionReceived(Controller target, Controller source, InteractionContext context)
+    private void HandleInteraction(Controller source, Controller target, InteractionContext context)
     {
         if (target != controller || context == null || context.Type != InteractionType.Attack || context.Value <= 0f)
             return;
@@ -121,7 +121,7 @@ public sealed class DamageGlow : MonoBehaviour
     private void OnDisable()
     {
         if (entityManager != null)
-            entityManager.OnInteractionReceived -= HandleInteractionReceived;
+            entityManager.OnInteraction -= HandleInteraction;
         entityManager = null;
         RestoreMaterials();
     }

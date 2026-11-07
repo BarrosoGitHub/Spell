@@ -79,7 +79,7 @@ public class EnemyManager : MonoBehaviour
         enemyController.enemyType = enemyType;
         enemyController.Target = null;
         enemyController.State = enemyController.idlingState;
-        enemyController.entity.CurrentHealth = enemyController.entity.stats.MaxHealth;
+        enemyController.entity.AddCurrentHealth(enemyController.entity.stats.MaxHealth - enemyController.entity.CurrentHealth, null);
         enemyController.Consciousness = 100f;
 
         return enemyController;

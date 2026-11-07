@@ -150,9 +150,9 @@ public class EnemyController : Controller
 
         State?.OnFixedUpdate?.Invoke();
     }
-    public override void OnDied()
+    public override void OnDied(Entity source)
     {
-        base.OnDied();
+        base.OnDied(source);
 
         State = deadState;
     }

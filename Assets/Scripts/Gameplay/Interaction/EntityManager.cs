@@ -3,8 +3,7 @@ using UnityEngine;
 
 public class EntityManager : MonoBehaviour
 {
-    public Action<Controller, Controller, InteractionContext> OnInteractionProcessed;
-    public Action<Controller, Controller, InteractionContext> OnInteractionReceived;
+    public event Action<Controller, Controller, InteractionContext> OnInteraction;
 
     private static EntityManager instance;
 
@@ -53,8 +52,8 @@ public class EntityManager : MonoBehaviour
         {
             case InteractionType.Attack:
                 DamageResult damageResult = context.DamageOverride.HasValue
-                    ? new DamageResult { Damage = TakeDamage(target.entity, Mathf.Max(0f, context.DamageOverride.Value)), IsCritical = false }
-                    : Attack(source.entity, target.entity);
+                    ? new DamageResult { Damage = ApplyDamage(source, target, Mathf.Max(0f, context.DamageOverride.Value)), IsCritical = false }
+                    : Attack(source, target);
                 result = new InteractionContext
                 {
                     Type = InteractionType.Attack,
@@ -63,13 +62,13 @@ public class EntityManager : MonoBehaviour
                 };
                 Debug.Log($"{source.name} dealt {damageResult.Damage:0.##} damage to {target.name}" +
                     $"{(damageResult.IsCritical ? " (critical)" : "")}. Health: {target.entity.CurrentHealth:0.##}/{target.entity.stats.MaxHealth:0.##}", target);
-                EmitInteractionEvents(source, target, result);
+                OnInteraction?.Invoke(source, target, result);
                 return true;
 
             case InteractionType.Heal:
-                target.entity.Heal(context.Value);
+                target.entity.AddCurrentHealth(context.Value, source.entity);
                 result = context;
-                EmitInteractionEvents(source, target, result);
+                OnInteraction?.Invoke(source, target, result);
                 return true;
 
             default:
@@ -93,23 +92,18 @@ public class EntityManager : MonoBehaviour
         };
     }
 
-    private DamageResult Attack(Entity source, Entity target)
+    private DamageResult Attack(Controller source, Controller target)
     {
-        DamageResult result = CalculateDamage(source);
-        float mitigated = TakeDamage(target, result.Damage);
+        DamageResult result = CalculateDamage(source.entity);
+        float mitigated = ApplyDamage(source, target, result.Damage);
         return new DamageResult { Damage = mitigated, IsCritical = result.IsCritical };
     }
 
-    private float TakeDamage(Entity target, float amount)
+    private float ApplyDamage(Controller source, Controller target, float amount)
     {
-        float mitigated = amount - (target.stats.Defense * (1 + target.stats.DefensePerc));
+        float mitigated = amount - (target.entity.stats.Defense * (1 + target.entity.stats.DefensePerc));
         mitigated = Mathf.Max(0, mitigated);
-        return target.TakeDamage(mitigated);
-    }
-
-    private void EmitInteractionEvents(Controller source, Controller target, InteractionContext result)
-    {
-        OnInteractionProcessed?.Invoke(source, target, result);
-        OnInteractionReceived?.Invoke(target, source, result);
+        target.entity.AddCurrentHealth(-mitigated, source.entity);
+        return mitigated;
     }
 }

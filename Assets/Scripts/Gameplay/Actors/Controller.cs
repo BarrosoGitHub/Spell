@@ -167,7 +167,7 @@ public abstract class Controller : MonoBehaviour
         }
     }
 
-    public virtual void OnDied()
+    public virtual void OnDied(Entity source)
     {
         OnControllerDied?.Invoke(this);
 

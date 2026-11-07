@@ -38,7 +38,7 @@ its displayed shape matches the hit area.
 ## Stat-based damage
 
 Enemy hits go through `Controller.AttackController()` →
-`EntityManager.TryProcessInteraction()` → `EntityManager.Attack()` → `EntityManager.CalculateDamage()`. `EntityManager.TakeDamage()` applies defense and clamps damage to zero. `Entity.TakeDamage()` receives the final amount and updates health.
+`EntityManager.TryProcessInteraction()` → `EntityManager.Attack()` → `EntityManager.CalculateDamage()`. `EntityManager.ApplyDamage()` applies defense and clamps damage to zero. `Entity.AddCurrentHealth(amount, source)` receives the final amount and source entity, clamps health, and raises health/death notifications. `CurrentHealth` is read-only. `AddCurrentHealth()` adds a signed health change: positive values heal, negative values deal damage. Healing interactions and pooled-enemy restoration use positive amounts. Attack and healing interactions pass the source entity; mission and pool restoration pass `null` because they have no source entity.
 
 ```text
 baseHit = attacker.BaseDamage * (1 + attacker.BaseDamagePerc)
@@ -65,8 +65,8 @@ The default stats created by `Controller.Awake()` are 5 health, 1 base damage,
 0.76 defense, 0 critical chance, and a critical multiplier of 1. With no additional
 stats, a hit against another default entity deals approximately 0.24 damage.
 
-`EntityManager.TakeDamage()` returns damage after defense, even if it exceeds remaining health;
-health itself is clamped to zero. Health changes and death use the entity's existing
+`EntityManager.ApplyDamage()` returns a nonnegative damage magnitude after defense, even if it exceeds remaining health;
+health itself is clamped to zero. Death is notified only when health transitions from above zero to zero, so repeated damage or zero changes while dead do not notify again. Restoring health permits a later death notification. Health changes and death use the entity's existing
 callbacks, and the interaction result reports the damage and critical flag.
 
 ## Weapon damage override
