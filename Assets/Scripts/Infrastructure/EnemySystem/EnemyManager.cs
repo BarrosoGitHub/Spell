@@ -11,10 +11,31 @@ public class EnemyManager : MonoBehaviour
     public float refreshEnemyFollowGroupInterval = 0.25f;
     private readonly Dictionary<EnemyGroup, Coroutine[]> groupCoroutines = new();
     private List<Controller> availableControllers = new();
+    private readonly HashSet<EnemyController> spawnedEnemies = new();
+    private EntityManager entityManager;
 
     void Awake()
     {
         controllerSpawner = GetComponent<ControllerSpawner>();
+    }
+
+    private void OnEnable()
+    {
+        entityManager = EntityManager.Instance;
+        entityManager.OnControllerDied += HandleControllerDied;
+    }
+
+    private void OnDisable()
+    {
+        if (entityManager != null)
+            entityManager.OnControllerDied -= HandleControllerDied;
+        entityManager = null;
+    }
+
+    private void HandleControllerDied(Controller source, Controller target)
+    {
+        if (target is EnemyController enemy && spawnedEnemies.Contains(enemy))
+            DespawnEnemy(enemy);
     }
 
     public void AddEnemyGroup(EnemyGroup enemyGroup)
@@ -73,13 +94,12 @@ public class EnemyManager : MonoBehaviour
         if (!enemyController) return null;
 
         availableControllers.Add(enemyController);
-        enemyController.OnControllerDied -= DespawnEnemy;
-        enemyController.OnControllerDied += DespawnEnemy;
+        spawnedEnemies.Add(enemyController);
 
         enemyController.enemyType = enemyType;
         enemyController.Target = null;
         enemyController.State = enemyController.idlingState;
-        enemyController.entity.AddCurrentHealth(enemyController.entity.stats.MaxHealth - enemyController.entity.CurrentHealth, null);
+        enemyController.entity.AddCurrentHealth(enemyController.entity.stats.MaxHealth - enemyController.entity.CurrentHealth);
         enemyController.Consciousness = 100f;
 
         return enemyController;
@@ -110,9 +130,7 @@ public class EnemyManager : MonoBehaviour
     private void DespawnEnemy(Controller controller)
     {
         EnemyController enemyController = controller as EnemyController;
-        if (enemyController == null) return;
-
-        enemyController.OnControllerDied -= DespawnEnemy;
+        if (enemyController == null || !spawnedEnemies.Remove(enemyController)) return;
 
         foreach (EnemyGroup group in groupCoroutines.Keys.ToList())
         {

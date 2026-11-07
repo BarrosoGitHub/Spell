@@ -9,7 +9,7 @@ public class Entity
     private List<Equipment> equipmentList;
 
     public Action<float> OnHealthChanged;
-    public Action<Entity> OnEntityDied;
+    public Action OnEntityDied;
 
     public event Action OnLevelUp;
 
@@ -83,7 +83,7 @@ public class Entity
         }
     }
 
-    public float AddCurrentHealth(float amount, Entity source)
+    public float AddCurrentHealth(float amount)
     {
         float previousHealth = currentHealth;
         float value = currentHealth + amount;
@@ -96,7 +96,7 @@ public class Entity
         {
             currentHealth = 0f;
             if (previousHealth > 0f)
-                OnEntityDied?.Invoke(source);
+                OnEntityDied?.Invoke();
         }
         else
         {
@@ -106,6 +106,6 @@ public class Entity
         if (previousHealth != currentHealth)
             OnHealthChanged?.Invoke(currentHealth);
 
-        return amount;
+        return currentHealth;
     }
 }

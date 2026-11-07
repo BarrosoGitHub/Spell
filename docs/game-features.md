@@ -59,6 +59,7 @@ See [ragdoll details](ragdoll-manager.md).
 - Enemy groups specify a target, enemy type, recruitment engagement distance, separate attack trigger range (default 3 units), group limit, simultaneous attacker limit, and attack interval. Each attacker must be within its group's attack range before beginning an attack.
 - Group refresh selects nearby eligible enemies and retains attackers and link traversers until their actions finish.
 - Enemy spawning and despawning use the controller spawner and object pool.
+- Each `EnemyManager` listens to `EntityManager.OnControllerDied(source, target)` while enabled and despawns only enemies it spawned. It no longer subscribes to individual enemy death callbacks.
 - Available enemies and active group members are tracked for bulk cleanup.
 - Bulk cleanup returns tracked enemies to the pool and stops registered group coroutines.
 - A separate `EnemySetup` component can register groups and spawn an initial batch at configured points.

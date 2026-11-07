@@ -4,6 +4,7 @@ using UnityEngine;
 public class EntityManager : MonoBehaviour
 {
     public event Action<Controller, Controller, InteractionContext> OnInteraction;
+    public Action<Controller, Controller> OnControllerDied;
 
     private static EntityManager instance;
 
@@ -66,7 +67,7 @@ public class EntityManager : MonoBehaviour
                 return true;
 
             case InteractionType.Heal:
-                target.entity.AddCurrentHealth(context.Value, source.entity);
+                target.entity.AddCurrentHealth(context.Value);
                 result = context;
                 OnInteraction?.Invoke(source, target, result);
                 return true;
@@ -80,7 +81,9 @@ public class EntityManager : MonoBehaviour
     {
         float damage = source.stats.BaseDamage * (1 + source.stats.BaseDamagePerc);
 
-        bool isCritical = UnityEngine.Random.Range(0f, 100f) <= source.stats.CriticalChance;
+        float chance = source.stats.CriticalChance;
+        bool isCritical = chance >= 100f ||
+            (chance > 0f && UnityEngine.Random.Range(0f, 100f) < chance);
 
         if (isCritical)
             damage *= source.stats.CriticalDamage;
@@ -103,7 +106,19 @@ public class EntityManager : MonoBehaviour
     {
         float mitigated = amount - (target.entity.stats.Defense * (1 + target.entity.stats.DefensePerc));
         mitigated = Mathf.Max(0, mitigated);
-        target.entity.AddCurrentHealth(-mitigated, source.entity);
+        float healthResult = target.entity.AddCurrentHealth(-mitigated);
+
+        if (healthResult <= 0f)
+        {
+            ControllerDied(source, target);
+        }
+
         return mitigated;
+    }
+
+    private void ControllerDied(Controller source, Controller target)
+    {
+        OnControllerDied?.Invoke(source, target);
+        source.entity.AddExperience(target.entity.stats.Level);
     }
 }

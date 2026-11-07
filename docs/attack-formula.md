@@ -42,7 +42,7 @@ Enemy hits go through `Controller.AttackController()` →
 
 ```text
 baseHit = attacker.BaseDamage * (1 + attacker.BaseDamagePerc)
-isCritical = Random.Range(0f, 100f) <= attacker.CriticalChance
+isCritical = chance >= 100 OR (chance > 0 AND Random.Range(0f, 100f) < chance)
 rawDamage = isCritical ? baseHit * attacker.CriticalDamage : baseHit
 effectiveDefense = target.Defense * (1 + target.DefensePerc)
 damage = max(0, rawDamage - effectiveDefense)
@@ -50,7 +50,7 @@ newHealth = clamp(oldHealth - damage, 0, target.MaxHealth)
 ```
 
 - Percentage modifiers are fractions: `0.25` means +25%. They are added to 1 before multiplication.
-- `CriticalChance` uses a 0–100 scale. The current comparison is inclusive (`<=`), so a zero roll can pass even with a chance of zero.
+- `CriticalChance` uses a 0–100 scale. Chances at or below zero never crit; chances at or above 100 always crit. Other chances use a strict `<` comparison.
 - `CriticalDamage` is the whole multiplier: `2` means double damage, not +200%.
 - Defense subtracts a flat amount after critical damage is applied. It is not percentage damage reduction.
 - Base stats and equipped item stats are added field by field, including percentage modifiers and critical multipliers, before this calculation.
