@@ -5,6 +5,7 @@ public class EntityManager : MonoBehaviour
 {
     public event Action<Controller, Controller, InteractionContext> OnInteraction;
     public Action<Controller, Controller> OnControllerDied;
+    public Action<Controller> OnControllerLeveledUp;
 
     private static EntityManager instance;
 
@@ -119,6 +120,9 @@ public class EntityManager : MonoBehaviour
     private void ControllerDied(Controller source, Controller target)
     {
         OnControllerDied?.Invoke(source, target);
-        source.entity.AddExperience(target.entity.stats.Level);
+        if (source.entity.AddExperienceAndCheckLevelUp(target.entity.stats.Level))
+        {
+            OnControllerLeveledUp?.Invoke(source);
+        }
     }
 }

@@ -11,10 +11,7 @@ public class Entity
     public Action<float> OnHealthChanged;
     public Action OnEntityDied;
 
-    public event Action OnLevelUp;
-
     private float currentExperience;
-
     public float LevelUpExperience => stats.Level * 2f;
 
     private float currentHealth;
@@ -28,9 +25,9 @@ public class Entity
         currentHealth = stats.MaxHealth;
     }
 
-    public void AddExperience(float amount)
+    public bool AddExperienceAndCheckLevelUp(float amount)
     {
-        if (amount <= 0f) return;
+        if (amount <= 0f) return false;
 
         currentExperience += amount;
 
@@ -40,8 +37,9 @@ public class Entity
             baseStats.Level++;
             UpdateStats();
             Debug.Log($"Entity leveled up to level {stats.Level}.");
-            OnLevelUp?.Invoke();
+            return true;
         }
+        return false;
     }
 
     public void ResetLevel()
