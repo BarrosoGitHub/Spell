@@ -128,6 +128,7 @@ See [building navigation](building-navmesh.md) and the [foot placement component
 - Equipment slot and stat data classes exist; a complete inventory or equipment interface is not established by those classes.
 - `EquipmentDrop` assets generate equipment of a configured slot and rarity, selecting distinct stat bonuses up to shared `EquipmentRaritySettings` limits and rolling their designer-defined ranges. See [equipment drops](equipment-drops.md).
 - `EquipmentDropTable` assets select an `EquipmentDrop` by relative weight and generate one item, optionally restricted to a requested rarity. `EquipmentManager` exposes specific-drop and random generation methods; its prefab references the starter Boots table.
+- `RewardManager` listens to `EntityManager.OnControllerLeveledUp`, generates three equipment options, and raises `OnRewardsGenerated(controller, rewards)`. It is configured on the EquipmentManager prefab; UI and selection remain caller-owned.
 - Reusable interpolation utilities support animation and effect transitions.
 
 ## Verification scope

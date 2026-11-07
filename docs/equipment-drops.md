@@ -64,6 +64,31 @@ Equipment rare = equipmentManager.GetRandomEquipment(Rarity.Rare);
 
 Each call generates a fresh item. A rarity request never falls back to another rarity: if no enabled entry matches, generation throws a configuration exception. Zero-weight entries stay disabled for both kinds of roll. The manager does not retain generated equipment, equip it, or spawn pickups; the caller owns the returned item. The prefab must be added to a scene before scene components can reference its instance.
 
+## Level-up rewards
+
+`RewardManager` subscribes to `EntityManager.OnControllerLeveledUp` while enabled. For every notification it requests three independent weighted rolls from `EquipmentManager` and raises `OnRewardsGenerated(controller, rewards)`. The payload is an `IReadOnlyList<Equipment>` containing three fresh instances. Each offer owns a new array, so later level-ups do not overwrite earlier offers. Repeated equipment definitions or rarities are allowed.
+
+The existing EquipmentManager prefab includes a RewardManager referencing its equipment component. Place it in the scene; EntityManager defaults to its existing singleton unless explicitly assigned. Consumers subscribe to the RewardManager instance:
+
+```csharp
+private void OnEnable()
+{
+    rewardManager.OnRewardsGenerated += ShowRewards;
+}
+
+private void OnDisable()
+{
+    rewardManager.OnRewardsGenerated -= ShowRewards;
+}
+
+private void ShowRewards(Controller controller, IReadOnlyList<Equipment> rewards)
+{
+    // Show the three choices for this controller.
+}
+```
+
+RewardManager generates and announces choices; it does not equip them or own their UI. It unsubscribes when disabled or destroyed, preventing duplicate subscriptions on enable/reuse. Offers are generated for any controller reported by EntityManager. XP granted directly to an Entity must be reported by its caller through EntityManager's level-up notification flow to produce an offer.
+
 ## Maximum stat lines by rarity
 
 Create **Equipment > Rarity Settings** to configure the maximum number of distinct bonus stats per item. The included `EquipmentRaritySettings.asset` is assigned to all five starter Boots definitions and defaults to:
