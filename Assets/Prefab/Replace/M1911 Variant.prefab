@@ -14959,7 +14959,7 @@ MonoBehaviour:
     executingTime: 0
   stats:
     fireRate: 6
-    damagePerBullet: 1
+    damagePerBullet: 5
     magazine: 8
     reloadTime: 1.5
     range: 50

@@ -63,7 +63,7 @@ public sealed class MissionManager : MonoBehaviour
         selectedMission.StartMission();
 
         //This needs better way
-        subscribedPlayer.entity.AddCurrentHealth(300, null);
+        subscribedPlayer.entity.AddCurrentHealth(300);
         return true;
     }
 

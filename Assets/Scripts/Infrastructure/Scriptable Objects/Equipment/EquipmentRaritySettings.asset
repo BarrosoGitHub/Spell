@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13e6fb7e9e1a47ce958a2911e934c06f, type: 3}
   m_Name: EquipmentRaritySettings
   m_EditorClassIdentifier: 
-  common: 1
+  common: 2
   uncommon: 2
   rare: 3
-  epic: 4
-  legendary: 5
+  epic: 3
+  legendary: 4

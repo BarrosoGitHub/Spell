@@ -20,7 +20,7 @@ public struct WeaponStats
     public static WeaponStats Default => new WeaponStats
     {
         fireRate = 10f,
-        damagePerBullet = 1f,
+        damagePerBullet = 5f,
         magazine = 30,
         ammunition = 30,
         lastAttackTime = float.NegativeInfinity,

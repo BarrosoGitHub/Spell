@@ -50,7 +50,7 @@ MonoBehaviour:
     executingTime: 0
   stats:
     fireRate: 10
-    damagePerBullet: 1
+    damagePerBullet: 5
     magazine: 30
     reloadTime: 2
     range: 50
