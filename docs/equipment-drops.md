@@ -66,7 +66,7 @@ Each call generates a fresh item. A rarity request never falls back to another r
 
 ## Level-up rewards
 
-`RewardManager` subscribes to `EntityManager.OnControllerLeveledUp` while enabled. For every notification it requests three independent weighted rolls from `EquipmentManager` and raises `OnRewardsGenerated(controller, rewards)`. The payload is an `IReadOnlyList<Equipment>` containing three fresh instances. Each offer owns a new array, so later level-ups do not overwrite earlier offers. Repeated equipment definitions or rarities are allowed.
+`RewardManager` subscribes to `EntityManager.OnControllerLeveledUp` while enabled. Each level-up generates three independent weighted rolls from `EquipmentManager` and queues the choices for that controller. Each controller has an independent FIFO queue, so waiting on one player does not block another. Only the first offer in each controller’s queue raises `OnRewardsGenerated(controller, rewards)`. After the current reward is equipped, that offer is dequeued and the same controller’s next offer is announced. Empty controller queues are removed. The payload is an `IReadOnlyList<Equipment>` containing three fresh instances. Each offer owns a new array, so later level-ups do not overwrite earlier offers. Repeated equipment definitions or rarities are allowed.
 
 The existing EquipmentManager prefab includes a RewardManager referencing its equipment component. Place it in the scene; EntityManager defaults to its existing singleton unless explicitly assigned. Consumers subscribe to the RewardManager instance:
 
@@ -87,7 +87,11 @@ private void ShowRewards(Controller controller, IReadOnlyList<Equipment> rewards
 }
 ```
 
-RewardManager generates and announces choices; it does not equip them or own their UI. It unsubscribes when disabled or destroyed, preventing duplicate subscriptions on enable/reuse. Offers are generated for any controller reported by EntityManager. XP granted directly to an Entity must be reported by its caller through EntityManager's level-up notification flow to produce an offer.
+RewardManager generates and announces choices and exposes `SelectReward(controller, equipment)`, which accepts only an item from the current offer for its controller, forwards it to `EntityManager.AddEquipment`, and advances the queue. Invalid or repeated selections are ignored. Disabling the manager clears all controller queues. It does not own the UI. It unsubscribes when disabled or destroyed, preventing duplicate subscriptions on enable/reuse. Offers are generated for any controller reported by EntityManager. XP granted directly to an Entity must be reported by its caller through EntityManager's level-up notification flow to produce an offer.
+
+`RewardDisplay` is attached to the **Game UI** canvas in `Assets/Scenes/Test 1.unity`, with a serialized reference to that scene’s Equipment/Reward Manager instance. It builds a hidden panel inside the existing canvas once and displays three centered, spaced cards when `OnRewardsGenerated` fires. Each card shows the equipment name, rarity, slot, and nonzero rolled bonuses. Fractional bonuses are shown as percentages, critical chance as percentage points, and critical damage as an added multiplier. Empty builds show “No bonus stats.” Labels are updated before the panel appears and replaced on each new offer.
+
+The cards use normalized screen anchors, padded text, and font sizing that adapts to available space. Clicking or tapping a card calls `RewardManager.SelectReward(controller, equipment)`, which calls `EntityManager.AddEquipment` with that offer’s controller and chosen item, after the UI hides the current panel. If another offer is queued, it immediately appears. Each offer can be selected once; disabling the display clears the offer. The Test 1 canvas has a GraphicRaycaster and the scene has an Input System EventSystem for pointer and touch input. Choosing a reward does not pause the game. The display unsubscribes and hides on disable, and destroys its owned panel when removed. A font can be assigned in the Inspector; otherwise it uses Unity's built-in LegacyRuntime font.
 
 ## Maximum stat lines by rarity
 

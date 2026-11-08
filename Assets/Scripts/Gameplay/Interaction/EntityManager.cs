@@ -78,6 +78,16 @@ public class EntityManager : MonoBehaviour
         }
     }
 
+    public void AddEquipment(Controller controller, Equipment equipment)
+    {
+        if (controller == null || controller.entity == null || equipment == null)
+        {
+            return;
+        }
+
+        controller.entity.Equip(equipment);
+    }
+
     private DamageResult CalculateDamage(Entity source)
     {
         float damage = source.stats.BaseDamage * (1 + source.stats.BaseDamagePerc);
@@ -103,6 +113,7 @@ public class EntityManager : MonoBehaviour
         return new DamageResult { Damage = mitigated, IsCritical = result.IsCritical };
     }
 
+    //needs fixing, dies multiple times when attacked with health 0
     private float ApplyDamage(Controller source, Controller target, float amount)
     {
         float mitigated = amount - (target.entity.stats.Defense * (1 + target.entity.stats.DefensePerc));
