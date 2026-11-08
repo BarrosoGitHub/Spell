@@ -47,8 +47,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stats:
-    fireRate: 6
-    damagePerBullet: 5
+    fireRate: 2
+    damagePerBullet: 0
     magazine: 30
     reloadTime: 2
     range: 50
@@ -72,8 +72,8 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   projectileDisplay: {fileID: 11400002}
   maxIcicles: 128
-  embedDepth: 0.0625
-  landedSizeMultiplier: 0.8
+  embedDepth: 0.2
+  landedSizeMultiplier: 0.225
   angleVariation: 12
 --- !u!114 &11400002
 MonoBehaviour:

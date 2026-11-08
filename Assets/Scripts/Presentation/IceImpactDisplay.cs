@@ -6,14 +6,17 @@ public sealed class IceImpactDisplay : MonoBehaviour
 {
     [SerializeField] private IceProjectileDisplay projectileDisplay;
     [SerializeField, Min(1)] private int maxIcicles = 128;
-    [SerializeField, Min(0f)] private float embedDepth = 0.0625f;
+    [SerializeField, Min(0f)] private float embedDepth = 0.2f;
 
-    [SerializeField, Range(0.1f, 1f)] private float landedSizeMultiplier = 0.8f;
+    [SerializeField, Range(0.1f, 1f)] private float landedSizeMultiplier = 0.225f;
     [Tooltip("Maximum random tilt from the incoming direction, in degrees.")]
     [SerializeField, Range(0f, 30f)] private float angleVariation = 12f;
 
     private IceParticleDamage collisionSource;
-    private ParticleSystem impactParticles;
+    private Transform[] icicles;
+    private Mesh shardMesh;
+    private Material[] shardMaterials;
+    private int nextIcicle;
     private Vector3 meshTip;
 
     private void Start()
@@ -28,30 +31,9 @@ public sealed class IceImpactDisplay : MonoBehaviour
 
         ParticleSystemRenderer shardRenderer = projectileDisplay.ProjectileParticles.GetComponent<ParticleSystemRenderer>();
         meshTip = new Vector3(shardRenderer.mesh.bounds.min.x, 0f, 0f);
-        GameObject impactObject = new GameObject("Embedded Icicles");
-        impactObject.transform.SetParent(transform, false);
-        impactParticles = impactObject.AddComponent<ParticleSystem>();
-        impactParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-        var main = impactParticles.main;
-        main.playOnAwake = false;
-        main.loop = false;
-        main.startSpeed = 0f;
-        main.startRotation3D = true;
-        main.startColor = projectileDisplay.ProjectileParticles.main.startColor;
-        main.simulationSpace = ParticleSystemSimulationSpace.World;
-        main.maxParticles = maxIcicles;
-        main.ringBufferMode = ParticleSystemRingBufferMode.PauseUntilReplaced;
-        var emission = impactParticles.emission;
-        emission.enabled = false;
-        var shape = impactParticles.shape;
-        shape.enabled = false;
-        var renderer = impactParticles.GetComponent<ParticleSystemRenderer>();
-        renderer.renderMode = ParticleSystemRenderMode.Mesh;
-        renderer.mesh = shardRenderer.mesh;
-        renderer.sharedMaterials = shardRenderer.sharedMaterials;
-        renderer.alignment = ParticleSystemRenderSpace.World;
-        renderer.shadowCastingMode = ShadowCastingMode.Off;
-        renderer.receiveShadows = false;
+        shardMesh = shardRenderer.mesh;
+        shardMaterials = shardRenderer.sharedMaterials;
+        icicles = new Transform[Mathf.Max(1, maxIcicles)];
 
         collisionSource = projectileDisplay.CollisionDamage;
         collisionSource.OnImpact += LeaveIcicle;
@@ -65,8 +47,7 @@ public sealed class IceImpactDisplay : MonoBehaviour
     private void OnDisable()
     {
         if (collisionSource != null) collisionSource.OnImpact -= LeaveIcicle;
-        if (impactParticles != null)
-            impactParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        ClearIcicles();
     }
 
     private void LeaveIcicle(ParticleCollisionEvent collision)
@@ -80,19 +61,64 @@ public sealed class IceImpactDisplay : MonoBehaviour
         Quaternion rotation = facing * Quaternion.Euler(projectileDisplay.ShardRotationOffset);
         var sizeRange = projectileDisplay.ProjectileParticles.main.startSize;
         float size = Random.Range(sizeRange.constantMin, sizeRange.constantMax) * landedSizeMultiplier;
-        Vector3 position = collision.intersection - rotation * (meshTip * size) + direction * embedDepth;
-        impactParticles.Play(false);
-        impactParticles.Emit(new ParticleSystem.EmitParams
+        Vector3 contact = collision.intersection;
+        Transform parent = collision.colliderComponent != null ? collision.colliderComponent.transform : transform;
+        if (collision.colliderComponent != null &&
+            collision.colliderComponent.TryGetComponent<RagdollHitbox>(out var hitbox) &&
+            hitbox.VisibleBone != null)
         {
-            position = position,
-            velocity = Vector3.zero,
-            rotation3D = rotation.eulerAngles,
-            startSize = size
-        }, 1);
+            // Preserve the hit's limb-local pose on the rendered, blended skeleton.
+            Transform bone = hitbox.VisibleBone;
+            contact = bone.TransformPoint(parent.InverseTransformPoint(contact));
+            Quaternion toVisibleBone = bone.rotation * Quaternion.Inverse(parent.rotation);
+            rotation = toVisibleBone * rotation;
+            direction = toVisibleBone * direction;
+            parent = bone;
+        }
+        Vector3 position = contact - rotation * (meshTip * size) + direction * embedDepth;
+        Transform icicle = icicles[nextIcicle];
+        if (icicle == null)
+        {
+            GameObject shard = new GameObject("Embedded Icicle");
+            shard.AddComponent<EmbeddedIcicleLifetime>();
+            shard.AddComponent<MeshFilter>().sharedMesh = shardMesh;
+            var renderer = shard.AddComponent<MeshRenderer>();
+            renderer.sharedMaterials = shardMaterials;
+            renderer.shadowCastingMode = ShadowCastingMode.Off;
+            renderer.receiveShadows = false;
+            icicle = shard.transform;
+            icicles[nextIcicle] = icicle;
+        }
+        nextIcicle = (nextIcicle + 1) % icicles.Length;
+        // Establish world size before parenting so scaled models retain the impact size.
+        icicle.SetParent(null, false);
+        icicle.SetPositionAndRotation(position, rotation);
+        icicle.localScale = Vector3.one * size;
+        icicle.SetParent(parent, true);
+    }
+
+    private void ClearIcicles()
+    {
+        if (icicles == null) return;
+        for (int i = 0; i < icicles.Length; i++)
+        {
+            if (icicles[i] != null) Destroy(icicles[i].gameObject);
+            icicles[i] = null;
+        }
+        nextIcicle = 0;
     }
 
     private void OnDestroy()
     {
-        if (impactParticles != null) Destroy(impactParticles.gameObject);
+        ClearIcicles();
+    }
+}
+
+// Remove attachments when a pooled target is disabled, before its next spawn.
+internal sealed class EmbeddedIcicleLifetime : MonoBehaviour
+{
+    private void OnDisable()
+    {
+        Destroy(gameObject);
     }
 }

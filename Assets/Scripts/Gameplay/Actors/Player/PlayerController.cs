@@ -357,9 +357,7 @@ public class PlayerController : Controller
             Weapon weapon = weaponHandler.EquippedWeapon;
             if (CalculationHelper.TryGetMouseAimPoint(this, weapon, cam, aimMask, out Vector3 aimPoint))
             {
-                var (target, context) = weaponHandler.TryExecuteAttack(this, aimPoint);
-                if (target != null && context != null)
-                    AttackController(target, context);
+                Shoot(aimPoint);
             }
         }
     }

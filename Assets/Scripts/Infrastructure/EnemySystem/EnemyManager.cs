@@ -80,15 +80,7 @@ public class EnemyManager : MonoBehaviour
 
         EnemyController enemy = SpawnEnemy(enemyGroup.EnemyType, Vector3.zero, Quaternion.identity);
         if (enemy)
-        {
-            availableControllers.Remove(enemy);
-            enemyGroup.EnemyList.Add(enemy);
-        }
-        if (enemy)
-        {
-            enemy.SetIdleTarget(enemyGroup.TargetController);
-            enemy.Target = enemyGroup.TargetController;
-        }
+            AddControllerToGroup(enemyGroup, enemy);
         return enemy;
     }
 

@@ -137,6 +137,18 @@ public class PlayerAnimationController : MonoBehaviour, ISerializationCallbackRe
             UpdateBodyRotation();
         };
 
+        playerController.ActionInstances[4].preparing.OnFixedUpdate += () =>
+        {
+            UpdateBodyPosition(Vector3.zero);
+            UpdateBodyRotation();
+        };
+
+        playerController.ActionInstances[4].executing.OnFixedUpdate += () =>
+        {
+            UpdateBodyPosition(Vector3.zero);
+            UpdateBodyRotation();
+        };
+
     }
 
     private void SetOnExitState()

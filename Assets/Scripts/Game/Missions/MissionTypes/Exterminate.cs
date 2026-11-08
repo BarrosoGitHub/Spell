@@ -15,17 +15,14 @@ public class Exterminate : Mission
             EnemyType.Normal, 
             GameManager.Instance.playerController,
             3,
-            5f,
+            15f,
             1,
             1.5f
         );
         
         enemyManager.AddEnemyGroup(enemyGroup);
 
-        for (int i = 0; i < 10; i++)
-        {
-            enemyManager.SpawnEnemy(enemyGroup);
-        }
+        enemyManager.SpawnEnemy(enemyGroup);
 
         Debug.Log("Starting Exterminate mission.");
     }

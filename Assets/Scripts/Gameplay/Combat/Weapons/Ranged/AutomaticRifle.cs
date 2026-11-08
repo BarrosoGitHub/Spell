@@ -2,7 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// Request a shot every frame while firing. Only accepted shots run hit detection.
-/// Weapon tuning comes from WeaponStats; Weapon manages ammunition. Returns attack context to the controller.
+/// Weapon tuning comes from WeaponStats; Weapon manages ammunition. Confirms hits through the weapon event and returns whether a shot fired.
 /// </summary>
 public class AutomaticRifle : RangedWeapon
 {
@@ -46,19 +46,19 @@ public class AutomaticRifle : RangedWeapon
         if (muzzle != null)
             muzzle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
     }
-    public override (Controller target, InteractionContext context) TryExecuteAttack(Controller attacker, Vector3 aimPoint)
+    public override bool TryExecuteAttack(Controller attacker, Vector3 aimPoint)
     {
 
         if (!isActiveAndEnabled || attacker == null || attacker.entity == null ||
             attacker.entity.CurrentHealth <= 0f)
-            return default;
+            return false;
         Vector3 origin = MuzzleOrigin;
         Vector3 direction = aimPoint - origin;
         if (direction.sqrMagnitude <= Mathf.Epsilon)
-            return default;
+            return false;
 
         direction.Normalize();
-        if (!TryFire(Time.time)) return default;
+        if (!TryFire(Time.time)) return false;
 
         if (muzzle != null)
         {
@@ -108,12 +108,15 @@ public class AutomaticRifle : RangedWeapon
         {
             target.Consciousness -= Stats.consciousnessDamage;
         }
-        if (target == null) return default;
-        return (target, new InteractionContext
+        if (target != null)
         {
-            Type = InteractionType.Attack,
-            DamageOverride = Stats.damagePerBullet
-        });
+            ConfirmAttack(target, new InteractionContext
+            {
+                Type = InteractionType.Attack,
+                DamageOverride = Stats.damagePerBullet
+            });
+        }
+        return true;
     }
 
     public override void CancelAttack()

@@ -14,7 +14,7 @@ public abstract class Weapon : MonoBehaviour
 
     public virtual bool Reload() => false;
 
-    public abstract (Controller target, InteractionContext context) TryExecuteAttack(
+    public abstract bool TryExecuteAttack(
         Controller attacker,
         Vector3 aimPoint
     );

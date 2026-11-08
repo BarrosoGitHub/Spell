@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public abstract class Controller : MonoBehaviour
 {
+    public event Action<Weapon, Vector3> OnShoot;
     public Action<ActionInstance> OnActionInstancePerformed;
     public Action<float, ActionInstance> OnPreparingActionInstance;
     public Action<float, ActionInstance> OnExecutingActionInstance;
@@ -146,6 +147,14 @@ public abstract class Controller : MonoBehaviour
     public abstract void SetOnFixedUpdateState();
 
     public abstract void SetActions();
+
+    public void Shoot(Vector3 aimPoint)
+    {
+        if (weaponHandler != null && weaponHandler.TryExecuteAttack(this, aimPoint))
+        {
+            OnShoot?.Invoke(weaponHandler.EquippedWeapon, aimPoint);
+        }
+    }
 
     public void AttackController(Controller target)
     {

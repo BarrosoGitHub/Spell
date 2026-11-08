@@ -156,7 +156,7 @@ public sealed partial class HitRagdollManager
         body.maxAngularVelocity = 30f;
         body.solverIterations = 12;
         body.solverVelocityIterations = 4;
-        obj.AddComponent<RagdollHitbox>().Initialize(this);
+        obj.AddComponent<RagdollHitbox>().Initialize(this, bone);
         var collider = obj.AddComponent<CapsuleCollider>();
         var offset = end ? Quaternion.Inverse(bone.rotation) * (end.position - bone.position) : Vector3.up * 0.16f;
         collider.direction = Mathf.Abs(offset.x) > Mathf.Abs(offset.y) ? 0 : 1;

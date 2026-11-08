@@ -27,7 +27,7 @@ public class CombatHandler : MonoBehaviour
 
         EquippedWeapon = Instantiate(weapon, attachment, false);
         EquippedWeapon.transform.localPosition = weaponOffset;
-        if (isActiveAndEnabled) EquippedWeapon.OnAttackConfirmed += ForwardAttack;
+        if (isActiveAndEnabled) EquippedWeapon.OnAttackConfirmed += ConfirmAttack;
     }
 
     public void UnequipWeapon()
@@ -35,16 +35,16 @@ public class CombatHandler : MonoBehaviour
         if (EquippedWeapon == null)
             return;
 
-        EquippedWeapon.OnAttackConfirmed -= ForwardAttack;
+        EquippedWeapon.OnAttackConfirmed -= ConfirmAttack;
         EquippedWeapon.CancelAttack();
         Destroy(EquippedWeapon.gameObject);
         EquippedWeapon = null;
     }
 
-    public (Controller target, InteractionContext context) TryExecuteAttack(Controller attacker, Vector3 aimPoint)
+    public bool TryExecuteAttack(Controller attacker, Vector3 aimPoint)
     {
         if (EquippedWeapon == null)
-            return default;
+            return false;
 
         return EquippedWeapon.TryExecuteAttack(attacker, aimPoint);
     }
@@ -59,19 +59,19 @@ public class CombatHandler : MonoBehaviour
         EquippedWeapon?.CancelAttack();
     }
 
-    private void ForwardAttack(Controller target, InteractionContext context)
+    private void ConfirmAttack(Controller target, InteractionContext context)
     {
         OnAttackConfirmed?.Invoke(target, context);
     }
 
     private void OnEnable()
     {
-        if (EquippedWeapon != null) EquippedWeapon.OnAttackConfirmed += ForwardAttack;
+        if (EquippedWeapon != null) EquippedWeapon.OnAttackConfirmed += ConfirmAttack;
     }
 
     private void OnDisable()
     {
-        if (EquippedWeapon != null) EquippedWeapon.OnAttackConfirmed -= ForwardAttack;
+        if (EquippedWeapon != null) EquippedWeapon.OnAttackConfirmed -= ConfirmAttack;
         CancelAttack();
     }
 }

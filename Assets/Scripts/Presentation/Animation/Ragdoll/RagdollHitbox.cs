@@ -4,7 +4,13 @@ using UnityEngine;
 public sealed class RagdollHitbox : MonoBehaviour
 {
     private HitRagdollManager owner;
-    public void Initialize(HitRagdollManager manager) => owner = manager;
+    public Transform VisibleBone { get; private set; }
+
+    public void Initialize(HitRagdollManager manager, Transform visibleBone = null)
+    {
+        owner = manager;
+        VisibleBone = visibleBone;
+    }
 
     public void ApplyBulletImpact(RaycastHit hit, Vector3 direction, WeaponStats data)
     {

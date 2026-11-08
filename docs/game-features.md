@@ -30,7 +30,7 @@ Default input bindings include WASD movement, Space (or gamepad south button) fo
 - Player 1 equips `IceWeapon`, which throws ParticlePack IceLance particles automatically or while attack input is held. Ice casts are unlimited and use the configured fire rate as their cooldown. The rifle remains available as a separate weapon.
 - Optional `PlayerAutoAttack`, enabled on Player 1, automatically aims and fires at the nearest living enemy visible on camera and within weapon range, requiring clear lines of sight from both camera and weapon transform. The weapon checks actual muzzle obstruction when firing.
 - Mouse aiming against scene geometry, with a fallback aim plane when no surface is hit.
-- IceWeapon raises an OnCast Action consumed by IceProjectileDisplay. Particle contacts return through a callback to IceWeapon, which raises OnAttackConfirmed through CombatHandler to Controller and EntityManager. The collision adapter also raises OnImpact for IceImpactDisplay decoration. Shards face their travel direction with the demo’s random roll. The main-scene IceLance random sizes, 80-unit/s speed and particle children are retained without the casting sphere. IceImpactDisplay leaves randomly sized shards at quarter scale, embedded 0.0625 units at impact, retaining the latest 128. Rifle shots retain hitscan collision.
+- IceWeapon raises an OnCast Action consumed by IceProjectileDisplay. Particle contacts return through a callback to IceWeapon, which raises OnAttackConfirmed through CombatHandler to Controller and EntityManager. The collision adapter also raises OnImpact for IceImpactDisplay decoration. Shards face their travel direction with the demo’s random roll. The main-scene IceLance random sizes, 80-unit/s speed and particle children are retained without the casting sphere. IceImpactDisplay attaches smaller, randomly sized and tilted crystals to the mapped visible bone (or contacted scenery), embedded 0.2 units at impact, reusing up to 128 shard objects. Rifle shots retain hitscan collision.
 - Configurable weapon damage, fire rate, range, ammunition, reload duration, consciousness damage, and physical hit response.
 - Magazine consumption, automatic reload on empty, and a manual reload API. Reserve ammunition is unlimited.
 - Muzzle flash, moving tracer particles, and scenery impact sparks and dust.
@@ -85,7 +85,7 @@ The enemy type enum contains Normal, Tank, and Boss. These identifiers alone do 
 
 | Mission | Current behavior |
 | --- | --- |
-| Exterminate | Creates a normal-enemy group and spawns a batch of enemies. Its current settings spawn 10 enemies, allow 3 group members and 1 simultaneous attacker, and use a 3-unit engagement distance. Aborting calls enemy cleanup. |
+| Exterminate | Creates a normal-enemy group and spawns one enemy. Its current settings spawn 1 enemy, allow 3 group members and 1 simultaneous attacker, and use a 15-unit engagement distance. Aborting calls enemy cleanup. |
 | Survival | Tracks time while running, resolves the player reference from `GameManager` if needed, and reacts to player death or a missing player with an unsuccessful result. |
 
 ### Mission work still needed
@@ -135,3 +135,5 @@ See [building navigation](building-navmesh.md) and the [foot placement component
 ## Verification scope
 
 This document describes the source available on the review date. No gameplay tests, Unity compilation, performance measurements, or standalone build validation were run to create it. Scene references, imported assets, and component configuration still determine which features are active during play.
+
+Grouped enemy spawns enter Pursuing through the same group-assignment method as recruited enemies. Exterminate recruits within 15 units, beyond the idle stopping distance of 10 units, so idle enemies can approach into recruitment range.

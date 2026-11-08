@@ -1573,7 +1573,7 @@ MonoBehaviour:
   armsRig: {fileID: 2991821606628810272}
   aimRig: {fileID: 3682320434613342300}
   shootingPoseHoldTime: 0.2
-  shootingPoseReleaseTime: 0.12
+  shootingBlendTime: 0.1
   shootingHandRotationOffset: {x: 0, y: 90, z: 0}
   HeadConstraint: {fileID: 0}
   ChestConstraint: {fileID: 0}

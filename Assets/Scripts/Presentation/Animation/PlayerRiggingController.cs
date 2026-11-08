@@ -18,18 +18,12 @@ public class PlayerRiggingController : MonoBehaviour
 
     [Header("Shooting Aim")]
     [SerializeField, Min(0f)] private float shootingPoseHoldTime = 0.2f;
-    [SerializeField, Min(0.01f)] private float shootingPoseReleaseTime = 0.12f;
+    [SerializeField, Min(0f)] private float shootingBlendTime = 0.1f;
     [Tooltip("Rotation from the shot direction to the right hand's local axes.")]
     [SerializeField] private Vector3 shootingHandRotationOffset = new Vector3(0f, 90f, 0f);
 
-    private CombatHandler shootingCombatHandler;
-    private bool shootingPoseActive;
-    private Vector3 shootingDirection;
-    private float shootingPoseUntil, shootingArmReach;
-    private float previousArmWeight, previousArmsRigWeight;
-    private float previousPositionWeight, previousRotationWeight;
-    private Vector3 previousTargetPosition;
-    private Quaternion previousTargetRotation;
+    private Sequence shootingReleaseSequence;
+    private Interpolate shootingArmTween, shootingRigTween;
 
     [Header("Constraints")]
     [SerializeField] private MultiAimConstraint HeadConstraint;
@@ -39,12 +33,9 @@ public class PlayerRiggingController : MonoBehaviour
     [SerializeField] private TwoBoneIKConstraint LLegBoneIK;
     [SerializeField] private TwoBoneIKConstraint RLegBoneIK;
 
- 
-
     Animator animator;
   
     public PlayerController playerController;
-
     
     void Start()
     {
@@ -55,115 +46,32 @@ public class PlayerRiggingController : MonoBehaviour
         SetOnStateVariationUpdate();
     }
 
-    private void OnEnable()
+    private void AimShootingArm(Weapon weapon, Vector3 aimPoint)
     {
-        if (!playerController)
-            playerController = GetComponent<PlayerController>();
-        shootingCombatHandler = playerController ? playerController.GetComponent<CombatHandler>() : null;
-        if (playerController)
-            playerController.OnActionInstancePerformed += ReleaseShootingPoseForAction;
-    }
-
-    private void OnDisable()
-    {
-        if (playerController)
-            playerController.OnActionInstancePerformed -= ReleaseShootingPoseForAction;
-        RestoreShootingPose();
-    }
-
-    private void ReleaseShootingPoseForAction(ActionInstance action)
-    {
-        // Release before the action's entry handler places the hands on a hold.
-        RestoreShootingPose();
-    }
-
-    private void AimShootingArm(Vector3 origin, Vector3 end)
-    {
-        // Climbing actions own both hand targets and must not be overridden.
-        if (!CanAimShootingArm()) return;
-        Vector3 direction = end - origin;
+        Debug.Log($"Aiming shooting arm at {aimPoint}");
+        Vector3 direction = aimPoint - RArmBoneIK.data.root.position;
         if (direction.sqrMagnitude <= Mathf.Epsilon) return;
 
-        if (!shootingPoseActive)
-        {
-            var data = RArmBoneIK.data;
-            if (!data.root || !data.mid || !data.tip) return;
-            shootingArmReach = (Vector3.Distance(data.root.position, data.mid.position)
-                + Vector3.Distance(data.mid.position, data.tip.position)) * 0.95f;
-            previousArmWeight = RArmBoneIK.weight;
-            previousArmsRigWeight = armsRig ? armsRig.weight : 0f;
-            previousPositionWeight = data.targetPositionWeight;
-            previousRotationWeight = data.targetRotationWeight;
-            previousTargetPosition = RArmTarget.localPosition;
-            previousTargetRotation = RArmTarget.localRotation;
-            data.targetPositionWeight = 1f;
-            data.targetRotationWeight = 1f;
-            RArmBoneIK.data = data;
-            shootingPoseActive = true;
-        }
-
-        shootingDirection = direction.normalized;
-        shootingPoseUntil = Time.time + shootingPoseHoldTime;
-        UpdateShootingPose();
-    }
-
-    private bool CanAimShootingArm()
-    {
-        return playerController && RArmTarget && RArmBoneIK
-            && playerController.entity != null && playerController.entity.CurrentHealth > 0f
-            && playerController.State == playerController.movingState
-            && playerController.CurrentActionInstance == null;
-    }
-
-    private void Update()
-    {
-        if (!shootingPoseActive) return;
-        if (!CanAimShootingArm())
-        {
-            // State/action handlers may already have placed the targets for climbing.
-            RestoreShootingPose(false);
-            return;
-        }
-        if (!shootingCombatHandler || !shootingCombatHandler.EquippedWeapon)
-            shootingPoseUntil = Mathf.Min(shootingPoseUntil, Time.time);
-        UpdateShootingPose();
-    }
-
-    private void UpdateShootingPose()
-    {
-        float blend = 1f - Mathf.Clamp01((Time.time - shootingPoseUntil) / shootingPoseReleaseTime);
-        if (blend <= 0f)
-        {
-            RestoreShootingPose();
-            return;
-        }
-        RArmTarget.position = RArmBoneIK.data.root.position + shootingDirection * shootingArmReach;
-        Vector3 up = Mathf.Abs(Vector3.Dot(shootingDirection, Vector3.up)) > 0.99f
+        RArmTarget.position = aimPoint;
+        Vector3 up = Mathf.Abs(Vector3.Dot(direction.normalized, Vector3.up)) > 0.99f
             ? Vector3.forward : Vector3.up;
-        RArmTarget.rotation = Quaternion.LookRotation(shootingDirection, up)
+        RArmTarget.rotation = Quaternion.LookRotation(direction, up)
             * Quaternion.Euler(shootingHandRotationOffset);
-        RArmBoneIK.weight = Mathf.Lerp(previousArmWeight, 1f, blend);
-        if (armsRig) armsRig.weight = Mathf.Lerp(previousArmsRigWeight, 1f, blend);
-    }
 
-    private void RestoreShootingPose(bool restoreTarget = true)
-    {
-        if (!shootingPoseActive) return;
-        shootingPoseActive = false;
-        if (RArmBoneIK)
+        if (shootingArmTween) shootingArmTween.Cancel();
+        if (shootingRigTween) shootingRigTween.Cancel();
+        
+        shootingArmTween = SetRigWeight(RArmBoneIK, 1f, shootingBlendTime);
+        shootingRigTween = SetRigWeight(armsRig, 1f, shootingBlendTime);
+        shootingReleaseSequence?.Cancel();
+        shootingReleaseSequence = Delay(() =>
         {
-            RArmBoneIK.weight = previousArmWeight;
-            var data = RArmBoneIK.data;
-            data.targetPositionWeight = previousPositionWeight;
-            data.targetRotationWeight = previousRotationWeight;
-            RArmBoneIK.data = data;
-        }
-        if (armsRig) armsRig.weight = previousArmsRigWeight;
-        if (restoreTarget && RArmTarget)
-        {
-            RArmTarget.localPosition = previousTargetPosition;
-            RArmTarget.localRotation = previousTargetRotation;
-        }
+            shootingReleaseSequence = null;
+            if (shootingArmTween) shootingArmTween.Cancel();
+            if (shootingRigTween) shootingRigTween.Cancel();
+            shootingArmTween = SetRigWeight(RArmBoneIK, 0f, shootingBlendTime);
+            shootingRigTween = SetRigWeight(armsRig, 0f, shootingBlendTime);
+        }, shootingPoseHoldTime);
     }
 
     private void SetOnEnterState()
@@ -285,70 +193,6 @@ public class PlayerRiggingController : MonoBehaviour
             }
         };
     }
-
-    // private void ClimbJumpIK(float moveTime)
-    // {
-    //     float wallJumpTime = 1;
-    //     Vector3 wallNormal = CalculationHelper.GetSurfaceNormalFromHold(playerController.closestHold.transform);
-    //     Ray refRay = new(playerController.closestHold.transform.position + Vector3.up * 0.05f, playerController.closestHold.transform.forward);
-    //     RaycastHit LArmHit = new(), RArmHit = new();
-
-    //     if (Physics.Raycast(refRay, out RaycastHit refHit, 1, groundMask))
-    //     {
-    //         Vector3 referencePos = playerController.closestHold.transform.position + refHit.normal * 0.05f + playerController.closestHold.transform.forward * 0.01f;
-
-    //         Vector3 referenceRight = Vector3.Cross(refHit.normal, playerController.closestHold.transform.forward);
-
-    //         Ray LArmRay = new(referencePos - referenceRight * 0.05f, -refHit.normal);
-    //         Ray RArmRay = new(referencePos + referenceRight * 0.05f, -refHit.normal);
-
-    //         Debug.DrawRay(referencePos - referenceRight * 0.05f, -refHit.normal, Color.red, 5f);
-    //         Debug.DrawRay(referencePos, Vector3.up, Color.blue, 5f);
-
-    //         if (Physics.Raycast(LArmRay, out LArmHit, 1, groundMask))
-    //         {
-    //             Vector3 LArmPos = LArmHit.point - refHit.normal * 0.1f - playerController.transform.forward * 0.01f - referenceRight * 0.1f;
-    //             LArmTarget.gameObject.InterpolatePosition(LArmPos, moveTime);
-
-    //             LArmTarget.rotation = Quaternion.LookRotation(-wallNormal) * Quaternion.Euler(0, 90, 0);
-    //         }
-
-    //         if (Physics.Raycast(RArmRay, out RArmHit, 1, groundMask))
-    //         {
-    //             Vector3 RArmPos = RArmHit.point - refHit.normal * 0.1f - playerController.transform.forward * 0.01f + referenceRight * 0.1f;
-    //             RArmTarget.gameObject.InterpolatePosition(RArmPos, moveTime).SetEase(Ease.Linear);
-
-    //             RArmTarget.rotation = Quaternion.LookRotation(wallNormal) * Quaternion.Euler(0, 90, 0);
-    //         }
-    //     }
-
-
-
-    //     Vector3 LLegPos = Vector3.zero;
-    //     Vector3 RLegPos = Vector3.zero;
-    //     float footSeparation = 0.1f;
-
-    //     Vector3 wallParallelVector = Vector3.Cross(wallNormal, Vector3.up);
-
-    //     Ray LLegRay = new(playerController.closestHold.transform.position + Vector3.down + wallNormal * 0.1f - wallParallelVector * footSeparation, -wallNormal);
-    //     Ray RLegRay = new(playerController.closestHold.transform.position + Vector3.down + wallNormal * 0.1f + wallParallelVector * footSeparation, -wallNormal);
-
-    //     if (Physics.Raycast(LLegRay, out RaycastHit LLegHit, 1, groundMask))
-    //     {
-    //         LLegPos = new Vector3(LLegHit.point.x, RArmHit.point.y - 1f, LLegHit.point.z) + wallNormal * 0.18f;
-
-    //         Debug.DrawRay(LLegHit.point, -wallNormal, Color.red, 25);
-    //     }
-    //     if (Physics.Raycast(RLegRay, out RaycastHit RLegHit, groundMask))
-    //     {
-    //         RLegPos = new Vector3(RLegHit.point.x, LArmHit.point.y - 1f, RLegHit.point.z) + wallNormal * 0.18f;
-    //     }
-    //     LLegTarget.gameObject.InterpolatePosition(LLegPos, moveTime).SetEase(Ease.Linear);
-    //     RLegTarget.gameObject.InterpolatePosition(RLegPos, moveTime).SetEase(Ease.Linear);
-
-    //     LLegTarget.rotation = Quaternion.LookRotation(-wallNormal) * Quaternion.Euler(90, 0, 0);
-    //     RLegTarget.rotation = Quaternion.LookRotation(-wallNormal) * Quaternion.Euler(90, 0, 0);
-    // }
 
     private void UpdateHandMask(bool left, float blendTime)
     {
@@ -481,22 +325,52 @@ public class PlayerRiggingController : MonoBehaviour
     //     // RLegTarget.rotation = Quaternion.LookRotation(-wallNormal) * Quaternion.Euler(90, 0, 0);
     // }
 
-    private void SetRigWeight(Rig rig, float weight, float time)
+    private Interpolate SetRigWeight(Rig rig, float weight, float time)
     {
-        if (!rig) return;
-        playerController.gameObject.ToFloat(() => rig.weight, x => rig.weight = x, weight, time).SetEase(Ease.Linear);
+        if (!rig) return null;
+        return playerController.gameObject.ToFloat(() => rig.weight, x => rig.weight = x, weight, time).SetEase(Ease.Linear);
     }
 
-    private void SetRigWeight(TwoBoneIKConstraint constraint, float weight, float time)
+    private Interpolate SetRigWeight(TwoBoneIKConstraint constraint, float weight, float time)
     {
-        if (!constraint) return;
-        playerController.gameObject.ToFloat(() => constraint.weight, x => constraint.weight = x, weight, time).SetEase(Ease.Linear);
+        if (!constraint) return null;
+        return playerController.gameObject.ToFloat(() => constraint.weight, x => constraint.weight = x, weight, time).SetEase(Ease.Linear);
     }
 
-    public void Delay(Action action, float amount)
+    public Sequence Delay(Action action, float amount)
     {
         Sequence sequence = new();
         sequence.AppendInterval(amount).AppendCallback(() => action());
         StartCoroutine(sequence.ExecuteActions());
+        return sequence;
+    }
+
+    private void OnEnable()
+    {
+        if (!playerController)
+            playerController = GetComponent<PlayerController>();
+        if (playerController)
+        {
+            playerController.OnShoot += AimShootingArm;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (playerController)
+        {
+            playerController.OnShoot -= AimShootingArm;
+        }
+        bool wasShooting = shootingReleaseSequence != null || shootingArmTween || shootingRigTween;
+        if (shootingArmTween) shootingArmTween.Cancel();
+        if (shootingRigTween) shootingRigTween.Cancel();
+        shootingArmTween = shootingRigTween = null;
+        if (wasShooting)
+        {
+            shootingReleaseSequence?.Cancel();
+            shootingReleaseSequence = null;
+            SetRigWeight(RArmBoneIK, 0f, 0f);
+            SetRigWeight(armsRig, 0f, 0f);
+        }
     }
 }

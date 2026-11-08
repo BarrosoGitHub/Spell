@@ -55,9 +55,7 @@ public sealed class PlayerAutoAttack : MonoBehaviour
         // Recheck visibility before every shot request, including between acquisition scans.
         if (CanSeeEnemy(currentEnemy, currentCollider, weapon))
         {
-            var (target, context) = combatHandler.TryExecuteAttack(playerController, currentCollider.bounds.center);
-            if (target != null && context != null)
-                playerController.AttackController(target, context);
+            playerController.Shoot(currentCollider.bounds.center);
         }
     }
 

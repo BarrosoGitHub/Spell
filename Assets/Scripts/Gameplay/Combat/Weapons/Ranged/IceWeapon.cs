@@ -11,21 +11,21 @@ public class IceWeapon : Weapon
     private Controller source;
     private Func<GameObject, bool> contactCallback;
 
-    public override (Controller target, InteractionContext context) TryExecuteAttack(Controller attacker, Vector3 aimPoint)
+    public override bool TryExecuteAttack(Controller attacker, Vector3 aimPoint)
     {
         if (!isActiveAndEnabled || attacker == null || attacker.entity == null ||
             attacker.entity.CurrentHealth <= 0f || Time.time < nextCastTime)
-            return default;
+            return false;
 
         Vector3 direction = aimPoint - transform.position;
         if (direction.sqrMagnitude <= Mathf.Epsilon)
-            return default;
+            return false;
 
         nextCastTime = Time.time + 1f / Mathf.Max(0.01f, stats.fireRate);
         source = attacker;
         contactCallback ??= ConfirmContact;
         OnCast?.Invoke(transform.position, direction.normalized * projectileSpeed, stats, contactCallback);
-        return default;
+        return true;
     }
 
     private bool ConfirmContact(GameObject other)
