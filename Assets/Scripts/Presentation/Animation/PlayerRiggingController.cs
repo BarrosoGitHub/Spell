@@ -19,11 +19,13 @@ public class PlayerRiggingController : MonoBehaviour
     [Header("Shooting Aim")]
     [SerializeField, Min(0f)] private float shootingPoseHoldTime = 0.2f;
     [SerializeField, Min(0f)] private float shootingBlendTime = 0.1f;
-    [Tooltip("Rotation from the shot direction to the right hand's local axes.")]
+    [Tooltip("Rotation from the shot direction to the hand's local axes.")]
     [SerializeField] private Vector3 shootingHandRotationOffset = new Vector3(0f, 90f, 0f);
 
     private Sequence shootingReleaseSequence;
-    private Interpolate shootingArmTween, shootingRigTween;
+    private Interpolate shootingArmTween, shootingRigTween, shootingLookTween;
+    private Interpolate otherArmTween;
+    private TwoBoneIKConstraint shootingArm;
 
     [Header("Constraints")]
     [SerializeField] private MultiAimConstraint HeadConstraint;
@@ -46,31 +48,53 @@ public class PlayerRiggingController : MonoBehaviour
         SetOnStateVariationUpdate();
     }
 
+    private (TwoBoneIKConstraint arm, Transform target) ChooseShootingArm(Vector3 aimPoint)
+    {
+        // This component shares the animated model's transform and facing.
+        Vector3 direction = aimPoint - transform.position;
+        return Vector3.Dot(transform.right, direction) > 0f
+            ? (RArmBoneIK, RArmTarget)
+            : (LArmBoneIK, LArmTarget);
+    }
+
     private void AimShootingArm(Weapon weapon, Vector3 aimPoint)
     {
         Debug.Log($"Aiming shooting arm at {aimPoint}");
-        Vector3 direction = aimPoint - RArmBoneIK.data.root.position;
+        var (arm, target) = ChooseShootingArm(aimPoint);
+        if (!arm || !target || !arm.data.root) return;
+        Vector3 direction = aimPoint - arm.data.root.position;
         if (direction.sqrMagnitude <= Mathf.Epsilon) return;
 
-        RArmTarget.position = aimPoint;
+        target.position = aimPoint;
+        if (AimTarget) AimTarget.position = aimPoint;
         Vector3 up = Mathf.Abs(Vector3.Dot(direction.normalized, Vector3.up)) > 0.99f
             ? Vector3.forward : Vector3.up;
-        RArmTarget.rotation = Quaternion.LookRotation(direction, up)
+        target.rotation = Quaternion.LookRotation(direction, up)
             * Quaternion.Euler(shootingHandRotationOffset);
 
         if (shootingArmTween) shootingArmTween.Cancel();
         if (shootingRigTween) shootingRigTween.Cancel();
+        if (shootingLookTween) shootingLookTween.Cancel();
         
-        shootingArmTween = SetRigWeight(RArmBoneIK, 1f, shootingBlendTime);
-        shootingRigTween = SetRigWeight(armsRig, 1f, shootingBlendTime);
+        if (shootingArm != arm)
+        {
+            if (otherArmTween) otherArmTween.Cancel();
+            otherArmTween = SetRigWeight(shootingArm, 0f, shootingBlendTime);
+        }
+        shootingArm = arm;
+        shootingArmTween = SetRigWeight(arm, 1f, 0.05f);
+        shootingRigTween = SetRigWeight(armsRig, 1f, 0.05f);
+        shootingLookTween = SetRigWeight(aimRig, 1f, 0.05f);
         shootingReleaseSequence?.Cancel();
         shootingReleaseSequence = Delay(() =>
         {
             shootingReleaseSequence = null;
             if (shootingArmTween) shootingArmTween.Cancel();
             if (shootingRigTween) shootingRigTween.Cancel();
-            shootingArmTween = SetRigWeight(RArmBoneIK, 0f, shootingBlendTime);
+            if (shootingLookTween) shootingLookTween.Cancel();
+            shootingArmTween = SetRigWeight(arm, 0f, shootingBlendTime);
             shootingRigTween = SetRigWeight(armsRig, 0f, shootingBlendTime);
+            shootingLookTween = SetRigWeight(aimRig, 0f, 0.4f);
         }, shootingPoseHoldTime);
     }
 
@@ -361,16 +385,20 @@ public class PlayerRiggingController : MonoBehaviour
         {
             playerController.OnShoot -= AimShootingArm;
         }
-        bool wasShooting = shootingReleaseSequence != null || shootingArmTween || shootingRigTween;
+        bool wasShooting = shootingReleaseSequence != null || shootingArmTween || shootingRigTween || shootingLookTween || otherArmTween;
         if (shootingArmTween) shootingArmTween.Cancel();
         if (shootingRigTween) shootingRigTween.Cancel();
-        shootingArmTween = shootingRigTween = null;
+        if (shootingLookTween) shootingLookTween.Cancel();
+        if (otherArmTween) otherArmTween.Cancel();
+        shootingArmTween = shootingRigTween = shootingLookTween = otherArmTween = null;
         if (wasShooting)
         {
             shootingReleaseSequence?.Cancel();
             shootingReleaseSequence = null;
+            SetRigWeight(LArmBoneIK, 0f, 0f);
             SetRigWeight(RArmBoneIK, 0f, 0f);
             SetRigWeight(armsRig, 0f, 0f);
+            SetRigWeight(aimRig, 0f, 0f);
         }
     }
 }
