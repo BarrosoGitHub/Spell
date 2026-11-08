@@ -1483,7 +1483,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponHandler
   weaponSocket: {fileID: 2126801291}
   weaponOffset: {x: 0.02, y: 0.15, z: 0.06}
-  startingWeapon: {fileID: -5085834790474079942, guid: 8e7ce9db44d35a0479b0994d62aed63e, type: 3}
+  startingWeapon: {fileID: 11400000, guid: e766df37ffdf40659939c3b14dd370fa, type: 3}
 --- !u!114 &744515315 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2730051286634281295, guid: 3c190a89d9a66814699dba519e7c6bb9, type: 3}

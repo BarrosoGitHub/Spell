@@ -347,7 +347,7 @@ public class PlayerController : Controller
         }
     }
 
-        private void ManageWeapon()
+    private void ManageWeapon()
     {
         if (weaponHandler == null || weaponHandler.EquippedWeapon == null)
             return;

@@ -84,7 +84,11 @@ public class EnemyManager : MonoBehaviour
             availableControllers.Remove(enemy);
             enemyGroup.EnemyList.Add(enemy);
         }
-        if (enemy) enemy.Target = enemyGroup.TargetController;
+        if (enemy)
+        {
+            enemy.SetIdleTarget(enemyGroup.TargetController);
+            enemy.Target = enemyGroup.TargetController;
+        }
         return enemy;
     }
 
@@ -97,6 +101,7 @@ public class EnemyManager : MonoBehaviour
         spawnedEnemies.Add(enemyController);
 
         enemyController.enemyType = enemyType;
+        enemyController.SetIdleTarget(GameManager.Instance != null ? GameManager.Instance.playerController : null);
         enemyController.Target = null;
         enemyController.State = enemyController.idlingState;
         enemyController.entity.AddCurrentHealth(enemyController.entity.stats.MaxHealth - enemyController.entity.CurrentHealth);
@@ -142,6 +147,7 @@ public class EnemyManager : MonoBehaviour
         }
         availableControllers.Remove(enemyController);
 
+        enemyController.SetIdleTarget(null);
         controllerSpawner.DespawnController(enemyController.enemyType.ToString(), enemyController);
     }
 
@@ -255,6 +261,7 @@ public class EnemyManager : MonoBehaviour
             enemyGroup.EnemyList.Remove(enemyController);
             if (!enemyController) return;
          
+            enemyController.SetIdleTarget(enemyGroup.TargetController);
             enemyController.Target = null;
             if (enemyController.navMeshAgent && enemyController.State == enemyController.pursuingState)
             {
@@ -269,6 +276,7 @@ public class EnemyManager : MonoBehaviour
         if (!enemyGroup.EnemyList.Contains(enemyController))
         {
             enemyGroup.EnemyList.Add(enemyController);
+            enemyController.SetIdleTarget(enemyGroup.TargetController);
             enemyController.Target = enemyGroup.TargetController;
             if (enemyController.State == enemyController.idlingState)
             {

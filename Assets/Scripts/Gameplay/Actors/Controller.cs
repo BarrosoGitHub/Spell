@@ -104,6 +104,7 @@ public abstract class Controller : MonoBehaviour
 
     protected virtual void Awake()
     {
+        weaponHandler = GetComponent<CombatHandler>();
         ActionInstances = new List<ActionInstance>();
 
         //This needs a better way to start
@@ -129,7 +130,6 @@ public abstract class Controller : MonoBehaviour
     {
         col = GetComponent<Collider>();
         rb = GetComponent<Rigidbody>();
-        weaponHandler = GetComponent<CombatHandler>();
 
         SetOnEnterState();
         SetOnExitState();
@@ -221,6 +221,7 @@ public abstract class Controller : MonoBehaviour
 
     protected virtual void OnEnable()
     {
+        if (weaponHandler != null) weaponHandler.OnAttackConfirmed += AttackController;
         if (entity != null)
         {
             entity.OnEntityDied += OnDied;
@@ -229,6 +230,7 @@ public abstract class Controller : MonoBehaviour
 
     protected virtual void OnDisable()
     {
+        if (weaponHandler != null) weaponHandler.OnAttackConfirmed -= AttackController;
         CancelAction();
         if (entity != null)
         {

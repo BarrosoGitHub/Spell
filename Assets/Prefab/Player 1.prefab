@@ -214,7 +214,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponHandler
   weaponSocket: {fileID: 8054719007681891065}
   weaponOffset: {x: 0.02, y: 0.15, z: 0.06}
-  startingWeapon: {fileID: -5085834790474079942, guid: 8e7ce9db44d35a0479b0994d62aed63e, type: 3}
+  startingWeapon: {fileID: 11400000, guid: e766df37ffdf40659939c3b14dd370fa, type: 3}
 --- !u!1 &721301343034770419
 GameObject:
   m_ObjectHideFlags: 0

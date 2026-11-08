@@ -40,6 +40,7 @@
   <Project Path="Unity.InternalAPIEngineBridge.RenderPipelines.Core.Runtime.Shared.csproj" />
   <Project Path="Unity.Collections.Tests.CoreCLR.InternalJobNestedPrivate.csproj" />
   <Project Path="Unity.StarterAssets.csproj" />
+  <Project Path="UnityTechnologies.ParticlePack.Editor.csproj" />
   <Project Path="Unity.StarterAssets.Editor.csproj" />
   <Project Path="Unity.Animation.Rigging.DocCodeExamples.csproj" />
   <Project Path="Unity.PathTracing.Editor.csproj" />
@@ -48,6 +49,7 @@
   <Project Path="Unity.RenderPipelines.Core.Runtime.Shared.csproj" />
   <Project Path="Unity.Collections.Tests.CoreCLR.PublicJobPrivateGeneric.csproj" />
   <Project Path="Unity.InternalAPIEditorBridge.ShaderGraph.Editor.csproj" />
+  <Project Path="UnityTechnologies.ParticlePack.csproj" />
   <Project Path="Unity.Burst.csproj" />
   <Project Path="Unity.Rendering.LightTransport.Editor.csproj" />
   <Project Path="Unity.Collections.Editor.csproj" />

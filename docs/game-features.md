@@ -27,17 +27,17 @@ Default input bindings include WASD movement, Space (or gamepad south button) fo
 
 - Weapon attachment through a configurable socket and local offset.
 - Equipping, unequipping, and cancelling weapon attacks.
-- Automatic rifle with repeated fire while the attack input is held.
+- Player 1 equips `IceWeapon`, which throws ParticlePack IceLance particles automatically or while attack input is held. Ice casts are unlimited and use the configured fire rate as their cooldown. The rifle remains available as a separate weapon.
 - Optional `PlayerAutoAttack`, enabled on Player 1, automatically aims and fires at the nearest living enemy visible on camera and within weapon range, requiring clear lines of sight from both camera and weapon transform. The weapon checks actual muzzle obstruction when firing.
 - Mouse aiming against scene geometry, with a fallback aim plane when no surface is hit.
-- Hitscan collision checks from the muzzle, including obstruction by intervening geometry.
+- IceWeapon raises an OnCast Action consumed by IceProjectileDisplay. Particle contacts return through a callback to IceWeapon, which raises OnAttackConfirmed through CombatHandler to Controller and EntityManager. The collision adapter also raises OnImpact for IceImpactDisplay decoration. Shards face their travel direction with the demo’s random roll. The main-scene IceLance random sizes, 80-unit/s speed and particle children are retained without the casting sphere. IceImpactDisplay leaves randomly sized shards at quarter scale, embedded 0.0625 units at impact, retaining the latest 128. Rifle shots retain hitscan collision.
 - Configurable weapon damage, fire rate, range, ammunition, reload duration, consciousness damage, and physical hit response.
 - Magazine consumption, automatic reload on empty, and a manual reload API. Reserve ammunition is unlimited.
 - Muzzle flash, moving tracer particles, and scenery impact sparks and dust.
 - Enemies currently use only directional attacks, damaging their living target once when execution begins, after preparation, if it is still inside the attack shape. Hits use the existing interaction flow, including attacker stats, critical hits, target defense, and health/death events. Cone and circular attack implementations remain available but are not selected by enemies.
 - Enemy attack preparation indicators with configurable materials, range, and fill.
 
-See [attack formula](attack-formula.md), [automatic rifle details](automatic-rifle.md), and [weapon stats](weapon-stats.md).
+See [ice weapon](ice-weapon.md), [attack formula](attack-formula.md), [automatic rifle details](automatic-rifle.md), and [weapon stats](weapon-stats.md).
 
 ## Health and physical reactions
 
@@ -55,6 +55,7 @@ See [ragdoll details](ragdoll-manager.md).
 ## Enemy AI and spawning
 
 - Enemies idle, pursue targets, traverse navigation links, attack, become unconscious, recover, and die.
+- Idle enemies follow their assigned player with a configurable `idleStoppingDistance` (default 10 units), instead of wandering. EnemyManager assigns the player at spawn and keeps the group's player as the idle follow target when an enemy leaves that group. Combat pursuit restores the NavMeshAgent's original stopping distance. Idle follow targets are separate from combat targets and cleared on despawn.
 - NavMesh path following and direct traversal between link endpoints.
 - Enemy groups specify a target, enemy type, recruitment engagement distance, separate attack trigger range (default 3 units), group limit, simultaneous attacker limit, and attack interval. Each attacker must be within its group's attack range before beginning an attack.
 - Group refresh selects nearby eligible enemies and retains attackers and link traversers until their actions finish.

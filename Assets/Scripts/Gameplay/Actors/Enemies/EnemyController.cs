@@ -10,7 +10,14 @@ public class EnemyController : Controller
     public State climbingState = new State("Climbing");
     public State deadState = new State("Dead");
 
-    private float moveTimer = 5f;
+    [SerializeField, Min(0f)] private float idleStoppingDistance = 10f;
+    private Controller idleTarget;
+    private float pursuitStoppingDistance;
+
+    public void SetIdleTarget(Controller controller)
+    {
+        idleTarget = controller;
+    }
 
     public EnemyType enemyType;
     [Tooltip("Movement speed across NavMesh links, in units per second.")]
@@ -29,7 +36,14 @@ public class EnemyController : Controller
             gameObject.AddComponent<EnemyPursuitIndicator>();
         navMeshAgent = GetComponent<NavMeshAgent>();
         navMeshAgent.autoTraverseOffMeshLink = false;
+        pursuitStoppingDistance = navMeshAgent.stoppingDistance;
 
+    }
+
+    public override void Start()
+    {
+        base.Start();
+        State?.OnEnterState?.Invoke();
     }
 
     public override void SetOnEnterState()
@@ -38,13 +52,14 @@ public class EnemyController : Controller
         {
             navMeshAgent.enabled = true;
             if (navMeshAgent.isOnNavMesh) navMeshAgent.isStopped = false;
-            moveTimer = 5f;
+            navMeshAgent.stoppingDistance = idleStoppingDistance;
         };
         pursuingState.OnEnterState += () =>
         {
             navMeshAgent.enabled = true;
             if (navMeshAgent.isOnNavMesh) navMeshAgent.isStopped = false;
             navMeshAgent.speed = 2.5f;
+            navMeshAgent.stoppingDistance = pursuitStoppingDistance;
         };
 
         climbingState.OnEnterState += () =>
@@ -78,14 +93,8 @@ public class EnemyController : Controller
     {
         idlingState.OnFixedUpdate += () =>
         {
-            if (navMeshAgent == null || !navMeshAgent.enabled || !navMeshAgent.isOnNavMesh) return;
-            if (moveTimer >= 5f)
-            {
-                Vector3 destination = transform.position + new Vector3(Random.Range(-10f, 10f), 0f, Random.Range(-10f, 10f));
-                navMeshAgent.SetDestination(destination);
-                moveTimer = 0f;
-            }
-            moveTimer += Time.fixedDeltaTime;
+            if (idleTarget == null || !navMeshAgent.enabled || !navMeshAgent.isOnNavMesh) return;
+            navMeshAgent.SetDestination(idleTarget.transform.position);
         };
 
         pursuingState.OnFixedUpdate += UpdatePursuit;

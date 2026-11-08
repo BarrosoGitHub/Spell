@@ -6,6 +6,8 @@ public class CombatHandler : MonoBehaviour
     [SerializeField] private Transform weaponSocket;
     [SerializeField] private Vector3 weaponOffset;
     [SerializeField] private Weapon startingWeapon;
+    public event Action<Controller, InteractionContext> OnAttackConfirmed;
+
     public Weapon EquippedWeapon { get; private set; }
 
     private void Start()
@@ -25,6 +27,7 @@ public class CombatHandler : MonoBehaviour
 
         EquippedWeapon = Instantiate(weapon, attachment, false);
         EquippedWeapon.transform.localPosition = weaponOffset;
+        if (isActiveAndEnabled) EquippedWeapon.OnAttackConfirmed += ForwardAttack;
     }
 
     public void UnequipWeapon()
@@ -32,6 +35,7 @@ public class CombatHandler : MonoBehaviour
         if (EquippedWeapon == null)
             return;
 
+        EquippedWeapon.OnAttackConfirmed -= ForwardAttack;
         EquippedWeapon.CancelAttack();
         Destroy(EquippedWeapon.gameObject);
         EquippedWeapon = null;
@@ -55,8 +59,19 @@ public class CombatHandler : MonoBehaviour
         EquippedWeapon?.CancelAttack();
     }
 
+    private void ForwardAttack(Controller target, InteractionContext context)
+    {
+        OnAttackConfirmed?.Invoke(target, context);
+    }
+
+    private void OnEnable()
+    {
+        if (EquippedWeapon != null) EquippedWeapon.OnAttackConfirmed += ForwardAttack;
+    }
+
     private void OnDisable()
     {
+        if (EquippedWeapon != null) EquippedWeapon.OnAttackConfirmed -= ForwardAttack;
         CancelAttack();
     }
 }
