@@ -86,6 +86,7 @@ The enemy type enum contains Normal, Tank, and Boss. These identifiers alone do 
 | Mission | Current behavior |
 | --- | --- |
 | Exterminate | Creates a normal-enemy group and spawns one enemy. Its current settings spawn 1 enemy, allow 3 group members and 1 simultaneous attacker, and use a 15-unit engagement distance. Aborting calls enemy cleanup. |
+| EndlessWaves | Endless waves of 3, 5, 7… enemies, spawned individually 1 second apart. Clear the entire wave, then wait 1 second for the next. Inspector settings control growth and timing; failure, abort, completion or disable clean up the run. |
 | Survival | Tracks time while running, resolves the player reference from `GameManager` if needed, and reacts to player death or a missing player with an unsuccessful result. |
 
 ### Mission work still needed

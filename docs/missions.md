@@ -50,3 +50,13 @@ Mission types do not handle player death separately. They can override `FailMiss
 Call `SelectMission(typeof(Survival))` or `SelectMission(index)` to create and select a discovered mission type, then `StartMission()` to run it. `selectedMission` exposes the selected instance. Switching types is blocked while Running; reset a stopped mission before restarting it.
 
 The manager listens to the selected mission's `OnStateChanged`. Entering Running clears `LastResult` and invokes `OnMissionStarted` once. Entering Completed stores the mission's `Result` in `LastResult` and invokes `OnMissionCompleted`. Call `Mission.CompleteMission(result)` to set the result before entering Completed. The manager unsubscribes when replacing the selection or being destroyed.
+
+## Endless waves
+
+`EndlessWaves` is automatically discovered by MissionManager and its Play Mode selector. Select it by name or call `SelectMission(typeof(EndlessWaves))`, then start the mission. It has no automatic victory condition.
+
+The default wave counts are 3, 5, 7, and so on: `firstWaveEnemies + (wave - 1) * enemiesAddedPerWave`. Each enemy uses the existing Normal pool and group spawn path, one spawn every 0.2 seconds. After every enemy in the wave has spawned and been despawned, a one-second break precedes the next wave. Enemies do not need to die before the next individual spawn. The four wave settings are editable on the selected mission component before starting. Timers use scaled time, so pausing freezes progress.
+
+The mission owns wave progression and a set of its living enemies. It listens to ControllerSpawner's despawn notification, so distance-based combat group changes do not count as kills or clear a wave. EnemyManager continues to own combat groups, death handling and pooling. The group uses the Exterminate engagement settings (3 members, 15-unit range, 1 simultaneous attacker). Spawn positions follow the existing group spawning implementation.
+
+Leaving Running stops the spawn coroutine and cleans up enemies and group coroutines. Disabling aborts the run and unsubscribes; reset clears wave/time counters before a restart. Player death or loss fails the mission. `CurrentWave`, `EnemiesInWave`, `EnemiesRemaining` (currently spawned and alive), and `SurvivalTime` provide read-only progress.

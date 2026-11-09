@@ -38,6 +38,7 @@ public class IceWeapon : Weapon
             return true;
 
         target.Consciousness -= stats.consciousnessDamage;
+        Debug.Log($"IceWeapon confirmed a hit on {target.name}; sending {stats.damagePerBullet:0.##} damage to EntityManager.", this);
         ConfirmAttack(target, new InteractionContext
         {
             Type = InteractionType.Attack,

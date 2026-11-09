@@ -59,7 +59,6 @@ public class PlayerRiggingController : MonoBehaviour
 
     private void AimShootingArm(Weapon weapon, Vector3 aimPoint)
     {
-        Debug.Log($"Aiming shooting arm at {aimPoint}");
         var (arm, target) = ChooseShootingArm(aimPoint);
         if (!arm || !target || !arm.data.root) return;
         Vector3 direction = aimPoint - arm.data.root.position;
