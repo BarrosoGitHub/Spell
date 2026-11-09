@@ -180,30 +180,26 @@ public abstract class Controller : MonoBehaviour
         }
     }
 
-    public void AddBuff(Buff buff)
+    public bool AddBuff(Buff buff)
     {
-        if (buff == null || !isActiveAndEnabled || buffs.Contains(buff) ||
-            (entity != null && entity.CurrentHealth <= 0f)) return;
-
         buffs.Add(buff);
-        OnBuffStarted?.Invoke(buff);
+        entity.AddStatModifier(buff, buff.GetStats());
+        if (buffs.Contains(buff)) OnBuffStarted?.Invoke(buff);
+        return buffs.Contains(buff);
     }
 
     public void RemoveBuff(Buff buff)
     {
         if (!buffs.Remove(buff)) return;
+        entity.RemoveStatModifier(buff);
         OnBuffFinished?.Invoke(buff);
     }
 
     public void ClearBuffs()
     {
-        if (buffs.Count == 0) return;
-
-        Buff[] finishedBuffs = buffs.ToArray();
-        buffs.Clear();
-        foreach (Buff buff in finishedBuffs)
+        foreach (Buff buff in buffs.ToArray())
         {
-            OnBuffFinished?.Invoke(buff);
+            RemoveBuff(buff);
         }
     }
 

@@ -7,6 +7,7 @@ public class Entity
     private Stats baseStats;
     public Stats stats;
     private List<Equipment> equipmentList;
+    private readonly Dictionary<object, Stats> statModifiers = new Dictionary<object, Stats>();
 
     public Action<float> OnHealthChanged;
     public Action OnEntityDied;
@@ -71,6 +72,17 @@ public class Entity
         UpdateStats();
     }
 
+    public void AddStatModifier(object source, Stats modifier)
+    {
+        statModifiers[source] = modifier;
+        UpdateStats();
+    }
+
+    public void RemoveStatModifier(object source)
+    {
+        if (statModifiers.Remove(source)) UpdateStats();
+    }
+
     private void UpdateStats()
     {
         stats = baseStats;
@@ -78,6 +90,11 @@ public class Entity
         foreach (var equipment in equipmentList)
         {
             stats = stats.Add(equipment.Stats);
+        }
+
+        foreach (Stats modifier in statModifiers.Values)
+        {
+            stats = stats.Add(modifier);
         }
     }
 
