@@ -35,6 +35,7 @@ public class PlayerRiggingController : MonoBehaviour
     [SerializeField] private TwoBoneIKConstraint LLegBoneIK;
     [SerializeField] private TwoBoneIKConstraint RLegBoneIK;
 
+    private PlayerAnimationController playerAnimationController;
     Animator animator;
   
     public PlayerController playerController;
@@ -70,6 +71,8 @@ public class PlayerRiggingController : MonoBehaviour
             ? Vector3.forward : Vector3.up;
         target.rotation = Quaternion.LookRotation(direction, up)
             * Quaternion.Euler(shootingHandRotationOffset);
+        bool aimingBackward = Vector3.Dot(transform.forward, aimPoint - transform.position) < 0f;
+        playerAnimationController?.SetMovingBackward(aimingBackward);
 
         if (shootingArmTween) shootingArmTween.Cancel();
         if (shootingRigTween) shootingRigTween.Cancel();
@@ -85,16 +88,24 @@ public class PlayerRiggingController : MonoBehaviour
         shootingRigTween = SetRigWeight(armsRig, 1f, 0.05f);
         shootingLookTween = SetRigWeight(aimRig, 1f, 0.05f);
         shootingReleaseSequence?.Cancel();
-        shootingReleaseSequence = Delay(() =>
-        {
-            shootingReleaseSequence = null;
-            if (shootingArmTween) shootingArmTween.Cancel();
-            if (shootingRigTween) shootingRigTween.Cancel();
-            if (shootingLookTween) shootingLookTween.Cancel();
-            shootingArmTween = SetRigWeight(arm, 0f, shootingBlendTime);
-            shootingRigTween = SetRigWeight(armsRig, 0f, shootingBlendTime);
-            shootingLookTween = SetRigWeight(aimRig, 0f, 0.4f);
-        }, shootingPoseHoldTime);
+        shootingReleaseSequence = new Sequence()
+            .AppendInterval(shootingPoseHoldTime)
+            .AppendCallback(() =>
+            {
+                if (shootingArmTween) shootingArmTween.Cancel();
+                if (shootingRigTween) shootingRigTween.Cancel();
+                if (shootingLookTween) shootingLookTween.Cancel();
+                shootingArmTween = SetRigWeight(arm, 0f, shootingBlendTime);
+                shootingRigTween = SetRigWeight(armsRig, 0f, shootingBlendTime);
+                shootingLookTween = SetRigWeight(aimRig, 0f, 0.4f);
+            })
+            .AppendInterval(0.4f)
+            .AppendCallback(() =>
+            {
+                playerAnimationController?.SetMovingBackward(false);
+                shootingReleaseSequence = null;
+            });
+        StartCoroutine(shootingReleaseSequence.ExecuteActions());
     }
 
     private void SetOnEnterState()
@@ -372,6 +383,7 @@ public class PlayerRiggingController : MonoBehaviour
     {
         if (!playerController)
             playerController = GetComponent<PlayerController>();
+        playerAnimationController = GetComponent<PlayerAnimationController>();
         if (playerController)
         {
             playerController.OnShoot += AimShootingArm;
@@ -384,7 +396,8 @@ public class PlayerRiggingController : MonoBehaviour
         {
             playerController.OnShoot -= AimShootingArm;
         }
-        bool wasShooting = shootingReleaseSequence != null || shootingArmTween || shootingRigTween || shootingLookTween || otherArmTween;
+        bool wasShooting = shootingReleaseSequence != null || shootingArmTween || shootingRigTween
+            || shootingLookTween || otherArmTween;
         if (shootingArmTween) shootingArmTween.Cancel();
         if (shootingRigTween) shootingRigTween.Cancel();
         if (shootingLookTween) shootingLookTween.Cancel();
@@ -398,6 +411,7 @@ public class PlayerRiggingController : MonoBehaviour
             SetRigWeight(RArmBoneIK, 0f, 0f);
             SetRigWeight(armsRig, 0f, 0f);
             SetRigWeight(aimRig, 0f, 0f);
+            playerAnimationController?.SetMovingBackward(false);
         }
     }
 }

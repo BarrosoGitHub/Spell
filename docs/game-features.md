@@ -138,3 +138,5 @@ See [building navigation](building-navmesh.md) and the [foot placement component
 This document describes the source available on the review date. No gameplay tests, Unity compilation, performance measurements, or standalone build validation were run to create it. Scene references, imported assets, and component configuration still determine which features are active during play.
 
 Grouped enemy spawns enter Pursuing through the same group-assignment method as recruited enemies. Exterminate recruits within 15 units, beyond the idle stopping distance of 10 units, so idle enemies can approach into recruitment range.
+
+Player locomotion has a `MovingBackward` Animator bool. Shooting rigging sets it from the aim direction; PlayerAnimationController exposes `SetMovingBackward`, and rigging resets it after the shooting hold delay. The base locomotion state blends between idle, Walk Back and Unarmed Run Back by horizontal speed while the bool is active, then returns to the existing forward locomotion tree.

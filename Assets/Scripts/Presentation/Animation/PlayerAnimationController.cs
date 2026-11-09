@@ -37,7 +37,7 @@ public class PlayerAnimationController : MonoBehaviour, ISerializationCallbackRe
     private Animator animator;
     private Vector3 lastVelocity;
     private Quaternion currentTilt = Quaternion.identity;
-    private static int HorizontalSpeed, VerticalSpeed, Grounded, Moving, Hanging, Preparing, Executing, ActionIndex;
+    private static int HorizontalSpeed, VerticalSpeed, Grounded, Moving, Hanging, Preparing, Executing, ActionIndex, MovingBackward;
 
     public void OnBeforeSerialize() { }
     public void OnAfterDeserialize() => MigrateAnimationData();
@@ -77,8 +77,14 @@ public class PlayerAnimationController : MonoBehaviour, ISerializationCallbackRe
         Preparing = Animator.StringToHash("Preparing");
         Executing = Animator.StringToHash("Executing");
         ActionIndex = Animator.StringToHash("ActionIndex");
+        MovingBackward = Animator.StringToHash("MovingBackward");
         // Variation = Animator.StringToHash("Variation");
         // Mirrored = Animator.StringToHash("Mirrored");
+    }
+
+    public void SetMovingBackward(bool movingBackward)
+    {
+        if (animator) animator.SetBool(MovingBackward, movingBackward);
     }
 
     void Start()

@@ -5,6 +5,10 @@ using System.Collections.Generic;
 public abstract class Controller : MonoBehaviour
 {
     public event Action<Weapon, Vector3> OnShoot;
+    public event Action<Buff> OnBuffStarted;
+    public event Action<Buff> OnBuffFinished;
+    private readonly List<Buff> buffs = new List<Buff>();
+
     public Action<ActionInstance> OnActionInstancePerformed;
     public Action<float, ActionInstance> OnPreparingActionInstance;
     public Action<float, ActionInstance> OnExecutingActionInstance;
@@ -176,8 +180,36 @@ public abstract class Controller : MonoBehaviour
         }
     }
 
+    public void AddBuff(Buff buff)
+    {
+        if (buff == null || !isActiveAndEnabled || buffs.Contains(buff) ||
+            (entity != null && entity.CurrentHealth <= 0f)) return;
+
+        buffs.Add(buff);
+        OnBuffStarted?.Invoke(buff);
+    }
+
+    public void RemoveBuff(Buff buff)
+    {
+        if (!buffs.Remove(buff)) return;
+        OnBuffFinished?.Invoke(buff);
+    }
+
+    public void ClearBuffs()
+    {
+        if (buffs.Count == 0) return;
+
+        Buff[] finishedBuffs = buffs.ToArray();
+        buffs.Clear();
+        foreach (Buff buff in finishedBuffs)
+        {
+            OnBuffFinished?.Invoke(buff);
+        }
+    }
+
     public virtual void OnDied()
     {
+        ClearBuffs();
         OnControllerDied?.Invoke(this);
 
         CancelAction();
@@ -239,6 +271,7 @@ public abstract class Controller : MonoBehaviour
 
     protected virtual void OnDisable()
     {
+        ClearBuffs();
         if (weaponHandler != null) weaponHandler.OnAttackConfirmed -= AttackController;
         CancelAction();
         if (entity != null)
