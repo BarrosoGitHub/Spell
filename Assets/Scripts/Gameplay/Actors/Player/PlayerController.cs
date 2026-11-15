@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 public class PlayerController : Controller
 {
     private PlayerControls inputControls;
+    protected override float BaseMovementSpeed => movementData.maxSpeed;
 
     [Header("Slow Motion")]
     [Tooltip("Game speed while holding the right mouse button. 0.05 is 20 times slower.")]
@@ -133,7 +134,7 @@ public class PlayerController : Controller
 
         movingState.OnFixedUpdate += () =>
         {
-            PhysicsUpdate(movementData.drag, movementData.maxSpeed);
+            PhysicsUpdate(movementData.drag, Mathf.Max(0f, entity.stats.MovementSpeed));
         };
     }
 

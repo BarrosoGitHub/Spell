@@ -88,6 +88,11 @@ public class EntityManager : MonoBehaviour
         controller.entity.Equip(equipment);
     }
 
+    public bool AddBuff(Controller controller, Buff buff)
+    {
+        return controller != null && controller.AddBuff(buff);
+    }
+
     private DamageResult CalculateDamage(Entity source)
     {
         float damage = source.stats.BaseDamage * (1 + source.stats.BaseDamagePerc);

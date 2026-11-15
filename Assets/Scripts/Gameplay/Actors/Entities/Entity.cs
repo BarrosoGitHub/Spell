@@ -101,22 +101,10 @@ public class Entity
     public float AddCurrentHealth(float amount)
     {
         float previousHealth = currentHealth;
-        float value = currentHealth + amount;
+        currentHealth = Mathf.Clamp(currentHealth + amount, 0f, Mathf.Max(0f, stats.MaxHealth));
 
-        if (value > stats.MaxHealth)
-        {
-            currentHealth = stats.MaxHealth;
-        }
-        else if (value <= 0f)
-        {
-            currentHealth = 0f;
-            if (previousHealth > 0f)
-                OnEntityDied?.Invoke();
-        }
-        else
-        {
-            currentHealth = value;
-        }
+        if (currentHealth <= 0f && previousHealth > 0f)
+            OnEntityDied?.Invoke();
 
         if (previousHealth != currentHealth)
             OnHealthChanged?.Invoke(currentHealth);

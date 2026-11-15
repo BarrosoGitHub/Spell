@@ -4,6 +4,7 @@ public class Stats
     public float MaxHealth { get; private set; }
     public float BaseDamage { get; private set; }
     public float AttackSpeed { get; private set; }
+    public float MovementSpeed { get; private set; }
     public float Defense { get; private set; }
     public float CriticalChance { get; private set; }
     public float CriticalDamage { get; private set; }
@@ -23,12 +24,14 @@ public class Stats
                  float maxHealthPerc = 0,
                  float baseDamagePerc = 0,
                  float attackSpeedPerc = 0,
-                 float defensePerc = 0)
+                 float defensePerc = 0,
+                 float movementSpeed = 0)
     {
         Level = level;
         MaxHealth = maxHealth;
         BaseDamage = baseDamage;
         AttackSpeed = attackSpeed;
+        MovementSpeed = movementSpeed;
         Defense = defense;
         CriticalChance = criticalChance;
         CriticalDamage = criticalDamage;
@@ -51,7 +54,8 @@ public class Stats
             MaxHealthPerc + other.MaxHealthPerc,
             BaseDamagePerc + other.BaseDamagePerc,
             AttackSpeedPerc + other.AttackSpeedPerc,
-            DefensePerc + other.DefensePerc
+            DefensePerc + other.DefensePerc,
+            MovementSpeed + other.MovementSpeed
         );
     }
 }

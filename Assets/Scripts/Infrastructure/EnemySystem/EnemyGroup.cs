@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-public class    EnemyGroup
+public class EnemyGroup
 {
     public EnemyType EnemyType { get; set; }
     public List<EnemyController> EnemyList { get; set; }

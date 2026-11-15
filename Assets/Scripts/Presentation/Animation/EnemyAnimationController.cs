@@ -1,6 +1,7 @@
 using UnityEngine;
 
 [DisallowMultipleComponent]
+[RequireComponent(typeof(AnimatorFrequency))]
 public sealed class EnemyAnimationController : MonoBehaviour
 {
     public EnemyController enemyController;
