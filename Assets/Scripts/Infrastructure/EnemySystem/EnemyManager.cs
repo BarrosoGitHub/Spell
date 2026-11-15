@@ -12,6 +12,7 @@ public class EnemyManager : MonoBehaviour
     private readonly Dictionary<EnemyGroup, Coroutine[]> groupCoroutines = new();
     private List<Controller> availableControllers = new();
     private readonly HashSet<EnemyController> spawnedEnemies = new();
+    private readonly Dictionary<EnemyController, EnemyGroup> memberships = new();
     private EntityManager entityManager;
 
     void Awake()
@@ -129,14 +130,9 @@ public class EnemyManager : MonoBehaviour
         EnemyController enemyController = controller as EnemyController;
         if (enemyController == null || !spawnedEnemies.Remove(enemyController)) return;
 
-        foreach (EnemyGroup group in groupCoroutines.Keys.ToList())
-        {
-            if (group.EnemyList.Contains(enemyController))
-            {
-                group.EnemyList.Remove(enemyController);
-                break;
-            }
-        }
+        if (memberships.Remove(enemyController, out EnemyGroup group))
+            group.EnemyList.Remove(enemyController);
+
         availableControllers.Remove(enemyController);
 
         enemyController.SetIdleTarget(null);
@@ -205,17 +201,19 @@ public class EnemyManager : MonoBehaviour
     {
         while (true)
         {
-            // Keep attackers and link traversers in the group until they finish.
-            List<EnemyController> attackers = enemyGroup.EnemyList
+            Vector3 targetPosition = enemyGroup.TargetController.transform.position;
+
+            // Keep attackers and link traversers in their current group.
+            List<EnemyController> retainedMembers = enemyGroup.EnemyList
                 .Where(e => e && (
                     e.State == e.climbingState ||
                     e.ActionInstances.Any(a => e.State == a.preparing || e.State == a.executing)))
                 .Distinct()
                 .ToList();
-            List<EnemyController> closestEnemyControllers = attackers.Concat(
-                GetClosestEnemyControllers(enemyGroup.EnemyType,
-                    Mathf.Max(0, enemyGroup.MaxNumberOfEnemies - attackers.Count),
-                    enemyGroup.TargetController.transform.position, enemyGroup.MaxEngagementDistance))
+            List<EnemyController> closestEnemyControllers = retainedMembers.Concat(
+                GetClosestEnemyControllers(enemyGroup,
+                    Mathf.Max(0, enemyGroup.MaxNumberOfEnemies - retainedMembers.Count),
+                    targetPosition, enemyGroup.MaxEngagementDistance, retainedMembers))
                 .ToList();
 
             List<EnemyController> enemiesToRemove = enemyGroup.EnemyList.Except(closestEnemyControllers).ToList();
@@ -235,11 +233,13 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
-    private List<EnemyController> GetClosestEnemyControllers(EnemyType enemyType, int maxNumberOfEnemies, Vector3 position, float radius)
+    private List<EnemyController> GetClosestEnemyControllers(EnemyGroup group, int maxNumberOfEnemies, Vector3 position, float radius, List<EnemyController> retainedMembers)
     {
         return Physics.OverlapSphere(position, radius)
             .Select(c => c.GetComponent<EnemyController>())
-            .Where(e => e != null && e.enemyType == enemyType && (e.State == e.idlingState || e.State == e.pursuingState))
+            .Where(e => e != null && spawnedEnemies.Contains(e) && e.enemyType == group.EnemyType && !retainedMembers.Contains(e) &&
+                (e.State == e.idlingState || e.State == e.pursuingState) &&
+                (!memberships.TryGetValue(e, out EnemyGroup owner) || owner == group))
             .Distinct()
             .OrderBy(e => (e.transform.position - position).sqrMagnitude)
             .Take(maxNumberOfEnemies)
@@ -251,8 +251,9 @@ public class EnemyManager : MonoBehaviour
         if (enemyGroup.EnemyList.Contains(enemyController))
         {
             enemyGroup.EnemyList.Remove(enemyController);
+            memberships.Remove(enemyController);
             if (!enemyController) return;
-         
+
             enemyController.SetIdleTarget(enemyGroup.TargetController);
             enemyController.Target = null;
             if (enemyController.navMeshAgent && enemyController.State == enemyController.pursuingState)
@@ -265,8 +266,9 @@ public class EnemyManager : MonoBehaviour
 
     private void AddControllerToGroup(EnemyGroup enemyGroup, EnemyController enemyController)
     {
-        if (!enemyGroup.EnemyList.Contains(enemyController))
+        if (!memberships.ContainsKey(enemyController))
         {
+            memberships.Add(enemyController, enemyGroup);
             enemyGroup.EnemyList.Add(enemyController);
             enemyController.SetIdleTarget(enemyGroup.TargetController);
             enemyController.Target = enemyGroup.TargetController;

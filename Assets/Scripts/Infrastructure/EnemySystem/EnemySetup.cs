@@ -42,7 +42,6 @@ public class EnemySetup : MonoBehaviour
         int spawnIndex = 0;
         foreach (GroupSettings settings in groups)
         {
-            // One group per type avoids competing for the same enemies and target.
             if (settings == null || !registeredTypes.Add(settings.enemyType)) continue;
 
             var group = new EnemyGroup(settings.enemyType, target,

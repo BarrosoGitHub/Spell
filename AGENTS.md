@@ -44,6 +44,7 @@ Follow the existing organization for new code. These folders are a guide for res
 
 ## Readability and C# style
 
+- When creating a script, use nearby scripts with similar responsibilities as the reference for both coding style and implementation approach. Reuse established lifecycle and subsystem patterns where they fit.
 - Follow the surrounding C# formatting and naming conventions. Use descriptive names, explicit access modifiers, small cohesive methods, and guard clauses to keep control flow easy to follow.
 - Prefer straightforward control flow over clever expressions, deeply nested conditions, or boolean arguments whose meaning is unclear at the call site.
 - Name meaningful constants and expose designer-tunable settings through appropriate serialized fields. Include units in names or tooltips where ambiguity matters.

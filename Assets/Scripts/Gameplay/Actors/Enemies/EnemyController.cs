@@ -10,8 +10,13 @@ public class EnemyController : Controller
     public State climbingState = new State("Climbing");
     public State deadState = new State("Dead");
 
-    [SerializeField, Min(0f)] private float idleStoppingDistance = 10f;
+    private float pathTimer;
+
+    [SerializeField, Min(0f)] private float idleStoppingDistance = 3f;
+    private const float MinIdleAvoidanceMultiplier = 1.3f;
+    private const float MaxIdleAvoidanceMultiplier = 3f;
     private Controller idleTarget;
+    private float defaultAvoidanceRadius;
     private float pursuitStoppingDistance;
 
     public void SetIdleTarget(Controller controller)
@@ -37,6 +42,7 @@ public class EnemyController : Controller
         navMeshAgent = GetComponent<NavMeshAgent>();
         navMeshAgent.autoTraverseOffMeshLink = false;
         pursuitStoppingDistance = navMeshAgent.stoppingDistance;
+        defaultAvoidanceRadius = navMeshAgent.radius;
 
     }
 
@@ -53,12 +59,12 @@ public class EnemyController : Controller
             navMeshAgent.enabled = true;
             if (navMeshAgent.isOnNavMesh) navMeshAgent.isStopped = false;
             navMeshAgent.stoppingDistance = idleStoppingDistance;
+            navMeshAgent.radius = defaultAvoidanceRadius * Random.Range(MinIdleAvoidanceMultiplier, MaxIdleAvoidanceMultiplier);
         };
         pursuingState.OnEnterState += () =>
         {
             navMeshAgent.enabled = true;
             if (navMeshAgent.isOnNavMesh) navMeshAgent.isStopped = false;
-            navMeshAgent.speed = 2.5f;
             navMeshAgent.stoppingDistance = pursuitStoppingDistance;
         };
 
@@ -85,6 +91,7 @@ public class EnemyController : Controller
 
     public override void SetOnExitState()
     {
+        idlingState.OnExitState += () => navMeshAgent.radius = defaultAvoidanceRadius;
         climbingState.OnExitState += () => navMeshAgent.updatePosition = savedUpdatePosition;
     }
     public override void SetOnUpdateState() { }
@@ -93,11 +100,15 @@ public class EnemyController : Controller
     {
         idlingState.OnFixedUpdate += () =>
         {
-            if (idleTarget == null || !navMeshAgent.enabled || !navMeshAgent.isOnNavMesh) return;
-            navMeshAgent.SetDestination(idleTarget.transform.position);
+            if (idleTarget == null) return;
+            UpdateNavigation(idleTarget.transform.position);
         };
 
-        pursuingState.OnFixedUpdate += UpdatePursuit;
+        pursuingState.OnFixedUpdate += () =>
+        {
+            if (Target == null) return;
+            UpdateNavigation(Target.transform.position);
+        };
         climbingState.OnFixedUpdate += UpdateLinkTraversal;
 
         unconsciousState.OnFixedUpdate += () =>
@@ -109,10 +120,15 @@ public class EnemyController : Controller
         };
     }
 
-    private void UpdatePursuit()
+    private void UpdateNavigation(Vector3 position)
     {
-        if (Target == null || !navMeshAgent.enabled || !navMeshAgent.isOnNavMesh) return;
-        navMeshAgent.SetDestination(Target.transform.position);
+        if (!navMeshAgent.enabled || !navMeshAgent.isOnNavMesh) return;
+
+        pathTimer += Time.fixedDeltaTime;
+        if (pathTimer < 0.25f) return;
+
+        pathTimer = 0f;
+        navMeshAgent.SetDestination(position);
     }
 
     private void UpdateLinkTraversal()
@@ -153,6 +169,7 @@ public class EnemyController : Controller
     protected override void FixedUpdate()
     {
         base.FixedUpdate();
+        navMeshAgent.speed = Mathf.Max(0f, entity.stats.MovementSpeed);
         if ((State == pursuingState || State == idlingState) && navMeshAgent.enabled &&
             navMeshAgent.isOnNavMesh && navMeshAgent.isOnOffMeshLink)
             State = climbingState;

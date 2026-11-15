@@ -13,6 +13,8 @@ This is an overview of the current Unity prototype based on its scripts and proj
 
 ## Player movement and traversal
 
+- Player 1 uses the Hooded Shadowwalker skinned mesh and Humanoid avatar, with its embedded color, metallic and roughness textures configured for URP. The existing Void Sentinel animation takes supply idle, forward and backward locomotion, and the rising airborne state. The existing fall, dodge and climbing motions still drive their respective states through the same player controller.
+
 - Camera-relative movement using the Unity Input System.
 - Rigidbody movement with spring-based ground support and configurable gravity.
 - `Dodge` uses the existing action lifecycle. Call `TryDodge()` to move in the input direction, falling back to facing when stationary. It sets horizontal velocity to 15 units/second, preserves collision and vertical movement, and stops horizontal movement on completion or cancellation. Duration comes from `PlayerActionsSO.Dodge`. The former jump input (Space or gamepad south button) triggers Dodge while moving. Cooldown and invulnerability are not provided.
@@ -54,16 +56,23 @@ See [ragdoll details](ragdoll-manager.md).
 
 ## Enemy AI and spawning
 
+- Normal enemies blend in a head aim constraint while pursuing a target. The constraint tracks the target at a configurable height and blends out when pursuit ends. With animation LOD enabled, the rig is evaluated at the same cadence as the Animator.
+
+- Enemy_normal uses the Crimson Wraith skinned mesh and its extracted base-color, metallic, and roughness textures with a URP Lit material (roughness is inverted into smoothness and packed into the metallic map alpha). Its Humanoid avatar retargets the existing EnemyAnimatorController clips; the animation scheduler and hit ragdoll remain attached to the model.
+
 - Enemies idle, pursue targets, traverse navigation links, attack, become unconscious, recover, and die.
-- Idle enemies follow their assigned player with a configurable `idleStoppingDistance` (default 10 units), instead of wandering. EnemyManager assigns the player at spawn and keeps the group's player as the idle follow target when an enemy leaves that group. Combat pursuit restores the NavMeshAgent's original stopping distance. Idle follow targets are separate from combat targets and cleared on despawn.
+- Idle enemies follow their assigned player with a configurable `idleStoppingDistance` (default 3 units), instead of wandering. EnemyManager assigns the player at spawn and keeps the group's player as the idle follow target when an enemy leaves that group. Combat pursuit restores the NavMeshAgent's original stopping distance. Idle follow targets are separate from combat targets and cleared on despawn. On entering idle, enemies randomly scale their authored NavMesh avoidance radius by 1.3 to 3 and restore it when leaving idle.
 - NavMesh path following and direct traversal between link endpoints.
 - Enemy groups specify a target, enemy type, recruitment engagement distance, separate attack trigger range (default 3 units), group limit, simultaneous attacker limit, and attack interval. Each attacker must be within its group's attack range before beginning an attack.
 - Group refresh selects nearby eligible enemies and retains attackers and link traversers until their actions finish.
 - Enemy spawning and despawning use the controller spawner and object pool.
+- Add `OptimizationManager` to a scene object and assign its spawner and distance origin. Its Animation Lod boolean creates or removes a child containing `DistanceManager` and `AnimationLodManager`. Disabling the owner removes that child and restores the models.
+- `AnimationLodManager` owns distance refresh and animation scheduling. Its Inspector settings default to 30 Hz within 15 units, 15 Hz within 40 units, and 5 Hz beyond. Entries reserve capacity for 1,000 enemies, stagger initial deadlines, and pass full accumulated scaled time to each animation sample. Spawn and despawn events maintain entries, including enemies already spawned when the system starts.
+- `AnimatorFrequency` has no per-frame callback. Its `Tick` samples the Animator. The scheduler owns evaluation while active. Manual animation disables the model’s hit ragdoll component, then restores its previous enabled state and Animator settings when released. Play Mode validation of animation scheduling and ragdoll integration remains required.
 - Each `EnemyManager` listens to `EntityManager.OnControllerDied(source, target)` while enabled and despawns only enemies it spawned. It no longer subscribes to individual enemy death callbacks.
 - Available enemies and active group members are tracked for bulk cleanup.
 - Bulk cleanup returns tracked enemies to the pool and stops registered group coroutines.
-- A separate `EnemySetup` component can register groups and spawn an initial batch at configured points.
+- `EnemySetup` registers one pursuit group per enemy type. Enemies pursue their assigned target directly, and each enemy can belong to one group registered by its spawning manager.
 - An orange `PURSUING` debug label appears above enemies actively pursuing a player target. The label is a screen overlay and remains visible through walls.
 
 The enemy type enum contains Normal, Tank, and Boss. These identifiers alone do not establish separate finished behaviors or encounters for each type. Group recruitment currently searches nearby matching enemies rather than filtering by the mission that spawned them.
@@ -85,8 +94,8 @@ The enemy type enum contains Normal, Tank, and Boss. These identifiers alone do 
 
 | Mission | Current behavior |
 | --- | --- |
-| Exterminate | Creates a normal-enemy group and spawns one enemy. Its current settings spawn 1 enemy, allow 3 group members and 1 simultaneous attacker, and use a 15-unit engagement distance. Aborting calls enemy cleanup. |
-| EndlessWaves | Endless waves of 3, 5, 7… enemies, spawned individually 1 second apart. Clear the entire wave, then wait 1 second for the next. Inspector settings control growth and timing; failure, abort, completion or disable clean up the run. |
+| Exterminate | Spawns 100 normal enemies for profiling, using a grid projected onto the NavMesh near world origin. Grid points that miss the NavMesh use the sampled center. The combat group recruits up to 3 enemies within 15 units and allows 1 simultaneous attacker. Failure and abort clean up the crowd. |
+| EndlessWaves | Infinite waves of five enemies, spawned together outside the main camera frustum on reachable NavMesh positions. The next wave starts after ten scaled seconds or immediately when the newest wave is cleared. Earlier survivors stay alive. If no valid offscreen batch fits, spawning retries every second. Inspector settings control count, interval and clearance. Failure, abort, completion or disable clean up the run. |
 | Survival | Tracks time while running, resolves the player reference from `GameManager` if needed, and reacts to player death or a missing player with an unsuccessful result. |
 
 ### Mission work still needed
@@ -116,7 +125,7 @@ See [destruction holds](DestructionHolds.md), [debris](Debris.md), and [hold reb
 - Building and city NavMesh baking tools with editor controls.
 - Automatic links between lower navigation surfaces and elevated building surfaces.
 - Incremental baking, forced rebuilds, and configurable geometry filtering.
-- Player and enemy animation controllers.
+- Player and enemy animation controllers. Animated enemies use `AnimatorFrequency.Tick` when managed by the optional animation LOD system, using full elapsed time and disabling root motion during manual evaluation. Tank and boss placeholder prefabs currently have no Animator.
 - Player rigging for traversal poses, plus foot placement components and physical hit-reaction tooling.
 
 See [building navigation](building-navmesh.md) and the [foot placement component documentation](../Assets/Scripts/Presentation/Animation/FootPlacement/README.md).
@@ -137,6 +146,6 @@ See [building navigation](building-navmesh.md) and the [foot placement component
 
 This document describes the source available on the review date. No gameplay tests, Unity compilation, performance measurements, or standalone build validation were run to create it. Scene references, imported assets, and component configuration still determine which features are active during play.
 
-Grouped enemy spawns enter Pursuing through the same group-assignment method as recruited enemies. Exterminate recruits within 15 units, beyond the idle stopping distance of 10 units, so idle enemies can approach into recruitment range.
+Grouped enemy spawns enter Pursuing through the same group-assignment method as recruited enemies. Exterminate recruits within 15 units, beyond the idle stopping distance of 3 units, so idle enemies can approach into recruitment range.
 
 Player locomotion has a `MovingBackward` Animator bool. Shooting rigging sets it from the aim direction; PlayerAnimationController exposes `SetMovingBackward`, and rigging resets it after the shooting hold delay. The base locomotion state blends between idle, Walk Back and Unarmed Run Back by horizontal speed while the bool is active, then returns to the existing forward locomotion tree.

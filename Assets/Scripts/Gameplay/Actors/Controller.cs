@@ -7,7 +7,7 @@ public abstract class Controller : MonoBehaviour
     public event Action<Weapon, Vector3> OnShoot;
     public event Action<Buff> OnBuffStarted;
     public event Action<Buff> OnBuffFinished;
-    private readonly List<Buff> buffs = new List<Buff>();
+    private readonly Dictionary<Buff, Sequence> buffs = new();
 
     public Action<ActionInstance> OnActionInstancePerformed;
     public Action<float, ActionInstance> OnPreparingActionInstance;
@@ -73,6 +73,7 @@ public abstract class Controller : MonoBehaviour
     [SerializeField] protected CombatHandler weaponHandler;
 
     public Entity entity;
+    protected virtual float BaseMovementSpeed => 2.5f;
     public List<ActionInstance> ActionInstances { get; set; }
     public ActionInstance CurrentActionInstance { get; private set; }
     public Sequence ActionSequence;
@@ -121,6 +122,7 @@ public abstract class Controller : MonoBehaviour
                     maxHealth: 5,
                     baseDamage: 1,
                     attackSpeed: 1,
+                    movementSpeed: BaseMovementSpeed,
                     defense: 0.76f,
                     criticalChance: 0,
                     criticalDamage: 1
@@ -182,24 +184,41 @@ public abstract class Controller : MonoBehaviour
 
     public bool AddBuff(Buff buff)
     {
-        buffs.Add(buff);
+        if (buff == null || !isActiveAndEnabled || entity == null ||
+            entity.CurrentHealth <= 0f || buffs.ContainsKey(buff)) return false;
+
+        Sequence expiry = new Sequence()
+            .AppendInterval(buff.Duration)
+            .AppendCallback(() => RemoveBuff(buff));
+
+        buffs.Add(buff, expiry);
         entity.AddStatModifier(buff, buff.GetStats());
-        if (buffs.Contains(buff)) OnBuffStarted?.Invoke(buff);
-        return buffs.Contains(buff);
+        OnBuffStarted?.Invoke(buff);
+
+        // A start listener can remove or replace this activation.
+        if (buffs.TryGetValue(buff, out Sequence current) && current == expiry)
+            StartCoroutine(expiry.ExecuteActions());
+
+        return true;
     }
 
     public void RemoveBuff(Buff buff)
     {
-        if (!buffs.Remove(buff)) return;
+        if (ReferenceEquals(buff, null) || !buffs.Remove(buff, out Sequence expiry)) return;
+
+        expiry.Cancel();
         entity.RemoveStatModifier(buff);
         OnBuffFinished?.Invoke(buff);
     }
 
     public void ClearBuffs()
     {
-        foreach (Buff buff in buffs.ToArray())
+        if (buffs.Count == 0) return;
+
+        foreach (var activation in new List<KeyValuePair<Buff, Sequence>>(buffs))
         {
-            RemoveBuff(buff);
+            if (buffs.TryGetValue(activation.Key, out Sequence current) && current == activation.Value)
+                RemoveBuff(activation.Key);
         }
     }
 

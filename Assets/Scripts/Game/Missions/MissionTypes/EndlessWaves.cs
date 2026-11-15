@@ -1,14 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public sealed class EndlessWaves : Mission
 {
     [Header("Waves")]
-    [SerializeField, Min(1)] private int firstWaveEnemies = 3;
-    [SerializeField, Min(1)] private int enemiesAddedPerWave = 2;
-    [SerializeField, Min(0.1f)] private float spawnInterval = 0.2f;
-    [SerializeField, Min(0f)] private float waveBreak = 1f;
+    [SerializeField, Min(1)] private int enemiesPerWave = 5;
+    [SerializeField, Min(0.1f)] private float waveInterval = 10f;
+    [SerializeField, Min(0.1f)] private float spawnClearance = 2f;
 
     public int CurrentWave { get; private set; }
     public int EnemiesInWave { get; private set; }
@@ -16,15 +16,21 @@ public sealed class EndlessWaves : Mission
     public float SurvivalTime { get; private set; }
     protected override float ElapsedTime => SurvivalTime;
 
-    // Group membership changes with distance, so track this mission's spawns separately.
+    // Only the newest wave controls early advancement; older survivors remain managed by EnemyManager.
     private readonly HashSet<Controller> livingEnemies = new();
     private ControllerSpawner spawner;
     private Controller player;
     private EnemyGroup enemyGroup;
     private Coroutine waves;
+    private Camera gameplayCamera;
+    private NavMeshTriangulation navigation;
+    private readonly Plane[] cameraPlanes = new Plane[6];
+    private NavMeshPath spawnPath;
+    private Vector3[] spawnPositions;
 
     protected override void Awake()
     {
+        spawnPath = new NavMeshPath();
         ReadyState.OnEnterState += ResetProgress;
         RunningState.OnEnterState += StartWaves;
         RunningState.OnUpdate += UpdateSurvival;
@@ -50,6 +56,14 @@ public sealed class EndlessWaves : Mission
             Debug.LogWarning("EndlessWaves requires a living player before starting.", this);
             return;
         }
+        gameplayCamera = Camera.main;
+        navigation = NavMesh.CalculateTriangulation();
+        if (gameplayCamera == null || navigation.indices.Length < 3)
+        {
+            Debug.LogWarning("EndlessWaves requires a MainCamera and a baked NavMesh.", this);
+            return;
+        }
+        spawnPositions = new Vector3[Mathf.Max(1, enemiesPerWave)];
         base.StartMission();
     }
 
@@ -73,18 +87,23 @@ public sealed class EndlessWaves : Mission
 
     private IEnumerator RunWaves()
     {
-        var betweenSpawns = new WaitForSeconds(Mathf.Max(0.1f, spawnInterval));
-        var betweenWaves = new WaitForSeconds(Mathf.Max(0f, waveBreak));
-
+        var retrySpawn = new WaitForSeconds(1f);
         while (State == RunningState)
         {
-            CurrentWave++;
-            EnemiesInWave = Mathf.Max(1, firstWaveEnemies)
-                + (CurrentWave - 1) * Mathf.Max(1, enemiesAddedPerWave);
+            // Prepare the entire batch before activating any enemies.
+            if (!TryFindSpawnPositions())
+            {
+                yield return retrySpawn;
+                continue;
+            }
 
+            livingEnemies.Clear();
+            CurrentWave++;
+            EnemiesInWave = spawnPositions.Length;
             for (int i = 0; i < EnemiesInWave; i++)
             {
-                Controller enemy = enemyManager.SpawnEnemy(enemyGroup);
+                Controller enemy = enemyManager.SpawnEnemy(EnemyType.Normal,
+                    spawnPositions[i], Quaternion.identity);
                 if (enemy == null)
                 {
                     Debug.LogError("EndlessWaves could not spawn a Normal enemy. Check the enemy pool.", this);
@@ -92,13 +111,54 @@ public sealed class EndlessWaves : Mission
                     yield break;
                 }
                 livingEnemies.Add(enemy);
-                if (i < EnemiesInWave - 1) yield return betweenSpawns;
             }
 
-            // Start the break only after the entire wave has spawned and been cleared.
-            while (livingEnemies.Count > 0) yield return null;
-            yield return betweenWaves;
+            float elapsed = 0f;
+            while (livingEnemies.Count > 0 && elapsed < waveInterval)
+            {
+                yield return null;
+                elapsed += Time.deltaTime;
+            }
         }
+    }
+
+    private bool TryFindSpawnPositions()
+    {
+        if (gameplayCamera == null || player == null) return false;
+        GeometryUtility.CalculateFrustumPlanes(gameplayCamera, cameraPlanes);
+        if (!NavMesh.SamplePosition(player.transform.position, out NavMeshHit target, 3f, NavMesh.AllAreas))
+            return false;
+
+        for (int i = 0; i < spawnPositions.Length; i++)
+        {
+            float closestDistanceSquared = float.PositiveInfinity;
+            for (int attempt = 0; attempt < 256; attempt++)
+            {
+                int triangle = Random.Range(0, navigation.indices.Length / 3) * 3;
+                Vector3 a = navigation.vertices[navigation.indices[triangle]];
+                Vector3 b = navigation.vertices[navigation.indices[triangle + 1]];
+                Vector3 c = navigation.vertices[navigation.indices[triangle + 2]];
+                float u = Mathf.Sqrt(Random.value);
+                Vector3 position = (1f - u) * a + u * (1f - Random.value) * (b - c) + u * c;
+                if (!NavMesh.SamplePosition(position, out NavMeshHit hit, 1f, NavMesh.AllAreas)) continue;
+                position = hit.position;
+                float distanceSquared = (position - player.transform.position).sqrMagnitude;
+                if (distanceSquared >= closestDistanceSquared) continue;
+                Bounds bounds = new Bounds(position + Vector3.up, Vector3.one * spawnClearance * 2f);
+                if (GeometryUtility.TestPlanesAABB(cameraPlanes, bounds)) continue;
+                bool overlaps = false;
+                for (int j = 0; j < i; j++)
+                    if ((spawnPositions[j] - position).sqrMagnitude < spawnClearance * spawnClearance)
+                        overlaps = true;
+                if (overlaps) continue;
+                if (!NavMesh.CalculatePath(position, target.position, NavMesh.AllAreas, spawnPath)
+                    || spawnPath.status != NavMeshPathStatus.PathComplete) continue;
+                spawnPositions[i] = position;
+                closestDistanceSquared = distanceSquared;
+            }
+            if (float.IsPositiveInfinity(closestDistanceSquared)) return false;
+        }
+        return true;
     }
 
     private void HandleEnemyDespawned(Controller enemy) => livingEnemies.Remove(enemy);

@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stats:
-    fireRate: 3
+    fireRate: 1.2
     damagePerBullet: 5
     magazine: 30
     reloadTime: 2

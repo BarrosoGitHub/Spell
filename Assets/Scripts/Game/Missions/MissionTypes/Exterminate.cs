@@ -1,7 +1,12 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 public class Exterminate : Mission
 {
+    private const int EnemyCount = 5;
+    private const int SpawnColumns = 10;
+    private const float SpawnSpacing = 2f;
+
     private EnemyGroup enemyGroup;
 
     public override void StartMission()
@@ -11,18 +16,34 @@ public class Exterminate : Mission
         if (State != RunningState) return;
 
         enemyManager.DespawnAllEnemiesAndStopCoroutines();
+        if (!NavMesh.SamplePosition(Vector3.zero, out NavMeshHit spawnCenter, 15f, NavMesh.AllAreas))
+        {
+            Debug.LogError("Exterminate needs a baked NavMesh within 15 units of world origin.", this);
+            FailMission();
+            return;
+        }
+
         enemyGroup = new EnemyGroup(
             EnemyType.Normal, 
             GameManager.Instance.playerController,
             3,
             15f,
             1,
-            1.5f
+            3f
         );
         
         enemyManager.AddEnemyGroup(enemyGroup);
 
-        enemyManager.SpawnEnemy(enemyGroup);
+        for (int i = 0; i < EnemyCount; i++)
+        {
+            float x = (i % SpawnColumns - (SpawnColumns - 1) * 0.5f) * SpawnSpacing;
+            float z = (i / SpawnColumns - (SpawnColumns - 1) * 0.5f) * SpawnSpacing;
+            Vector3 candidate = spawnCenter.position + new Vector3(x, 0f, z);
+            Vector3 position = NavMesh.SamplePosition(candidate, out NavMeshHit hit, SpawnSpacing, NavMesh.AllAreas)
+                ? hit.position
+                : spawnCenter.position;
+            enemyManager.SpawnEnemy(EnemyType.Normal, position, Quaternion.identity);
+        }
 
         Debug.Log("Starting Exterminate mission.");
     }
