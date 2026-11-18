@@ -17,6 +17,12 @@ public sealed class MissionManager : MonoBehaviour
 
     private PlayerController subscribedPlayer;
 
+    private void Start()
+    {
+        if (selectedMission == null)
+            SelectMission(typeof(EndlessWaves));
+    }
+
     public bool SelectMission(int index)
     {
         if (index < 0 || index >= AvailableMissions.Length) return false;

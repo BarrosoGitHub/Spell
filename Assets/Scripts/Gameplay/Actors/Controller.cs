@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 using System.Collections.Generic;
 
 public abstract class Controller : MonoBehaviour
@@ -21,6 +22,9 @@ public abstract class Controller : MonoBehaviour
     public Action<bool> OnStateVariationChanged;
     public Action<float> OnConsciousnessChanged;
     public State unconsciousState = new State("Unconscious");
+
+    [FormerlySerializedAs("levelProgression")]
+    [SerializeField] private ControllerStats controllerStats;
 
     private State state;
     private Controller target;
@@ -113,20 +117,10 @@ public abstract class Controller : MonoBehaviour
         weaponHandler = GetComponent<CombatHandler>();
         ActionInstances = new List<ActionInstance>();
 
-        //This needs a better way to start
-        //ScriptableObject or something
         if (entity == null)
         {
             entity = new Entity(
-                new Stats(
-                    maxHealth: 5,
-                    baseDamage: 1,
-                    attackSpeed: 1,
-                    movementSpeed: BaseMovementSpeed,
-                    defense: 0.76f,
-                    criticalChance: 0,
-                    criticalDamage: 1
-                )
+                controllerStats: controllerStats
             );
         }
         SetActions();

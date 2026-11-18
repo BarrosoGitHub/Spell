@@ -5,8 +5,9 @@ using UnityEngine;
 public class Entity
 {
     private Stats baseStats;
-    public Stats stats;
-    private List<Equipment> equipmentList;
+    private readonly ControllerStats controllerStats;
+    public Stats stats { get; private set; }
+    private readonly List<Equipment> equipmentList;
     private readonly Dictionary<object, Stats> statModifiers = new Dictionary<object, Stats>();
 
     public Action<float> OnHealthChanged;
@@ -18,9 +19,13 @@ public class Entity
     private float currentHealth;
     public float CurrentHealth => currentHealth;
 
-    public Entity(Stats baseStats, List<Equipment> equipmentList = null)
+    public Entity(List<Equipment> equipmentList = null, ControllerStats controllerStats = null)
     {
-        this.baseStats = baseStats;
+        if (controllerStats == null)
+            throw new ArgumentNullException(nameof(controllerStats), "Assign a ControllerStats asset before creating an Entity.");
+
+        baseStats = controllerStats.CreateBaseStats();
+        this.controllerStats = controllerStats;
         this.equipmentList = equipmentList ?? new List<Equipment>();
         UpdateStats();
         currentHealth = stats.MaxHealth;
@@ -43,12 +48,14 @@ public class Entity
         return false;
     }
 
-    public void ResetLevel()
+    public void SetLevel(int level)
     {
+        baseStats.Level = Mathf.Max(1, level);
         currentExperience = 0f;
-        baseStats.Level = 1;
         UpdateStats();
     }
+
+    public void ResetLevel() => SetLevel(1);
 
     public void AddBaseStats(Stats additionalStats)
     {
@@ -85,7 +92,8 @@ public class Entity
 
     private void UpdateStats()
     {
-        stats = baseStats;
+        // Recalculate from the base on every change, including pooled level resets.
+        stats = baseStats.Add(controllerStats.GetBonus(baseStats.Level));
 
         foreach (var equipment in equipmentList)
         {
