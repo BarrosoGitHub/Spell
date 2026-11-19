@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "ControllerStats", menuName = "Controllers/Stats")]
+[CreateAssetMenu(fileName = "StatProfile", menuName = "Controllers/Stat Profile")]
 public sealed class StatProfile : ScriptableObject
 {
     [Header("Initial Base Stats")]

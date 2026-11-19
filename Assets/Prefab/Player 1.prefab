@@ -146,6 +146,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b1086536dd89dd4ea1383fbbddae104, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
+  controllerStats: {fileID: 11400000, guid: c6407ec6fea141fb9ea9a1ae561b0738, type: 2}
   currentStateName: 
   col: {fileID: 0}
   rb: {fileID: 0}

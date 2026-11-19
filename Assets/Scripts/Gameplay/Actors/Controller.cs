@@ -22,7 +22,7 @@ public abstract class Controller : MonoBehaviour
     public Action<bool> OnStateVariationChanged;
 
     [FormerlySerializedAs("levelProgression")]
-    [SerializeField] private StatProfile controllerStats;
+    [SerializeField] private StatProfile statProfile;
 
     private State state;
     private Controller target;
@@ -87,11 +87,11 @@ public abstract class Controller : MonoBehaviour
 
         if (entity == null)
         {
-            if (controllerStats == null)
+            if (statProfile == null)
                 throw new InvalidOperationException(
-                    $"{name} requires a ControllerStats asset. Assign Controller Stats on its controller component.");
+                    $"{name} requires a StatProfile asset. Assign Stat Profile on its controller component.");
 
-            entity = new Entity(controllerStats: controllerStats);
+            entity = new Entity(controllerStats: statProfile);
         }
         SetActions();
 

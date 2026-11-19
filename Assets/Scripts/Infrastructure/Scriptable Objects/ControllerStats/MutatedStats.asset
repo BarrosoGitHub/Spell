@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d93c570abebb40c2960b5ab737d9fc33, type: 3}
   m_Name: MutatedStats
-  m_EditorClassIdentifier: Assembly-CSharp::ControllerStats
+  m_EditorClassIdentifier: Assembly-CSharp::StatProfile
   maxHealth: 2
   damage: 0.5
   defense: 0
