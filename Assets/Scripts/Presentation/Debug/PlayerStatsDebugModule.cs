@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public sealed class PlayerStatsDebugDisplay
+public sealed class PlayerStatsDebugModule
 {
     private const float RefreshInterval = 0.25f;
     private float nextRefresh;

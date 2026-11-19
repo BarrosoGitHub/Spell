@@ -72,7 +72,7 @@ See [ragdoll details](ragdoll-manager.md).
 - Available enemies and active group members are tracked for bulk cleanup.
 - Bulk cleanup returns tracked enemies to the pool and stops registered group coroutines.
 - `EnemySetup` registers one pursuit group per enemy type. Enemies pursue their assigned target directly, and each enemy can belong to one group registered by its spawning manager.
-- An orange `PURSUING` debug label appears above enemies actively pursuing a player target. The label is a screen overlay and remains visible through walls.
+- Scene-owned `DebugManager` coordinates modular debug features with live Inspector booleans for pursuit labels, enemy level labels, player stats, hold highlights, traversal rays, balance-beam geometry, combat logging, and mission-state logging. Enemy labels are projected above the head and remain visible through walls. Pursuit labels, enemy levels, and player stats start enabled. Other debug features start disabled. Disabling the manager clears highlights and subscriptions. Enemy/camera discovery runs once per unscaled second, and the stats panel refreshes every 0.25 unscaled seconds.
 
 The enemy type enum contains Normal, Tank, and Boss. These identifiers alone do not establish separate finished behaviors or encounters for each type. Group recruitment currently searches nearby matching enemies rather than filtering by the mission that spawned them.
 

@@ -62,8 +62,6 @@ public class EntityManager : MonoBehaviour
                     Value = damageResult.Damage,
                     IsCritical = damageResult.IsCritical
                 };
-                Debug.Log($"{source.name} dealt {damageResult.Damage:0.##} damage to {target.name}" +
-                    $"{(damageResult.IsCritical ? " (critical)" : "")}. Health: {target.entity.CurrentHealth:0.##}/{target.entity.stats.MaxHealth:0.##}", target);
                 OnInteraction?.Invoke(source, target, result);
                 return true;
 

@@ -45,7 +45,6 @@ public class Exterminate : Mission
             enemyManager.SpawnEnemy(EnemyType.Normal, position, Quaternion.identity);
         }
 
-        Debug.Log("Starting Exterminate mission.");
     }
 
     public override void CompleteMission(MissionResult result)
@@ -53,7 +52,6 @@ public class Exterminate : Mission
         if (State != RunningState) return;
         base.CompleteMission(result);
 
-        Debug.Log("Exterminate mission completed.");
     }
 
     public override void FailMission()
@@ -62,7 +60,6 @@ public class Exterminate : Mission
         enemyManager.DespawnAllEnemiesAndStopCoroutines();
         base.FailMission();
 
-        Debug.Log("Exterminate mission failed.");
     }
 
     public override void AbortMission()
@@ -71,7 +68,6 @@ public class Exterminate : Mission
         base.AbortMission();
 
 
-        Debug.Log("Exterminate mission aborted.");
     }
 
     public void OnDestroy()

@@ -6,6 +6,7 @@ public sealed class TraversalDebugModule
     private readonly HashSet<HoldSelectionDebug> highlighted = new HashSet<HoldSelectionDebug>();
     private readonly HashSet<HoldSelectionDebug> reachable = new HashSet<HoldSelectionDebug>();
     private HoldSelectionDebug selected;
+    private Collider[] overlapBuffer = new Collider[32];
 
     public void Refresh(PlayerController player, bool highlights, bool rays)
     {
@@ -35,13 +36,24 @@ public sealed class TraversalDebugModule
         {
             Vector3 center = player.transform.position + Vector3.up * 0.75f;
             Vector3 target = player.transform.position + player.GetRelativeDirection();
-            foreach (Collider hold in Physics.OverlapSphere(center, 0.6f, 64))
+            int count = Physics.OverlapSphereNonAlloc(center, 0.6f, overlapBuffer, 64);
+            while (count == overlapBuffer.Length && overlapBuffer.Length < 512)
             {
+                System.Array.Resize(ref overlapBuffer, overlapBuffer.Length * 2);
+                count = Physics.OverlapSphereNonAlloc(center, 0.6f, overlapBuffer, 64);
+            }
+            // A full bounded buffer falls back to an allocating query rather than hiding holds.
+            Collider[] results = count == overlapBuffer.Length ? Physics.OverlapSphere(center, 0.6f, 64) : overlapBuffer;
+            if (results != overlapBuffer) count = results.Length;
+            for (int i = 0; i < count; i++)
+            {
+                Collider hold = results[i];
                 if (!CalculationHelper.CanGrabHold(hold.gameObject, target, player.transform, player.closestHold)) continue;
                 HoldSelectionDebug highlight = GetHighlight(hold.gameObject);
                 reachable.Add(highlight);
                 highlight.SetGrabbable(true);
             }
+            System.Array.Clear(overlapBuffer, 0, overlapBuffer.Length);
         }
         foreach (HoldSelectionDebug highlight in highlighted)
             if (highlight != null && !reachable.Contains(highlight)) highlight.SetGrabbable(false);

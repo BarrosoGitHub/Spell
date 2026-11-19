@@ -9,12 +9,26 @@ public sealed class DebugManager : MonoBehaviour
     [SerializeField] private bool showHoldHighlights;
     [SerializeField] private bool showTraversalRays;
 
+    [SerializeField] private bool showGeometry;
+    [SerializeField] private bool logCombat;
+    [SerializeField] private bool logMissionStates;
+
+    private readonly GeometryDebugModule geometry = new GeometryDebugModule();
+    private readonly GameplayLoggingDebugModule logging = new GameplayLoggingDebugModule();
+    private EntityManager interactions;
+    private MissionManager missions;
+
     private readonly EnemyLabelsDebugModule enemyLabels = new EnemyLabelsDebugModule();
-    private readonly PlayerStatsDebugDisplay playerStats = new PlayerStatsDebugDisplay();
+    private readonly PlayerStatsDebugModule playerStats = new PlayerStatsDebugModule();
     private readonly TraversalDebugModule traversal = new TraversalDebugModule();
     private PlayerController player;
     private Camera viewCamera;
     private float nextDiscovery;
+
+    private void OnEnable()
+    {
+        interactions = EntityManager.Instance;
+    }
 
     private void Update()
     {
@@ -24,8 +38,14 @@ public sealed class DebugManager : MonoBehaviour
             nextDiscovery = Time.unscaledTime + 1f;
             player = GameManager.Instance != null ? GameManager.Instance.playerController : null;
             viewCamera = Camera.main;
+            if (missions == null) missions = FindAnyObjectByType<MissionManager>();
             if (showPursuitIndicators || showEnemyLevels) enemyLabels.Refresh();
         }
+        if (!showPursuitIndicators && !showEnemyLevels) enemyLabels.Clear();
+        logging.LogCombat = logCombat;
+        logging.LogMissions = logMissionStates;
+        logging.Bind(interactions, missions != null ? missions.selectedMission : null);
+        if (showGeometry) geometry.Draw();
         if (showPlayerStats) playerStats.Refresh(player);
         traversal.Refresh(player, showHoldHighlights, showTraversalRays);
     }
@@ -39,8 +59,11 @@ public sealed class DebugManager : MonoBehaviour
 
     private void OnDisable()
     {
+        logging.Clear();
         traversal.Clear();
         enemyLabels.Clear();
+        interactions = null;
+        missions = null;
         player = null;
         viewCamera = null;
         nextDiscovery = 0f;
