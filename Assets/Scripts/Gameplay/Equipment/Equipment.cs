@@ -1,14 +1,12 @@
-public class Equipment
+public class Equipment : StatModifier
 {
-    public string Name { get; set; }
     public SlotType Type { get; set; }
     public Rarity Rarity { get; set; }
-    public Stats Stats { get; set; }
 }
 
 public enum SlotType
 {
-    Boots,
+    Rune = 0,
 }
 
 public enum Rarity

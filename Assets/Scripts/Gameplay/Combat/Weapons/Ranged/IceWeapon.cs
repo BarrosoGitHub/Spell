@@ -4,9 +4,11 @@ using UnityEngine;
 public class IceWeapon : Weapon
 {
     // Contact returns to this weapon; presentation never dispatches controller attacks.
-    public event Action<Vector3, Vector3, WeaponStats, Func<GameObject, bool>> OnCast;
+    public event Action<Vector3, Vector3, float, Func<GameObject, bool>> OnCast;
 
     [SerializeField, Min(1f)] private float projectileSpeed = 80f;
+    [SerializeField, Min(0.01f)] private float range = 50f;
+    public override float Range => range;
     private float nextCastTime;
     private Controller source;
     private Func<GameObject, bool> contactCallback;
@@ -21,10 +23,10 @@ public class IceWeapon : Weapon
         if (direction.sqrMagnitude <= Mathf.Epsilon)
             return false;
 
-        nextCastTime = Time.time + 1f / Mathf.Max(0.01f, stats.fireRate);
+        nextCastTime = Time.time + 1f / Mathf.Max(0.01f, attacker.entity.stats.EffectiveAttackSpeed);
         source = attacker;
         contactCallback ??= ConfirmContact;
-        OnCast?.Invoke(transform.position, direction.normalized * projectileSpeed, stats, contactCallback);
+        OnCast?.Invoke(transform.position, direction.normalized * projectileSpeed, range, contactCallback);
         return true;
     }
 
@@ -37,12 +39,9 @@ public class IceWeapon : Weapon
             target == null || target.entity == null || target.entity.CurrentHealth <= 0f)
             return true;
 
-        target.Consciousness -= stats.consciousnessDamage;
-        Debug.Log($"IceWeapon confirmed a hit on {target.name}; sending {stats.damagePerBullet:0.##} damage to EntityManager.", this);
         ConfirmAttack(target, new InteractionContext
         {
-            Type = InteractionType.Attack,
-            DamageOverride = stats.damagePerBullet
+            Type = InteractionType.Attack
         });
         return true;
     }

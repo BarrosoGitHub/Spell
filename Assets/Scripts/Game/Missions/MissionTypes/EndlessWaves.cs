@@ -63,7 +63,7 @@ public sealed class EndlessWaves : Mission
             Debug.LogWarning("EndlessWaves requires a MainCamera and a baked NavMesh.", this);
             return;
         }
-        spawnPositions = new Vector3[Mathf.Max(1, enemiesPerWave)];
+        spawnPositions = new Vector3[Mathf.Max(1, enemiesPerWave) + 1];
         base.StartMission();
     }
 
@@ -82,6 +82,9 @@ public sealed class EndlessWaves : Mission
             maxNumberOfEnemies: 3, maxEngagementDistance: 15f,
             maxNumberOfEnemiesThatCanEngageSimultaneously: 1, attackInterval: 1.5f);
         enemyManager.AddEnemyGroup(enemyGroup);
+        enemyManager.AddEnemyGroup(new EnemyGroup(EnemyType.Mutated, player,
+            maxNumberOfEnemies: 1, maxEngagementDistance: 15f,
+            maxNumberOfEnemiesThatCanEngageSimultaneously: 1, attackInterval: 1.5f));
         waves = StartCoroutine(RunWaves());
     }
 
@@ -102,11 +105,12 @@ public sealed class EndlessWaves : Mission
             EnemiesInWave = spawnPositions.Length;
             for (int i = 0; i < EnemiesInWave; i++)
             {
-                Controller enemy = enemyManager.SpawnEnemy(EnemyType.Normal,
-                    spawnPositions[i], Quaternion.identity);
+                EnemyType type = i == EnemiesInWave - 1 ? EnemyType.Mutated : EnemyType.Normal;
+                Controller enemy = enemyManager.SpawnEnemy(type,
+                    spawnPositions[i], Quaternion.identity, CurrentWave);
                 if (enemy == null)
                 {
-                    Debug.LogError("EndlessWaves could not spawn a Normal enemy. Check the enemy pool.", this);
+                    Debug.LogError($"EndlessWaves could not spawn a {type} enemy. Check the enemy pool.", this);
                     FailMission();
                     yield break;
                 }

@@ -247,6 +247,7 @@ MonoBehaviour:
   rb: {fileID: 0}
   navMeshAgent: {fileID: 0}
   enemyType: 1
+  levelProgression: {fileID: 11400000, guid: dc24a5cb5fe343d1b0b2d2a9b1202ffd, type: 2}
 --- !u!195 &2328428007576126284
 NavMeshAgent:
   m_ObjectHideFlags: 0

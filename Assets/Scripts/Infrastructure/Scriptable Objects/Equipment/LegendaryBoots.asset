@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 948d15005fc34ac3b01af45a1562bac7, type: 3}
   m_Name: LegendaryBoots
   m_EditorClassIdentifier: 
-  equipmentName: Legendary Boots
+  equipmentName: Legendary Rune
   slot: 0
   rarity: 4
   raritySettings: {fileID: 11400000, guid: 71f7acf677564d798396170130990b10, type: 2}

@@ -119,9 +119,11 @@ public abstract class Controller : MonoBehaviour
 
         if (entity == null)
         {
-            entity = new Entity(
-                controllerStats: controllerStats
-            );
+            if (controllerStats == null)
+                throw new InvalidOperationException(
+                    $"{name} requires a ControllerStats asset. Assign Controller Stats on its controller component.");
+
+            entity = new Entity(controllerStats: controllerStats);
         }
         SetActions();
 
@@ -176,17 +178,20 @@ public abstract class Controller : MonoBehaviour
         }
     }
 
-    public bool AddBuff(Buff buff)
+    public bool AddBuff(BuffDefinition definition)
     {
-        if (buff == null || !isActiveAndEnabled || entity == null ||
-            entity.CurrentHealth <= 0f || buffs.ContainsKey(buff)) return false;
+        if (definition == null || !isActiveAndEnabled || entity == null ||
+            entity.CurrentHealth <= 0f) return false;
+        foreach (Buff activeBuff in buffs.Keys)
+            if (activeBuff.Definition == definition) return false;
 
+        Buff buff = new Buff(definition);
         Sequence expiry = new Sequence()
             .AppendInterval(buff.Duration)
             .AppendCallback(() => RemoveBuff(buff));
 
         buffs.Add(buff, expiry);
-        entity.AddStatModifier(buff, buff.GetStats());
+        entity.AddStatModifier(buff);
         OnBuffStarted?.Invoke(buff);
 
         // A start listener can remove or replace this activation.

@@ -75,7 +75,7 @@ public sealed class IceProjectileDisplay : MonoBehaviour
         weapon.OnCast += PlayCast;
     }
 
-    private void PlayCast(Vector3 origin, Vector3 velocity, WeaponStats stats, Func<GameObject, bool> confirmContact)
+    private void PlayCast(Vector3 origin, Vector3 velocity, float range, Func<GameObject, bool> confirmContact)
     {
         particleDamage.Initialize(iceLance, confirmContact);
         var authoredRoll = iceLance.main.startRotationX;
@@ -88,7 +88,7 @@ public sealed class IceProjectileDisplay : MonoBehaviour
             position = origin,
             velocity = velocity,
             rotation3D = orientation.eulerAngles,
-            startLifetime = stats.range / Mathf.Max(1f, velocity.magnitude)
+            startLifetime = range / Mathf.Max(1f, velocity.magnitude)
         }, 1);
     }
 

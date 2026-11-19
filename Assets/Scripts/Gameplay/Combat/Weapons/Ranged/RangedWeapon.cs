@@ -3,10 +3,12 @@ using UnityEngine;
 
 public abstract class RangedWeapon : Weapon
 {
+    [SerializeField] protected WeaponStats stats = WeaponStats.Default;
+    public WeaponStats Stats => stats;
     public Action<RaycastHit, Vector3> OnImpact;
 
     public int Ammunition => Stats.ammunition;
-    public float Range => Stats.range;
+    public override float Range => Stats.range;
 
     public bool IsReloading { get; private set; }
 

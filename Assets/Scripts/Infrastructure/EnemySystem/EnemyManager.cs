@@ -85,7 +85,7 @@ public class EnemyManager : MonoBehaviour
         return enemy;
     }
 
-    public EnemyController SpawnEnemy(EnemyType enemyType, Vector3 position, Quaternion rotation)
+    public EnemyController SpawnEnemy(EnemyType enemyType, Vector3 position, Quaternion rotation, int level = 1)
     {
         EnemyController enemyController = controllerSpawner.SpawnController(enemyType.ToString(), position, rotation) as EnemyController;
         if (!enemyController) return null;
@@ -93,11 +93,12 @@ public class EnemyManager : MonoBehaviour
         availableControllers.Add(enemyController);
         spawnedEnemies.Add(enemyController);
 
+        enemyController.entity.SetLevel(level);
         enemyController.enemyType = enemyType;
         enemyController.SetIdleTarget(GameManager.Instance != null ? GameManager.Instance.playerController : null);
         enemyController.Target = null;
         enemyController.State = enemyController.idlingState;
-        enemyController.entity.AddCurrentHealth(enemyController.entity.stats.MaxHealth - enemyController.entity.CurrentHealth);
+        enemyController.entity.RestoreHealth();
         enemyController.Consciousness = 100f;
 
         return enemyController;

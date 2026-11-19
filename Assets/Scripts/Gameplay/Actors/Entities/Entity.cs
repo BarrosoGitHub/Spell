@@ -4,119 +4,82 @@ using UnityEngine;
 
 public class Entity
 {
-    private Stats baseStats;
-    private readonly ControllerStats controllerStats;
     public Stats stats { get; private set; }
-    private readonly List<Equipment> equipmentList;
-    private readonly Dictionary<object, Stats> statModifiers = new Dictionary<object, Stats>();
+    private readonly List<StatModifier> statModifiers = new List<StatModifier>();
+    private readonly ControllerStats controllerStats;
 
-    public Action<float> OnHealthChanged;
-    public Action OnEntityDied;
 
-    private float currentExperience;
-    public float LevelUpExperience => stats.Level * 2f;
+    public event Action<float> OnHealthChanged;
+    public event Action OnEntityDied;
 
-    private float currentHealth;
-    public float CurrentHealth => currentHealth;
+    public float CurrentHealth { get; private set; }
+    public int Level { get; private set; } = 1;
+    public float CurrentExperience { get; private set; }
+    public float LevelUpExperience => Level * 2f;
 
-    public Entity(List<Equipment> equipmentList = null, ControllerStats controllerStats = null)
+    public Entity(ControllerStats controllerStats = null)
     {
         if (controllerStats == null)
             throw new ArgumentNullException(nameof(controllerStats), "Assign a ControllerStats asset before creating an Entity.");
 
-        baseStats = controllerStats.CreateBaseStats();
         this.controllerStats = controllerStats;
-        this.equipmentList = equipmentList ?? new List<Equipment>();
+    
         UpdateStats();
-        currentHealth = stats.MaxHealth;
+        RestoreHealth();
+    }
+    public float AddHealth(float amount)
+    {
+        float previousHealth = CurrentHealth;
+        CurrentHealth = Mathf.Clamp(CurrentHealth + amount, 0f, Mathf.Max(0f, stats.MaxHealth));
+        if (CurrentHealth <= 0f && previousHealth > 0f)
+            OnEntityDied?.Invoke();
+        if (previousHealth != CurrentHealth)
+            OnHealthChanged?.Invoke(CurrentHealth);
+        return CurrentHealth;
     }
 
-    public bool AddExperienceAndCheckLevelUp(float amount)
+    public void RestoreHealth() => AddHealth(stats.MaxHealth - CurrentHealth);
+
+    public bool AddExperience(float amount)
     {
         if (amount <= 0f) return false;
-
-        currentExperience += amount;
-
-        if (currentExperience >= LevelUpExperience)
-        {
-            currentExperience = 0f;
-            baseStats.Level++;
-            UpdateStats();
-            Debug.Log($"Entity leveled up to level {stats.Level}.");
-            return true;
-        }
-        return false;
+        CurrentExperience += amount;
+        if (CurrentExperience < LevelUpExperience) return false;
+        SetLevel(Level + 1);
+        return true;
     }
 
     public void SetLevel(int level)
     {
-        baseStats.Level = Mathf.Max(1, level);
-        currentExperience = 0f;
+        Level = Mathf.Max(1, level);
+        CurrentExperience = 0f;
         UpdateStats();
     }
 
     public void ResetLevel() => SetLevel(1);
 
-    public void AddBaseStats(Stats additionalStats)
+    
+
+    public void AddStatModifier(StatModifier modifier)
     {
-        baseStats = baseStats.Add(additionalStats);
+        if (modifier == null) return;
+        if (!statModifiers.Contains(modifier))
+            statModifiers.Add(modifier);
         UpdateStats();
     }
 
-    public void Equip(Equipment equipment)
+    public void RemoveStatModifier(StatModifier modifier)
     {
-        if (equipment == null) return;
-
-        equipmentList.Add(equipment);
-        UpdateStats();
-    }
-
-    public void Unequip(Equipment equipment)
-    {
-        if (equipment == null) return;
-        if (!equipmentList.Remove(equipment)) return;
-
-        UpdateStats();
-    }
-
-    public void AddStatModifier(object source, Stats modifier)
-    {
-        statModifiers[source] = modifier;
-        UpdateStats();
-    }
-
-    public void RemoveStatModifier(object source)
-    {
-        if (statModifiers.Remove(source)) UpdateStats();
+        if (statModifiers.Remove(modifier)) UpdateStats();
     }
 
     private void UpdateStats()
     {
-        // Recalculate from the base on every change, including pooled level resets.
-        stats = baseStats.Add(controllerStats.GetBonus(baseStats.Level));
+        stats = controllerStats.CreateBaseStats().Add(controllerStats.GetBonus(Level));
 
-        foreach (var equipment in equipmentList)
+        foreach (StatModifier modifier in statModifiers)
         {
-            stats = stats.Add(equipment.Stats);
+            stats = stats.Add(modifier.Stats);
         }
-
-        foreach (Stats modifier in statModifiers.Values)
-        {
-            stats = stats.Add(modifier);
-        }
-    }
-
-    public float AddCurrentHealth(float amount)
-    {
-        float previousHealth = currentHealth;
-        currentHealth = Mathf.Clamp(currentHealth + amount, 0f, Mathf.Max(0f, stats.MaxHealth));
-
-        if (currentHealth <= 0f && previousHealth > 0f)
-            OnEntityDied?.Invoke();
-
-        if (previousHealth != currentHealth)
-            OnHealthChanged?.Invoke(currentHealth);
-
-        return currentHealth;
     }
 }

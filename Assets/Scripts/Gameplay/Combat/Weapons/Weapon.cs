@@ -3,8 +3,7 @@ using UnityEngine;
 
 public abstract class Weapon : MonoBehaviour
 {
-    [SerializeField] protected WeaponStats stats = WeaponStats.Default;
-    public WeaponStats Stats => stats;
+    public abstract float Range { get; }
     public event Action<Controller, InteractionContext> OnAttackConfirmed;
 
     protected void ConfirmAttack(Controller target, InteractionContext context)

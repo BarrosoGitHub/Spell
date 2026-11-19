@@ -1,6 +1,7 @@
+using UnityEngine;
+
 public class Stats
 {
-    public int Level { get; set; }
     public float MaxHealth { get; private set; }
     public float BaseDamage { get; private set; }
     public float AttackSpeed { get; private set; }
@@ -14,8 +15,11 @@ public class Stats
     public float AttackSpeedPerc { get; private set; }
     public float DefensePerc { get; private set; }
 
-    public Stats(int level = 1,
-                 float maxHealth = 0, 
+    public float Damage => BaseDamage * (1f + BaseDamagePerc);
+    public float EffectiveAttackSpeed => AttackSpeed * (1f + AttackSpeedPerc);
+    public float EffectiveDefense => Defense * (1f + DefensePerc);
+
+    public Stats(float maxHealth = 0,
                  float baseDamage = 0, 
                  float attackSpeed = 0, 
                  float defense = 0, 
@@ -27,7 +31,6 @@ public class Stats
                  float defensePerc = 0,
                  float movementSpeed = 0)
     {
-        Level = level;
         MaxHealth = maxHealth;
         BaseDamage = baseDamage;
         AttackSpeed = attackSpeed;
@@ -41,10 +44,19 @@ public class Stats
         DefensePerc = defensePerc;
     }
 
+    public float GetDamage(bool isCritical)
+    {
+        return isCritical ? Damage * CriticalDamage : Damage;
+    }
+
+    public float MitigateDamage(float incomingDamage)
+    {
+        return Mathf.Max(0f, incomingDamage - EffectiveDefense);
+    }
+
     public Stats Add(Stats other)
     {
         return new Stats(
-            Level,
             MaxHealth + other.MaxHealth,
             BaseDamage + other.BaseDamage,
             AttackSpeed + other.AttackSpeed,

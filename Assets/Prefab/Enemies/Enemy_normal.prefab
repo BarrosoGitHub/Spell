@@ -227,6 +227,7 @@ MonoBehaviour:
   navMeshAgent: {fileID: 1528276455151762527}
   idleStoppingDistance: 3
   enemyType: 0
+  levelProgression: {fileID: 11400000, guid: d62eb58388d14ed1a30e86ac9ce2c1c7, type: 2}
   jumpSpeed: 0.4
 --- !u!195 &1528276455151762527
 NavMeshAgent:

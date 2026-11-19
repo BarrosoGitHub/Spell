@@ -2,5 +2,6 @@ public enum EnemyType
 {
     Normal,
     Tank,
-    Boss
+    Boss,
+    Mutated
 }

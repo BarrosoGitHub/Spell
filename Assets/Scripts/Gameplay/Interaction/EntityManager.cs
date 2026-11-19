@@ -68,7 +68,7 @@ public class EntityManager : MonoBehaviour
                 return true;
 
             case InteractionType.Heal:
-                target.entity.AddCurrentHealth(context.Value);
+                target.entity.AddHealth(context.Value);
                 result = context;
                 OnInteraction?.Invoke(source, target, result);
                 return true;
@@ -85,28 +85,23 @@ public class EntityManager : MonoBehaviour
             return;
         }
 
-        controller.entity.Equip(equipment);
+        controller.entity.AddStatModifier(equipment);
     }
 
-    public bool AddBuff(Controller controller, Buff buff)
+    public bool AddBuff(Controller controller, BuffDefinition buff)
     {
         return controller != null && controller.AddBuff(buff);
     }
 
     private DamageResult CalculateDamage(Entity source)
     {
-        float damage = source.stats.BaseDamage * (1 + source.stats.BaseDamagePerc);
-
         float chance = source.stats.CriticalChance;
         bool isCritical = chance >= 100f ||
             (chance > 0f && UnityEngine.Random.Range(0f, 100f) < chance);
 
-        if (isCritical)
-            damage *= source.stats.CriticalDamage;
-
         return new DamageResult
         {
-            Damage = damage,
+            Damage = source.stats.GetDamage(isCritical),
             IsCritical = isCritical
         };
     }
@@ -121,9 +116,8 @@ public class EntityManager : MonoBehaviour
     //needs fixing, dies multiple times when attacked with health 0
     private float ApplyDamage(Controller source, Controller target, float amount)
     {
-        float mitigated = amount - (target.entity.stats.Defense * (1 + target.entity.stats.DefensePerc));
-        mitigated = Mathf.Max(0, mitigated);
-        float healthResult = target.entity.AddCurrentHealth(-mitigated);
+        float mitigated = target.entity.stats.MitigateDamage(amount);
+        float healthResult = target.entity.AddHealth(-mitigated);
 
         if (healthResult <= 0f)
         {
@@ -136,7 +130,7 @@ public class EntityManager : MonoBehaviour
     private void ControllerDied(Controller source, Controller target)
     {
         OnControllerDied?.Invoke(source, target);
-        if (source.entity.AddExperienceAndCheckLevelUp(target.entity.stats.Level))
+        if (source.entity.AddExperience(target.entity.Level))
         {
             OnControllerLeveledUp?.Invoke(source);
         }

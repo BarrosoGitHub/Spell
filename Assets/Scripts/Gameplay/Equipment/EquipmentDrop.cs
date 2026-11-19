@@ -38,23 +38,22 @@ public class EquipmentDrop : ScriptableObject
             throw new System.InvalidOperationException("Assign EquipmentRaritySettings in the EquipmentDrop Inspector.");
 
         int selectedLines = SelectLines(raritySettings.GetMaxLines(rarity));
-        return new Equipment
-        {
-            Name = equipmentName,
-            Type = slot,
-            Rarity = rarity,
-            Stats = new Stats(
-                maxHealth: Roll(selectedLines, StatLine.MaxHealth),
-                baseDamage: Roll(selectedLines, StatLine.BaseDamage),
-                attackSpeed: Roll(selectedLines, StatLine.AttackSpeed),
-                defense: Roll(selectedLines, StatLine.Defense),
-                criticalChance: Roll(selectedLines, StatLine.CriticalChance),
-                criticalDamage: Roll(selectedLines, StatLine.CriticalDamage),
-                maxHealthPerc: Roll(selectedLines, StatLine.MaxHealthPerc),
-                baseDamagePerc: Roll(selectedLines, StatLine.BaseDamagePerc),
-                attackSpeedPerc: Roll(selectedLines, StatLine.AttackSpeedPerc),
-                defensePerc: Roll(selectedLines, StatLine.DefensePerc))
-        };
+        Equipment equipment = slot == SlotType.Rune ? new Rune() : new Equipment();
+        equipment.Name = equipmentName;
+        equipment.Type = slot;
+        equipment.Rarity = rarity;
+        equipment.Stats = new Stats(
+            maxHealth: Roll(selectedLines, StatLine.MaxHealth),
+            baseDamage: Roll(selectedLines, StatLine.BaseDamage),
+            attackSpeed: Roll(selectedLines, StatLine.AttackSpeed),
+            defense: Roll(selectedLines, StatLine.Defense),
+            criticalChance: Roll(selectedLines, StatLine.CriticalChance),
+            criticalDamage: Roll(selectedLines, StatLine.CriticalDamage),
+            maxHealthPerc: Roll(selectedLines, StatLine.MaxHealthPerc),
+            baseDamagePerc: Roll(selectedLines, StatLine.BaseDamagePerc),
+            attackSpeedPerc: Roll(selectedLines, StatLine.AttackSpeedPerc),
+            defensePerc: Roll(selectedLines, StatLine.DefensePerc));
+        return equipment;
     }
 
     private int SelectLines(int maximum)

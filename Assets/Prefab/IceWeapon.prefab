@@ -46,17 +46,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72d4d436b8a74a36b51e669569ab31b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stats:
-    fireRate: 1.2
-    damagePerBullet: 5
-    magazine: 30
-    reloadTime: 2
-    range: 50
-    consciousnessDamage: 15
-    impulse: 2
-    responseTime: 0.06
-    recoveryTime: 1
-    softness: 1
+  range: 50
   projectileSpeed: 80
 --- !u!114 &11400001
 MonoBehaviour:
