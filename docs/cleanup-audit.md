@@ -46,3 +46,11 @@ Static text/name and serialized GUID scans found no inbound references to the fo
 Inspected project C# sources, package manifest, build settings, serialized GUID references and asset metadata. No orphan `.meta` files were found before cleanup. Static scans cannot establish usage through all reflection, binary assets, unsaved scenes or future authoring workflows. No broad asset or package deletion was performed.
 
 Validation: `dotnet build Assembly-CSharp.csproj --verbosity quiet --nologo`. This is C# compilation against Unity's generated project, not a Unity player build or a play-mode test.
+
+## Requested cleanup — 2026-11-19
+
+Removed WeaponStats, RangedWeapon, BulletShotEffects, CameraAimOffset, and the old WaveSystemManager/WavePhase/WaveSpecification scripts from Assets. Removed RagdollHitbox.ApplyBulletImpact and updated generated hitbox initialization. RagdollHitbox still maps physics contacts to visible bones for ice decoration. Removed the bullet-only Resources/WeaponShotEffect material.
+
+Moved Blink, Dzeruza/CliffStonePackL, and Plugins/MotionMatching outside Assets into the ignored CleanupArchive/2026-11-19 folder, together with metadata. The removed packs occupy approximately 812 MiB in that recovery archive. Preserved the referenced 1.9 MiB Run_JumpUpHigh_Run clip and its GUID under Assets/Models/Animations/Traversal. Removed cliff prefab instances from Nature Square Arena and Cliffstone Basin. Their original scene files are backed up in the archive. Removed deleted-pack texture bindings from Cliff Floor and the two Cliffstone Basin materials, leaving those as untextured materials. Removed the editor-only CliffStoneMapBuilder, whose source pack has been removed.
+
+Static verification found no remaining references to archived GUIDs in Unity scene, prefab, material, controller, metadata, and asset files. Both edited scenes have complete local object references. Unity compilation, rendering, and Play Mode verification remain pending.
