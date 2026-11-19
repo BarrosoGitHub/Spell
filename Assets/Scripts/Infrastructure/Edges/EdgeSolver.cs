@@ -125,7 +125,6 @@ public class EdgeSolver : MonoBehaviour {
 
                         balanceBeams.Add(balanceBeam);
 
-                        Debug.DrawLine(obj.transform.TransformPoint(point1), obj.transform.TransformPoint(point2), Color.blue, 100f);
                     }
                 }
             }

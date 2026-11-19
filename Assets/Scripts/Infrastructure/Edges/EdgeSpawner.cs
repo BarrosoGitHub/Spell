@@ -299,7 +299,6 @@ public class EdgeSpawner : MonoBehaviour
         GameObject hold = Pooler.SpawnFromPool("Hold", parent.TransformPoint(localPosition),
             rotation);
         hold.transform.SetParent(parent, true);
-        Debug.DrawRay(hold.transform.position, hold.transform.forward * 0.25f, Color.blue, 10f, false);
         return hold;
     }
 

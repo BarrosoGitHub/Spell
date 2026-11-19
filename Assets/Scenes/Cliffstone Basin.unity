@@ -2294,6 +2294,7 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 891720124}
   - {fileID: 832122644}
   - {fileID: 1330055510}
   - {fileID: 2079317131}
@@ -2307,3 +2308,46 @@ SceneRoots:
   - {fileID: 900900005}
   - {fileID: 900900013}
   - {fileID: 380859189}
+--- !u!1 &891720123
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 891720124}
+  - component: {fileID: 891720125}
+  m_Layer: 0
+  m_Name: DebugManager
+  m_TagString: Untagged
+  m_IsActive: 1
+--- !u!4 &891720124
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 891720123}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+--- !u!114 &891720125
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 891720123}
+  m_Enabled: 1
+  m_Script: {fileID: 11500000, guid: 192f9a5d510a4a1883e326ae2fe8fa45, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::DebugManager
+  showPursuitIndicators: 1
+  showEnemyLevels: 1
+  showPlayerStats: 1
+  showHoldHighlights: 0
+  showTraversalRays: 0

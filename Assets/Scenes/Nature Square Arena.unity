@@ -10590,7 +10590,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 900900002}
-  - component: {fileID: 819470012345678901}
   - component: {fileID: 900900003}
   - component: {fileID: 900900004}
   - component: {fileID: 900900007}
@@ -22709,24 +22708,11 @@ Transform:
   - {fileID: 1793431904}
   m_Father: {fileID: 1045292555}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &819470012345678901
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 900900001}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 705dee3065224f298745e4fb7b5ca21a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerStatsDebugDisplay
-  player: {fileID: 0}
-  refreshInterval: 0.25
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 891720124}
   - {fileID: 832122644}
   - {fileID: 1330055510}
   - {fileID: 2079317131}
@@ -22740,3 +22726,46 @@ SceneRoots:
   - {fileID: 380859189}
   - {fileID: 1045292555}
   - {fileID: 1268934608}
+--- !u!1 &891720123
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 891720124}
+  - component: {fileID: 891720125}
+  m_Layer: 0
+  m_Name: DebugManager
+  m_TagString: Untagged
+  m_IsActive: 1
+--- !u!4 &891720124
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 891720123}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+--- !u!114 &891720125
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 891720123}
+  m_Enabled: 1
+  m_Script: {fileID: 11500000, guid: 192f9a5d510a4a1883e326ae2fe8fa45, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::DebugManager
+  showPursuitIndicators: 1
+  showEnemyLevels: 1
+  showPlayerStats: 1
+  showHoldHighlights: 0
+  showTraversalRays: 0

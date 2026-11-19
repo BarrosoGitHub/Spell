@@ -52,8 +52,6 @@ public class PlayerController : Controller
 
     public GameObject closestHold;
 
-    private readonly HashSet<HoldSelectionDebug> highlightedHolds = new HashSet<HoldSelectionDebug>();
-    private readonly HashSet<HoldSelectionDebug> reachableHolds = new HashSet<HoldSelectionDebug>();
 
     protected override void Awake()
     {
@@ -167,9 +165,7 @@ public class PlayerController : Controller
         State.OnUpdate?.Invoke();
 
         ManageInput();
-        HighlightGrabbableHolds();
 
-        Debug.DrawRay(transform.position, transform.forward, Color.red);
     }
 
     protected virtual void FixedUpdate()
@@ -309,7 +305,6 @@ public class PlayerController : Controller
 
         // CheckFreeHang(closestHold.transform.position + Vector3.down, -surfaceNormal);
 
-        Debug.DrawRay(transform.position, -surfaceNormal, Color.magenta);
 
         // if (StateVariation)
         // {
@@ -389,31 +384,6 @@ public class PlayerController : Controller
         return true;
     }
 
-    /// <summary>Colors every hold in grab range green while it passes the current grab rules.</summary>
-    public void HighlightGrabbableHolds()
-    {
-        reachableHolds.Clear();
-        if (State == movingState && !isGrounded)
-        {
-            Vector3 center = transform.position + Vector3.up * 0.75f;
-            Vector3 target = transform.position + GetRelativeDirection();
-            foreach (Collider hold in Physics.OverlapSphere(center, 0.6f, 64))
-            {
-                if (!CalculationHelper.CanGrabHold(hold.gameObject, target, transform, closestHold)) continue;
-                HoldSelectionDebug highlight = hold.GetComponent<HoldSelectionDebug>();
-                if (!highlight) highlight = hold.gameObject.AddComponent<HoldSelectionDebug>();
-                reachableHolds.Add(highlight);
-                highlight.SetGrabbable(true);
-            }
-        }
-
-        foreach (HoldSelectionDebug highlight in highlightedHolds)
-            if (highlight && !reachableHolds.Contains(highlight)) highlight.SetGrabbable(false);
-
-        highlightedHolds.Clear();
-        foreach (HoldSelectionDebug highlight in reachableHolds) highlightedHolds.Add(highlight);
-    }
-
     private bool CanGrabLedge()
     {
         if (isGrounded) return false;
@@ -481,10 +451,6 @@ public class PlayerController : Controller
         RestoreTimeScale();
         base.OnDisable();
         inputControls?.Disable();
-        foreach (HoldSelectionDebug highlight in highlightedHolds)
-            if (highlight) highlight.SetGrabbable(false);
-        highlightedHolds.Clear();
-        reachableHolds.Clear();
     }
 
     private void OnDestroy()

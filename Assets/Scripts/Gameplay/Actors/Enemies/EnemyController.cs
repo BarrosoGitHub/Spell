@@ -31,8 +31,6 @@ public class EnemyController : Controller
     protected override void Awake()
     {
         base.Awake();
-        if (GetComponent<EnemyPursuitIndicator>() == null)
-            gameObject.AddComponent<EnemyPursuitIndicator>();
         navMeshAgent = GetComponent<NavMeshAgent>();
         navMeshAgent.autoTraverseOffMeshLink = false;
         pursuitStoppingDistance = navMeshAgent.stoppingDistance;

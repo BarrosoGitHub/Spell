@@ -1,20 +1,21 @@
 using UnityEngine;
 
-public sealed class PlayerStatsDebugDisplay : MonoBehaviour
+public sealed class PlayerStatsDebugDisplay
 {
-    [SerializeField] private PlayerController player;
-    [SerializeField, Min(0.1f)] private float refreshInterval = 0.25f;
+    private const float RefreshInterval = 0.25f;
     private float nextRefresh;
     private string statsText = "Waiting for player...";
     private GUIStyle panelStyle;
 
-    private void Update()
+    public void Refresh(PlayerController player)
     {
         if (Time.unscaledTime < nextRefresh) return;
-        nextRefresh = Time.unscaledTime + refreshInterval;
-        if (player == null && GameManager.Instance != null)
-            player = GameManager.Instance.playerController;
-        if (player == null || player.entity == null) return;
+        nextRefresh = Time.unscaledTime + RefreshInterval;
+        if (player == null || player.entity == null)
+        {
+            statsText = "Waiting for player...";
+            return;
+        }
 
         Entity entity = player.entity;
         Stats stats = entity.stats;
@@ -37,7 +38,7 @@ public sealed class PlayerStatsDebugDisplay : MonoBehaviour
             $"Health bonus   {stats.MaxHealthPerc:P0}";
     }
 
-    private void OnGUI()
+    public void Draw()
     {
         if (panelStyle == null)
         {

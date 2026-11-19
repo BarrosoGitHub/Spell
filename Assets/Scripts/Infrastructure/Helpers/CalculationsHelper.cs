@@ -50,7 +50,6 @@ public class CalculationHelper
     private static int groundMask = 8;
     private static int holdMask = 64;
     private static int balanceBeamMask = 128;
-    private static GameObject debugSelectedEdge;
 
 
     /// <summary>
@@ -76,7 +75,6 @@ public class CalculationHelper
             }
         }
 
-        SetClosestEdgeDebugHighlight(closestEdgeObject);
         return closestEdgeObject;
     }
 
@@ -103,19 +101,6 @@ public class CalculationHelper
     public static bool IsTopFacingHold(Transform hold)
     {
         return Vector3.Dot(-hold.forward, Vector3.up) >= .08715574f; // 5 degrees above horizontal
-    }
-
-    static void SetClosestEdgeDebugHighlight(GameObject hold)
-    {
-        if (debugSelectedEdge != hold && debugSelectedEdge && debugSelectedEdge.TryGetComponent(out HoldSelectionDebug previous))
-            previous.SetSelected(false);
-
-        debugSelectedEdge = hold;
-        if (!debugSelectedEdge) return;
-
-        HoldSelectionDebug highlight = debugSelectedEdge.GetComponent<HoldSelectionDebug>();
-        if (!highlight) highlight = debugSelectedEdge.AddComponent<HoldSelectionDebug>();
-        highlight.SetSelected(true);
     }
 
     /// <summary>
@@ -161,7 +146,6 @@ public class CalculationHelper
         Collider[] holds = Physics.OverlapSphere(sphereCenterPoint, radius, holdMask);
         if (holds.Length == 0)
         {
-            SetClosestEdgeDebugHighlight(null);
             return null;
         }
 
@@ -183,7 +167,6 @@ public class CalculationHelper
                 closestObject = hold.gameObject;
             }
         }
-        SetClosestEdgeDebugHighlight(closestObject);
         return closestObject;
     }
 
