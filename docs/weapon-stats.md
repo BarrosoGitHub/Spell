@@ -5,13 +5,9 @@ pattern with public fields and a Default initializer. Edit stats on the weapon c
 or prefab in the Inspector.
 
 Stats contain fire rate (shots/second), damage per bullet (before target defense),
-magazine capacity, reload duration (seconds), range, consciousness damage, impulse,
+magazine capacity, reload duration (seconds), range, impulse,
 response time, recovery time and temporary softness.
 
-The rifle and pistol prefabs use 15 consciousness damage per hit. Their magazine/reload
-values remain 30/2 seconds and 8/1.5 seconds respectively. The WeaponStats initializer
-retains its default of 50 consciousness damage for newly configured weapons; the
-existing prefabs override it with 15.
 
 Weapon manages ammunition, cooldown and reload progress per instance. Empty magazines
 reload automatically with unlimited reserve ammunition. Call CombatHandler.Reload() or

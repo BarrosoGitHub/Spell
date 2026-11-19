@@ -99,7 +99,6 @@ public class EnemyManager : MonoBehaviour
         enemyController.Target = null;
         enemyController.State = enemyController.idlingState;
         enemyController.entity.RestoreHealth();
-        enemyController.Consciousness = 100f;
 
         return enemyController;
     }

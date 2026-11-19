@@ -3,7 +3,7 @@ using UnityEngine;
 // Optional gameplay integration. The rig and hit simulation remain in the other files.
 public sealed partial class HitRagdollManager
 {
-    [Header("Unconscious recovery")]
+    [Header("Ragdoll recovery")]
     [SerializeField] private Controller controller;
     [SerializeField, Min(0.01f)] private float recoveryBlendDuration = 0.4f;
     [SerializeField] private string faceUpGetUpState = "Base Layer.Getting up";
@@ -30,11 +30,6 @@ public sealed partial class HitRagdollManager
 
     private void HandleRecoveryState(State state)
     {
-        if (state == controller.unconsciousState)
-        {
-            SetRagdollActive(true);
-            return;
-        }
         if (getUpAction != null && state == getUpAction.preparing)
         {
             if (recoveryStrength >= 1f) return;
@@ -52,7 +47,7 @@ public sealed partial class HitRagdollManager
         ReleaseGetUp(false);
         recovering = false;
         recoveryStrength = 0f;
-        // Switch now so a knockout cannot display one last animated/kinematic pose.
+        // Switch now so a ragdoll activation cannot display one last animated/kinematic pose.
         foreach (var limb in limbs) SetDynamic(limb, true);
         if (controller && limbs.Count > 0)
             fallenRootOffset = limbs[0].body.position - controller.transform.position;
@@ -67,7 +62,7 @@ public sealed partial class HitRagdollManager
 
     private void UpdateRecoveryStrength()
     {
-        if (controller && controller.State == controller.unconsciousState && !recovering && limbs.Count > 0)
+        if (controller && recoveryStrength <= 0f && !recovering && limbs.Count > 0)
         {
             // Follow the fallen pelvis during simulation, rather than leaving the
             // gameplay root at the pre-fall location until get-up begins.

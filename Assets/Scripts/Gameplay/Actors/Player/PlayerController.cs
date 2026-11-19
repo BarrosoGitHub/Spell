@@ -172,9 +172,8 @@ public class PlayerController : Controller
         Debug.DrawRay(transform.position, transform.forward, Color.red);
     }
 
-    protected override void FixedUpdate()
+    protected virtual void FixedUpdate()
     {
-        base.FixedUpdate();
         State?.OnFixedUpdate?.Invoke();
     }
 

@@ -7,7 +7,7 @@
 
 - `HitRagdollManager.Setup.cs`: one-time humanoid rig, colliders and joints.
 - `HitRagdollManager.cs`: runtime torque, pose blending and impacts.
-- `HitRagdollManager.Recovery.cs`: optional Controller integration for unconsciousness and get-up.
+- `HitRagdollManager.Recovery.cs`: optional Controller integration for get-up.
 - `RagdollHitbox.cs`: forwards confirmed bullet contacts.
 
 Assign a Humanoid Animator. Physics Parent and Root Collider are optional. The
@@ -23,15 +23,12 @@ Upper Body includes spine, head and arms; Lower Body includes pelvis and legs.
 - Between 0 and 1: damped torque following animation, with linear visible pose blending.
 - 1: animation only, with kinematic physics bodies.
 
-Overall, Upper Body and Lower Body are manual sliders. Consciousness does not
-continuously change them. The manager handles torque, impacts and knockout recovery.
+Overall, Upper Body and Lower Body are manual sliders. The manager handles torque, impacts and knockout recovery.
 
 ## Knockout and get-up
 
-With the optional Controller assigned, zero consciousness enters Unconscious and
-sets Recovery to zero. All limbs ragdoll regardless of slider values. The existing
-controller waits until consciousness reaches 100 to start GettingUp.
-
+Ragdoll activation is explicit through `SetRagdollActive(true)`. Recovery starts through
+`BeginRecovery(duration)`, `SetRagdollActive(false)`, or the configured get-up action.
 Get-up preparation chooses the face-up/down animation, holds its first frame and
 raises Recovery from zero to one over Recovery Blend Duration, capped to preparation
 time. The same torque and pose-blending system returns the body to its configured

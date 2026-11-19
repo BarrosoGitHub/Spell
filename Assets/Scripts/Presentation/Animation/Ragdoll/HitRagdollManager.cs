@@ -16,7 +16,7 @@ public sealed partial class HitRagdollManager : MonoBehaviour
     private const float kneeFlexionLimit = 135f;
 
     [Header("Animation strength — 0: ragdoll, 1: animation")]
-    [Tooltip("Multiplies both region sliders. Zero releases the whole body; unconsciousness temporarily overrides all strengths.")]
+    [Tooltip("Multiplies both region sliders. Zero releases the whole body; manual ragdoll activation temporarily overrides all strengths.")]
     [FormerlySerializedAs("animationStrength")]
     [SerializeField, Range(0f, 1f)] private float overallStrength = 1f;
     [Tooltip("Spine, head and arms. Effective strength = Overall × Upper Body.")]

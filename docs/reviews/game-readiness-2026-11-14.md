@@ -32,13 +32,9 @@ Five enemies are spawned, but the mission does not track their deaths or complet
 
 **Fix direction:** Own the mission's spawned participants and remaining count; complete exactly once when the final participant dies. Make completion, failure, abort, restart, and disable cleanup consistent. Count mission ownership, not every enemy in the scene. Expose progress to the HUD and record meaningful elapsed time.
 
-### R03 — P1: Player unconsciousness has no recovery transition
+### R03 — Superseded by removal of the knockdown resource
 
-**Source:** `Assets/Scripts/Gameplay/Actors/Controller.cs:99`; `Assets/Scripts/Gameplay/Actors/Player/PlayerController.cs`, state setup and `SetActions`; compare `Enemies/EnemyController.cs:114`.
-
-Base consciousness handling cancels the action and enters `unconsciousState` at zero. Recovery raises consciousness again, but the player registers no exit/recovery callback for that state. Enemies explicitly transition into get-up when consciousness reaches 100; the player's action list contains only traversal and dodge. Following a zero-consciousness hit, normal player state callbacks can remain inaccessible indefinitely.
-
-**Fix direction:** Define player knockdown/recovery behavior and an explicit transition back to movement, with collision and physics restored. Verify zero consciousness while moving, grabbing, hanging, and dodging; verify death during recovery.
+The resource-driven knockdown and automatic recovery subsystem was removed on 2026-11-19.
 
 ### R04 — P1: Player death does not establish a dead gameplay state
 
@@ -54,7 +50,7 @@ The shared death handler clears buffs, notifies subscribers, and cancels the cur
 
 Preparation disables the main collider and starts positional interpolation. `Cancel` is empty. An interruption that does not enter movingState can retain disabled collision; the action does not own cancellation of its movement interpolation either.
 
-**Fix direction:** Make interruption restore collision and cancel owned movement work without overriding the destination state chosen by death/unconsciousness. Check all traversal actions against the same lifecycle contract.
+**Fix direction:** Make interruption restore collision and cancel owned movement work without overriding the destination state chosen by death. Check all traversal actions against the same lifecycle contract.
 
 ### R06 — P1: Directional melee can hit across floors and through walls
 
@@ -126,7 +122,7 @@ The manager survives scene loads but discovers the player only at startup. Loadi
 
 Manual evaluation disables the attached HitRagdollManager. The scheduler selects manual evaluation for all managed enemies, including the closest tier. Enabling this optimization therefore changes physical hit reactions, not just animation sampling frequency.
 
-**Fix direction:** Decide whether this is an intentional feature tradeoff. If hit reactions are required, coordinate animation/rig/ragdoll ownership instead of removing the reaction component. Test near/far tier changes, unconsciousness, disable/re-enable, and despawn during recovery. Do not claim performance benefit without comparable captures.
+**Fix direction:** Decide whether this is an intentional feature tradeoff. If hit reactions are required, coordinate animation/rig/ragdoll ownership instead of removing the reaction component. Test near/far tier changes, disable/re-enable, and despawn during recovery. Do not claim performance benefit without comparable captures.
 
 ### R15 — P2: Runtime chunk meshes lack explicit owner teardown
 
@@ -183,7 +179,7 @@ Use the same scene, camera, hardware, enemy count, attack sequence, and destruct
 - [ ] Deliberate launch flow: title/menu, start mission, objective HUD, success/failure result, retry, return to menu, quit.
 - [ ] Exterminate completes automatically after its five owned enemies die; zero duplicate completion/reward events.
 - [ ] Missing player/NavMesh/configuration produces an actionable failed start without partial encounter leftovers.
-- [ ] Death, unconsciousness, recovery, out-of-bounds recovery, and retry have explicit state transitions.
+- [ ] Death, recovery, out-of-bounds recovery, and retry have explicit state transitions.
 - [ ] Abort, complete, fail, reset, and scene unload cancel encounter coroutines and remove owned enemies.
 - [ ] Mission result includes meaningful elapsed time, outcome, and any promised score/rewards.
 - [ ] Pause actually controls simulation and UI input; its behavior composes with slow motion, focus loss, and retry.
@@ -251,10 +247,10 @@ Use the same scene, camera, hardware, enemy count, attack sequence, and destruct
 | Start without player or valid NavMesh | Clean rejection/failure, no exception or leftover encounter |
 | Kill all five Exterminate enemies | One victory and one complete result; no remaining mission work |
 | Hit the same zero-health target twice | One kill notification and one XP award |
-| Zero consciousness in movement and traversal | Recovery or death flow completes; collision restored appropriately |
+| Manual ragdoll activation during movement and traversal | Recovery or death flow completes; collision restored appropriately |
 | Die during grab/dodge/recovery/reward choice | Commands stop and retry produces a usable player |
 | Abort/complete/fail/retry for 20 cycles | Stable participant counts; no stale callbacks or pending rewards |
-| Pool an attacking/unconscious enemy and reuse it | New pose, target, health, timers, animation and subscriptions are correct |
+| Pool an attacking enemy and reuse it | New pose, target, health, timers, animation and subscriptions are correct |
 | Remove the occupied hold and reuse its object | Player does not follow the recycled transform |
 | Attack through a wall or onto the next floor | No damage outside the defined hit/obstruction rules |
 | Apply each supported stat bonus | Display and measured gameplay agree |

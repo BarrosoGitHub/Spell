@@ -28,12 +28,6 @@ public class EnemyController : Controller
     [Tooltip("Movement speed across NavMesh links, in units per second.")]
     [Min(0.1f)] public float jumpSpeed = 0.1f;
     private bool savedUpdatePosition;
-    protected override void UpdateConsciousnessState()
-    {
-        if (State == deadState || (entity != null && entity.CurrentHealth <= 0f)) return;
-        base.UpdateConsciousnessState();
-    }
-
     protected override void Awake()
     {
         base.Awake();
@@ -83,10 +77,6 @@ public class EnemyController : Controller
             Target = null;
         };
 
-        unconsciousState.OnEnterState += () =>
-        {
-            navMeshAgent.enabled = false;
-        };
     }
 
     public override void SetOnExitState()
@@ -111,13 +101,6 @@ public class EnemyController : Controller
         };
         climbingState.OnFixedUpdate += UpdateLinkTraversal;
 
-        unconsciousState.OnFixedUpdate += () =>
-        {
-            if (Consciousness == 100f)
-            {
-                PerformAction(ActionInstances.Find(a => a is GettingUp));
-            }
-        };
     }
 
     private void UpdateNavigation(Vector3 position)
@@ -166,9 +149,8 @@ public class EnemyController : Controller
         PerformAction(ActionInstances[0]);
     }
 
-    protected override void FixedUpdate()
+    protected virtual void FixedUpdate()
     {
-        base.FixedUpdate();
         navMeshAgent.speed = Mathf.Max(0f, entity.stats.MovementSpeed);
         if ((State == pursuingState || State == idlingState) && navMeshAgent.enabled &&
             navMeshAgent.isOnNavMesh && navMeshAgent.isOnOffMeshLink)

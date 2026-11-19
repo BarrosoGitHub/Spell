@@ -20,8 +20,6 @@ public abstract class Controller : MonoBehaviour
     public Action<Controller> OnControllerDied;
     public Action<bool> OnGroundedChanged;
     public Action<bool> OnStateVariationChanged;
-    public Action<float> OnConsciousnessChanged;
-    public State unconsciousState = new State("Unconscious");
 
     [FormerlySerializedAs("levelProgression")]
     [SerializeField] private StatProfile controllerStats;
@@ -82,36 +80,6 @@ public abstract class Controller : MonoBehaviour
     public ActionInstance CurrentActionInstance { get; private set; }
     public Sequence ActionSequence;
     
-    [Tooltip("Consciousness recovered per second.")]
-    [SerializeField, Min(0f)] private float consciousnessRecovery = 50f;
-    private float consciousness = 100f;
-    public float Consciousness
-    {
-        get => consciousness;
-        set
-        {
-            float clamped = Mathf.Clamp(value, 0f, 100f);
-            if (consciousness == clamped) return;
-            consciousness = clamped;
-
-            UpdateConsciousnessState();
-
-            OnConsciousnessChanged?.Invoke(consciousness);
-        }
-    }
-
-    protected virtual void UpdateConsciousnessState()
-    {
-        if (consciousness != 0f || (entity != null && entity.CurrentHealth <= 0f)) return;
-        CancelAction();
-        State = unconsciousState;
-    }
-
-    protected virtual void FixedUpdate()
-    {
-        Consciousness += consciousnessRecovery * Time.fixedDeltaTime;
-    }
-
     protected virtual void Awake()
     {
         weaponHandler = GetComponent<CombatHandler>();

@@ -78,7 +78,7 @@ That path skips attacker damage stats and the critical roll:
 damage = max(0, max(0, DamageOverride) - target.Defense * (1 + target.DefensePerc))
 ```
 
-The result is always marked non-critical. Consciousness damage and physical hit
+The result is always marked non-critical. Physical hit
 reactions are handled separately from this health damage calculation.
 
 ## Source references

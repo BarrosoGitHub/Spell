@@ -9,7 +9,7 @@ Controller.Shoot is the shared manual/automatic firing entry point. TryExecuteAt
 
 - `IceWeapon` validates casts and enforces cooldown. Its `OnCast` event supplies origin, velocity, stats and a cached contact callback.
 - `IceProjectileDisplay` owns and emits the particle effect. It passes the callback to `IceParticleDamage`, which reports contacts to its caller and raises `OnImpact` for accepted contacts. Neither component references or attacks a Controller.
-- `IceWeapon` resolves the contacted Controller, rejects self hits and invalid combatants, applies weapon consciousness damage and raises the inherited `OnAttackConfirmed` event with target and interaction context.
+- `IceWeapon` resolves the contacted Controller, rejects self hits and invalid combatants, raises the inherited `OnAttackConfirmed` event with target and interaction context.
 - `CombatHandler` forwards confirmation to its owning `Controller`, which calls `AttackController` and routes the interaction to EntityManager. The rifle confirms hits synchronously through the same event path.
 - `IceImpactDisplay` listens to `OnImpact` solely for embedded shard decoration.
 

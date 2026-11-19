@@ -76,7 +76,6 @@ MonoBehaviour:
   col: {fileID: 3705726388220822941}
   rb: {fileID: 0}
   weaponHandler: {fileID: 0}
-  consciousnessRecovery: 50
   navMeshAgent: {fileID: 4549190804523720699}
   idleStoppingDistance: 3
   enemyType: 3

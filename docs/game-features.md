@@ -33,7 +33,7 @@ Default input bindings include WASD movement, Space (or gamepad south button) fo
 - Optional `PlayerAutoAttack`, enabled on Player 1, automatically aims and fires at the nearest living enemy visible on camera and within weapon range, requiring clear lines of sight from both camera and weapon transform. The weapon checks actual muzzle obstruction when firing.
 - Mouse aiming against scene geometry, with a fallback aim plane when no surface is hit.
 - IceWeapon raises an OnCast Action consumed by IceProjectileDisplay. Particle contacts return through a callback to IceWeapon, which raises OnAttackConfirmed through CombatHandler to Controller and EntityManager. The collision adapter also raises OnImpact for IceImpactDisplay decoration. Shards face their travel direction with the demo’s random roll. The main-scene IceLance random sizes, 80-unit/s speed and particle children are retained without the casting sphere. IceImpactDisplay attaches smaller, randomly sized and tilted crystals to the mapped visible bone (or contacted scenery), embedded 0.2 units at impact, reusing up to 128 shard objects.
-- Configurable weapon damage, fire rate, range, ammunition, reload duration, consciousness damage, and physical hit response.
+- Configurable weapon damage, fire rate, range, ammunition, reload duration, physical hit response.
 - Magazine consumption, automatic reload on empty, and a manual reload API. Reserve ammunition is unlimited.
 - Muzzle flash, moving tracer particles, and scenery impact sparks and dust.
 - Enemies currently use only directional attacks, damaging their living target once when execution begins, after preparation, if it is still inside the attack shape. Hits use the existing interaction flow, including attacker stats, critical hits, target defense, and health/death events. Cone and circular attack implementations remain available but are not selected by enemies.
@@ -46,7 +46,6 @@ See [ice weapon](ice-weapon.md), [attack formula](attack-formula.md), and [weapo
 - Entity health, damage, healing, and death events.
 - `EntityManager` processes interactions. `Entity` handles level thresholds, XP reset, and `OnLevelUp` notifications; kill-XP awards are not wired.
 - Combat stats including defense and critical-hit properties.
-- Consciousness damage, unconscious states, and get-up actions.
 - Humanoid hitboxes that forward bullet impulses to a physical ragdoll system.
 - Configurable ragdoll strength for the whole body, upper body, and lower body.
 - Temporary limb softness, physical impact response, and recovery toward animation.
@@ -60,7 +59,7 @@ See [ragdoll details](ragdoll-manager.md).
 
 - Enemy_normal uses the Crimson Wraith skinned mesh and its extracted base-color, metallic, and roughness textures with a URP Lit material (roughness is inverted into smoothness and packed into the metallic map alpha). Its Humanoid avatar retargets the existing EnemyAnimatorController clips; the animation scheduler and hit ragdoll remain attached to the model.
 
-- Enemies idle, pursue targets, traverse navigation links, attack, become unconscious, recover, and die.
+- Enemies idle, pursue targets, traverse navigation links, attack and die.
 - Idle enemies follow their assigned player with a configurable `idleStoppingDistance` (default 3 units), instead of wandering. EnemyManager assigns the player at spawn and keeps the group's player as the idle follow target when an enemy leaves that group. Combat pursuit restores the NavMeshAgent's original stopping distance. Idle follow targets are separate from combat targets and cleared on despawn. On entering idle, enemies randomly scale their authored NavMesh avoidance radius by 1.3 to 3 and restore it when leaving idle.
 - NavMesh path following and direct traversal between link endpoints.
 - Enemy groups specify a target, enemy type, recruitment engagement distance, separate attack trigger range (default 3 units), group limit, simultaneous attacker limit, and attack interval. Each attacker must be within its group's attack range before beginning an attack.
