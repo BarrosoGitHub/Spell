@@ -29,17 +29,17 @@ Default input bindings include WASD movement, Space (or gamepad south button) fo
 
 - Weapon attachment through a configurable socket and local offset.
 - Equipping, unequipping, and cancelling weapon attacks.
-- Player 1 equips `IceWeapon`, which throws ParticlePack IceLance particles automatically or while attack input is held. Ice casts are unlimited and use the configured fire rate as their cooldown. The rifle remains available as a separate weapon.
+- Player 1 equips `IceWeapon`, which throws ParticlePack IceLance particles automatically or while attack input is held. Ice casts are unlimited and use the configured fire rate as their cooldown.
 - Optional `PlayerAutoAttack`, enabled on Player 1, automatically aims and fires at the nearest living enemy visible on camera and within weapon range, requiring clear lines of sight from both camera and weapon transform. The weapon checks actual muzzle obstruction when firing.
 - Mouse aiming against scene geometry, with a fallback aim plane when no surface is hit.
-- IceWeapon raises an OnCast Action consumed by IceProjectileDisplay. Particle contacts return through a callback to IceWeapon, which raises OnAttackConfirmed through CombatHandler to Controller and EntityManager. The collision adapter also raises OnImpact for IceImpactDisplay decoration. Shards face their travel direction with the demo’s random roll. The main-scene IceLance random sizes, 80-unit/s speed and particle children are retained without the casting sphere. IceImpactDisplay attaches smaller, randomly sized and tilted crystals to the mapped visible bone (or contacted scenery), embedded 0.2 units at impact, reusing up to 128 shard objects. Rifle shots retain hitscan collision.
+- IceWeapon raises an OnCast Action consumed by IceProjectileDisplay. Particle contacts return through a callback to IceWeapon, which raises OnAttackConfirmed through CombatHandler to Controller and EntityManager. The collision adapter also raises OnImpact for IceImpactDisplay decoration. Shards face their travel direction with the demo’s random roll. The main-scene IceLance random sizes, 80-unit/s speed and particle children are retained without the casting sphere. IceImpactDisplay attaches smaller, randomly sized and tilted crystals to the mapped visible bone (or contacted scenery), embedded 0.2 units at impact, reusing up to 128 shard objects.
 - Configurable weapon damage, fire rate, range, ammunition, reload duration, consciousness damage, and physical hit response.
 - Magazine consumption, automatic reload on empty, and a manual reload API. Reserve ammunition is unlimited.
 - Muzzle flash, moving tracer particles, and scenery impact sparks and dust.
 - Enemies currently use only directional attacks, damaging their living target once when execution begins, after preparation, if it is still inside the attack shape. Hits use the existing interaction flow, including attacker stats, critical hits, target defense, and health/death events. Cone and circular attack implementations remain available but are not selected by enemies.
 - Enemy attack preparation indicators with configurable materials, range, and fill.
 
-See [ice weapon](ice-weapon.md), [attack formula](attack-formula.md), [automatic rifle details](automatic-rifle.md), and [weapon stats](weapon-stats.md).
+See [ice weapon](ice-weapon.md), [attack formula](attack-formula.md), and [weapon stats](weapon-stats.md).
 
 ## Health and physical reactions
 

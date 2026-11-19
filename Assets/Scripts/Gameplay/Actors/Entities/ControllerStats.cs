@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "ControllerStats", menuName = "Controllers/Stats")]
-public sealed class ControllerStats : ScriptableObject
+public sealed class StatProfile : ScriptableObject
 {
     [Header("Initial Base Stats")]
     [SerializeField, Min(1f)] private float initialMaxHealth = 5f;

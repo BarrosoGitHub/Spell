@@ -51,11 +51,6 @@ public sealed class EndlessWaves : Mission
     {
         if (!isActiveAndEnabled || State != ReadyState) return;
         player = GameManager.Instance != null ? GameManager.Instance.playerController : null;
-        if (player == null || player.entity == null || player.entity.CurrentHealth <= 0f)
-        {
-            Debug.LogWarning("EndlessWaves requires a living player before starting.", this);
-            return;
-        }
         gameplayCamera = Camera.main;
         navigation = NavMesh.CalculateTriangulation();
         if (gameplayCamera == null || navigation.indices.Length < 3)

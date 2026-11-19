@@ -36,7 +36,7 @@ public class AttackWithCone : ActionInstance
 
     public override void Executing()
     {
-        if (IsTargetInRange() && controller.Target.entity != null && controller.Target.entity.CurrentHealth > 0f)
+        if (IsTargetInRange() )
             controller.AttackController(controller.Target);
     }
 

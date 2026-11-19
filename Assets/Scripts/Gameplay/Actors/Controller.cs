@@ -24,7 +24,7 @@ public abstract class Controller : MonoBehaviour
     public State unconsciousState = new State("Unconscious");
 
     [FormerlySerializedAs("levelProgression")]
-    [SerializeField] private ControllerStats controllerStats;
+    [SerializeField] private StatProfile controllerStats;
 
     private State state;
     private Controller target;

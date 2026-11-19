@@ -10198,14 +10198,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: -5085834790474079942, guid: 8e7ce9db44d35a0479b0994d62aed63e, type: 3}
-      propertyPath: muzzle
-      value: 
-      objectReference: {fileID: 3224679805759493286, guid: a94b1d15bfacb4c4e87943db20ff9400, type: 3}
-    - target: {fileID: -5085834790474079942, guid: 8e7ce9db44d35a0479b0994d62aed63e, type: 3}
-      propertyPath: shotsPerSecond
-      value: 5
-      objectReference: {fileID: 0}
     - target: {fileID: 4000854386761210877, guid: 8e7ce9db44d35a0479b0994d62aed63e, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

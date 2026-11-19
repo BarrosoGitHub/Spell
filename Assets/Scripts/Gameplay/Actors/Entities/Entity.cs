@@ -5,9 +5,8 @@ using UnityEngine;
 public class Entity
 {
     public Stats stats { get; private set; }
+    private readonly StatProfile statProfile;
     private readonly List<StatModifier> statModifiers = new List<StatModifier>();
-    private readonly ControllerStats controllerStats;
-
 
     public event Action<float> OnHealthChanged;
     public event Action OnEntityDied;
@@ -17,12 +16,12 @@ public class Entity
     public float CurrentExperience { get; private set; }
     public float LevelUpExperience => Level * 2f;
 
-    public Entity(ControllerStats controllerStats = null)
+    public Entity(StatProfile controllerStats = null)
     {
         if (controllerStats == null)
             throw new ArgumentNullException(nameof(controllerStats), "Assign a ControllerStats asset before creating an Entity.");
 
-        this.controllerStats = controllerStats;
+        this.statProfile = controllerStats;
     
         UpdateStats();
         RestoreHealth();
@@ -75,7 +74,7 @@ public class Entity
 
     private void UpdateStats()
     {
-        stats = controllerStats.CreateBaseStats().Add(controllerStats.GetBonus(Level));
+        stats = statProfile.CreateBaseStats().Add(statProfile.GetBonus(Level));
 
         foreach (StatModifier modifier in statModifiers)
         {

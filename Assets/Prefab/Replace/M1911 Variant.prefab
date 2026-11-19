@@ -14916,7 +14916,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4000854386761210877}
-  - component: {fileID: -5085834790474079942}
   m_Layer: 0
   m_Name: M1911 Variant
   m_TagString: Untagged
@@ -14942,41 +14941,6 @@ Transform:
   - {fileID: 4000706309382540451}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
---- !u!114 &-5085834790474079942
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4004402327717903337}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 06c45f8c32144856ad9f436b80c8b763, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  attackTiming:
-    preparingTime: 0
-    executingTime: 0
-  stats:
-    fireRate: 6
-    damagePerBullet: 5
-    magazine: 8
-    reloadTime: 1.5
-    range: 50
-    consciousnessDamage: 15
-    impulse: 2
-    responseTime: 0.06
-    recoveryTime: 1
-    softness: 1
-  muzzle: {fileID: 3224679805759493286}
-  hitMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  tracerSpeed: 120
-  tracerLength: 1.2
-  tracerWidth: 0.025
-  tracerColor: {r: 1, g: 0.8, b: 0.35, a: 1}
-  shotEffectMaterial: {fileID: 0}
 --- !u!1 &4004439507396730957
 GameObject:
   m_ObjectHideFlags: 0
