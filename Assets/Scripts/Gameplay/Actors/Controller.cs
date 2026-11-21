@@ -5,7 +5,10 @@ using System.Collections.Generic;
 
 public abstract class Controller : MonoBehaviour
 {
+    [SerializeField] private List<Skill> skills = new();
+    public IReadOnlyList<Skill> Skills => skills;
     public event Action<Weapon, Vector3> OnShoot;
+    public event Action<Controller, InteractionContext> OnHit;
     public event Action<Buff> OnBuffStarted;
     public event Action<Buff> OnBuffFinished;
     private readonly Dictionary<Buff, Sequence> buffs = new();
@@ -140,10 +143,13 @@ public abstract class Controller : MonoBehaviour
 
     private void Interact(Controller other, InteractionContext ctx)
     {
-        if (!EntityManager.Instance.TryProcessInteraction(this, other, ctx, out _))
+        if (!EntityManager.Instance.TryProcessInteraction(this, other, ctx, out InteractionContext result))
         {
             return;
         }
+
+        if (result.Type == InteractionType.Attack)
+            OnHit?.Invoke(other, result);
     }
 
     public bool AddBuff(BuffDefinition definition)

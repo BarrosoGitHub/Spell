@@ -27,6 +27,8 @@ Default input bindings include WASD movement, Space (or gamepad south button) fo
 
 ## Combat and weapons
 
+- Controller stores the available Skill assets and exposes read access through Skills. Controller enables that list on enable and disables it on disable. Each skill directly subscribes through Enable(controller) and unsubscribes through Disable(controller). Controller uses one serialized list for activation and cleanup, ignoring duplicate entries. Configure the list while disabled so subscriptions remain paired. Skill effects and event subscriptions remain inside each skill. SlowSkill listens to Controller.OnHit after confirmed attack interactions. SlowSkill is assigned to Player 1: 25% chance per hit to apply SlowBuff (-1 movement unit/second for 3 scaled seconds). The existing buff lifecycle prevents stacking the same definition and clears it on death/disable. Skills keep per-use state out of shared assets.
+
 - Weapon attachment through a configurable socket and local offset.
 - Equipping, unequipping, and cancelling weapon attacks.
 - Player 1 equips `IceWeapon`, which throws ParticlePack IceLance particles automatically or while attack input is held. Ice casts are unlimited and use the configured fire rate as their cooldown.
