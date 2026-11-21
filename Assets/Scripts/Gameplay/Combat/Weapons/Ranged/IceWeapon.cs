@@ -10,13 +10,16 @@ public class IceWeapon : Weapon
     [SerializeField, Min(1f)] private float projectileSpeed = 80f;
     [SerializeField, Min(0.01f)] private float range = 50f;
     public override float Range => range;
+    public Vector3 AimPoint => currentAimPoint;
     private static readonly WaitForSeconds MultishotDelay = new WaitForSeconds(0.1f);
+    private Vector3 currentAimPoint;
     private float nextCastTime;
     private Controller source;
     private Func<GameObject, bool> contactCallback;
 
     public override bool TryExecuteAttack(Controller attacker, Vector3 aimPoint)
     {
+        currentAimPoint = aimPoint;
         if (!isActiveAndEnabled || attacker == null || attacker.entity == null ||
             attacker.entity.CurrentHealth <= 0f || Time.time < nextCastTime)
             return false;
@@ -35,11 +38,11 @@ public class IceWeapon : Weapon
         if (remainingChance > 0f && UnityEngine.Random.Range(0f, 100f) < remainingChance)
             extraShots++;
         if (extraShots > 0)
-            StartCoroutine(FireExtraShots(attacker, direction.normalized * projectileSpeed, extraShots));
+            StartCoroutine(FireExtraShots(attacker, extraShots));
         return true;
     }
 
-    private IEnumerator FireExtraShots(Controller attacker, Vector3 velocity, int count)
+    private IEnumerator FireExtraShots(Controller attacker, int count)
     {
         for (int i = 0; i < count; i++)
         {
@@ -47,7 +50,9 @@ public class IceWeapon : Weapon
             if (!isActiveAndEnabled || attacker == null || !attacker.isActiveAndEnabled ||
                 attacker.entity == null || attacker.entity.CurrentHealth <= 0f) yield break;
 
-            OnCast?.Invoke(transform.position, velocity, range, contactCallback);
+            Vector3 direction = currentAimPoint - transform.position;
+            if (direction.sqrMagnitude <= Mathf.Epsilon) continue;
+            OnCast?.Invoke(transform.position, direction.normalized * projectileSpeed, range, contactCallback);
         }
     }
 
