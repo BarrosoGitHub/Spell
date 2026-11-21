@@ -9,6 +9,7 @@ public class Stats
     public float Defense { get; private set; }
     public float CriticalChance { get; private set; }
     public float CriticalDamage { get; private set; }
+    public float MultishotChance { get; private set; }
 
     public float MaxHealthPerc { get; private set; }
     public float BaseDamagePerc { get; private set; }
@@ -29,12 +30,14 @@ public class Stats
                  float baseDamagePerc = 0,
                  float attackSpeedPerc = 0,
                  float defensePerc = 0,
-                 float movementSpeed = 0)
+                 float movementSpeed = 0,
+                 float multishotChance = 0)
     {
         MaxHealth = maxHealth;
         BaseDamage = baseDamage;
         AttackSpeed = attackSpeed;
         MovementSpeed = movementSpeed;
+        MultishotChance = multishotChance;
         Defense = defense;
         CriticalChance = criticalChance;
         CriticalDamage = criticalDamage;
@@ -67,7 +70,8 @@ public class Stats
             BaseDamagePerc + other.BaseDamagePerc,
             AttackSpeedPerc + other.AttackSpeedPerc,
             DefensePerc + other.DefensePerc,
-            MovementSpeed + other.MovementSpeed
+            MovementSpeed + other.MovementSpeed,
+            MultishotChance + other.MultishotChance
         );
     }
 }

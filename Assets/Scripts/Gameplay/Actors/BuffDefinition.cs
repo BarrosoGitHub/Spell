@@ -23,6 +23,9 @@ public sealed class BuffDefinition : ScriptableObject
     [Tooltip("Added multiplier: 0.5 adds 0.5x critical damage.")]
     [SerializeField] private float criticalDamage;
 
+    [Tooltip("Percentage points: 25 adds 25% extra-shot chance.")]
+    [SerializeField] private float multishotChance;
+
     public BuffType Type => type;
     public float Duration => duration;
 
@@ -35,6 +38,7 @@ public sealed class BuffDefinition : ScriptableObject
             movementSpeed: movementSpeed,
             defense: defense,
             criticalChance: criticalChance,
-            criticalDamage: criticalDamage);
+            criticalDamage: criticalDamage,
+            multishotChance: multishotChance);
     }
 }

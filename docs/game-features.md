@@ -27,6 +27,8 @@ Default input bindings include WASD movement, Space (or gamepad south button) fo
 
 ## Combat and weapons
 
+- MultishotChance is an additive stat measured in percentage points (25 = 25%). Profiles, level gains, buffs and equipment/rune rolls can supply it. Each full 100 guarantees an extra projectile and the remainder rolls for one more (250 = two guaranteed extras plus a 50% chance of a third). IceWeapon fires extras in the same direction at 0.1-scaled-second intervals, without another cooldown or recursive roll. Existing profiles default to zero. Rune drops can roll multishot bonuses: Common 5–10, Uncommon 10–15, Rare 15–25, Epic 25–35, and Legendary 35–50 percentage points.
+
 - Controller stores the available Skill assets and exposes read access through Skills. Controller enables that list on enable and disables it on disable. Each skill directly subscribes through Enable(controller) and unsubscribes through Disable(controller). Controller uses one serialized list for activation and cleanup, ignoring duplicate entries. Configure the list while disabled so subscriptions remain paired. Skill effects and event subscriptions remain inside each skill. SlowSkill listens to Controller.OnHit after confirmed attack interactions. SlowSkill is assigned to Player 1: 25% chance per hit to apply SlowBuff (-1 movement unit/second for 3 scaled seconds). The existing buff lifecycle prevents stacking the same definition and clears it on death/disable. Skills keep per-use state out of shared assets.
 
 - Weapon attachment through a configurable socket and local offset.

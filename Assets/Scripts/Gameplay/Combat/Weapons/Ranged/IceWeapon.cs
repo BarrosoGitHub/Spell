@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public class IceWeapon : Weapon
@@ -9,6 +10,7 @@ public class IceWeapon : Weapon
     [SerializeField, Min(1f)] private float projectileSpeed = 80f;
     [SerializeField, Min(0.01f)] private float range = 50f;
     public override float Range => range;
+    private static readonly WaitForSeconds MultishotDelay = new WaitForSeconds(0.1f);
     private float nextCastTime;
     private Controller source;
     private Func<GameObject, bool> contactCallback;
@@ -27,7 +29,26 @@ public class IceWeapon : Weapon
         source = attacker;
         contactCallback ??= ConfirmContact;
         OnCast?.Invoke(transform.position, direction.normalized * projectileSpeed, range, contactCallback);
+        float multishotChance = Mathf.Max(0f, attacker.entity.stats.MultishotChance);
+        int extraShots = Mathf.FloorToInt(multishotChance / 100f);
+        float remainingChance = multishotChance % 100f;
+        if (remainingChance > 0f && UnityEngine.Random.Range(0f, 100f) < remainingChance)
+            extraShots++;
+        if (extraShots > 0)
+            StartCoroutine(FireExtraShots(attacker, direction.normalized * projectileSpeed, extraShots));
         return true;
+    }
+
+    private IEnumerator FireExtraShots(Controller attacker, Vector3 velocity, int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            yield return MultishotDelay;
+            if (!isActiveAndEnabled || attacker == null || !attacker.isActiveAndEnabled ||
+                attacker.entity == null || attacker.entity.CurrentHealth <= 0f) yield break;
+
+            OnCast?.Invoke(transform.position, velocity, range, contactCallback);
+        }
     }
 
     private bool ConfirmContact(GameObject other)
@@ -46,7 +67,11 @@ public class IceWeapon : Weapon
         return true;
     }
 
-    public override void CancelAttack() => source = null;
+    public override void CancelAttack()
+    {
+        StopAllCoroutines();
+        source = null;
+    }
 
     private void OnDisable() => CancelAttack();
 }

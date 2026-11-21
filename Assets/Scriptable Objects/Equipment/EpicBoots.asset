@@ -10,19 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 948d15005fc34ac3b01af45a1562bac7, type: 3}
-  m_Name: CommonBoots
+  m_Name: EpicBoots
   m_EditorClassIdentifier: 
-  equipmentName: Common Rune
+  equipmentName: Epic Rune
   slot: 0
-  rarity: 0
+  rarity: 3
   raritySettings: {fileID: 11400000, guid: 71f7acf677564d798396170130990b10, type: 2}
-  maxHealth: {x: 5, y: 10}
-  baseDamage: {x: 0.25, y: 0.5}
-  attackSpeed: {x: 0.02, y: 0.04}
-  defense: {x: 0.1, y: 0.2}
-  criticalChance: {x: 1, y: 2}
-  criticalDamage: {x: 0.05, y: 0.1}
-  maxHealthPerc: {x: 0.02, y: 0.04}
-  baseDamagePerc: {x: 0.02, y: 0.04}
-  attackSpeedPerc: {x: 0.01, y: 0.02}
-  defensePerc: {x: 0.02, y: 0.04}
+  maxHealth: {x: 35, y: 50}
+  baseDamage: {x: 2, y: 3}
+  attackSpeed: {x: 0.09, y: 0.12}
+  defense: {x: 0.7, y: 1}
+  criticalChance: {x: 5, y: 7}
+  criticalDamage: {x: 0.25, y: 0.4}
+  maxHealthPerc: {x: 0.09, y: 0.12}
+  baseDamagePerc: {x: 0.09, y: 0.12}
+  attackSpeedPerc: {x: 0.05, y: 0.07}
+  defensePerc: {x: 0.09, y: 0.12}
+  multishotChance: {x: 25, y: 35}

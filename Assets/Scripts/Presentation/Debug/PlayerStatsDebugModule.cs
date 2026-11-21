@@ -29,6 +29,7 @@ public sealed class PlayerStatsDebugModule
             $"Casts / second   {attackSpeed:0.##}\n" +
             $"Cast cooldown   {1f / attackSpeed:0.###} s\n" +
             $"Critical chance   {stats.CriticalChance:0.##}%\n" +
+            $"Multishot chance   {stats.MultishotChance:0.##}%\n" +
             $"Critical damage   {stats.CriticalDamage:0.##}x\n" +
             $"Defense   {defense:0.##}\n\n" +
             $"TOTAL FLAT / PERCENT BONUSES\n" +

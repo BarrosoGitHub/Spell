@@ -40,7 +40,7 @@ Equipment equipment = dropTable.Generate();
 
 ## Starter assets
 
-`Assets/Scripts/Infrastructure/Scriptable Objects/Equipment` contains Common, Uncommon, Rare, Epic, and Legendary Boots assets plus `BootsDropTable`. Boots is currently the only defined equipment slot.
+`Assets/Scriptable Objects/Equipment` contains Common, Uncommon, Rare, Epic, and Legendary Boots assets plus `BootsDropTable`. Boots is currently the only defined equipment slot.
 
 The table uses weights 60/25/10/4/1, giving those same percentages. Sample health ranges are 5–10, 10–20, 20–35, 35–50, and 50–75 respectively. All ten stat ranges are populated with progressively stronger sample bonuses by rarity; the maximum line count still controls how many are selected. These are editable starting values, not finalized balance. Assign `BootsDropTable` to a reward component's `EquipmentDropTable` field to use it. No scene reward component is wired automatically.
 

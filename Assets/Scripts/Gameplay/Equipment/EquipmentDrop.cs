@@ -11,7 +11,7 @@ public class EquipmentDrop : ScriptableObject
     private enum StatLine
     {
         MaxHealth, BaseDamage, AttackSpeed, Defense, CriticalChance, CriticalDamage,
-        MaxHealthPerc, BaseDamagePerc, AttackSpeedPerc, DefensePerc, Count
+        MaxHealthPerc, BaseDamagePerc, AttackSpeedPerc, DefensePerc, MultishotChance, Count
     }
 
     [Header("Stat Ranges (Min, Max)")]
@@ -29,6 +29,9 @@ public class EquipmentDrop : ScriptableObject
     [SerializeField] private Vector2 baseDamagePerc;
     [SerializeField] private Vector2 attackSpeedPerc;
     [SerializeField] private Vector2 defensePerc;
+
+    [Tooltip("Percentage points: 25 adds 25% extra-shot chance.")]
+    [SerializeField] private Vector2 multishotChance;
 
     public Rarity Rarity => rarity;
 
@@ -52,7 +55,8 @@ public class EquipmentDrop : ScriptableObject
             maxHealthPerc: Roll(selectedLines, StatLine.MaxHealthPerc),
             baseDamagePerc: Roll(selectedLines, StatLine.BaseDamagePerc),
             attackSpeedPerc: Roll(selectedLines, StatLine.AttackSpeedPerc),
-            defensePerc: Roll(selectedLines, StatLine.DefensePerc));
+            defensePerc: Roll(selectedLines, StatLine.DefensePerc),
+            multishotChance: Roll(selectedLines, StatLine.MultishotChance));
         return equipment;
     }
 
@@ -93,6 +97,7 @@ public class EquipmentDrop : ScriptableObject
     {
         return stat switch
         {
+            StatLine.MultishotChance => multishotChance,
             StatLine.MaxHealth => maxHealth,
             StatLine.BaseDamage => baseDamage,
             StatLine.AttackSpeed => attackSpeed,

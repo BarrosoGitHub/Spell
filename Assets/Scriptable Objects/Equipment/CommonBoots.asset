@@ -10,19 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 948d15005fc34ac3b01af45a1562bac7, type: 3}
-  m_Name: RareBoots
+  m_Name: CommonBoots
   m_EditorClassIdentifier: 
-  equipmentName: Rare Rune
+  equipmentName: Common Rune
   slot: 0
-  rarity: 2
+  rarity: 0
   raritySettings: {fileID: 11400000, guid: 71f7acf677564d798396170130990b10, type: 2}
-  maxHealth: {x: 20, y: 35}
-  baseDamage: {x: 1, y: 2}
-  attackSpeed: {x: 0.06, y: 0.09}
-  defense: {x: 0.4, y: 0.7}
-  criticalChance: {x: 3, y: 5}
-  criticalDamage: {x: 0.15, y: 0.25}
-  maxHealthPerc: {x: 0.06, y: 0.09}
-  baseDamagePerc: {x: 0.06, y: 0.09}
-  attackSpeedPerc: {x: 0.03, y: 0.05}
-  defensePerc: {x: 0.06, y: 0.09}
+  maxHealth: {x: 5, y: 10}
+  baseDamage: {x: 0.25, y: 0.5}
+  attackSpeed: {x: 0.02, y: 0.04}
+  defense: {x: 0.1, y: 0.2}
+  criticalChance: {x: 1, y: 2}
+  criticalDamage: {x: 0.05, y: 0.1}
+  maxHealthPerc: {x: 0.02, y: 0.04}
+  baseDamagePerc: {x: 0.02, y: 0.04}
+  attackSpeedPerc: {x: 0.01, y: 0.02}
+  defensePerc: {x: 0.02, y: 0.04}
+  multishotChance: {x: 5, y: 10}

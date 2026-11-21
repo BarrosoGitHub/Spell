@@ -26,3 +26,4 @@ MonoBehaviour:
   baseDamagePerc: {x: 0.04, y: 0.06}
   attackSpeedPerc: {x: 0.02, y: 0.03}
   defensePerc: {x: 0.04, y: 0.06}
+  multishotChance: {x: 10, y: 15}

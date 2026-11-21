@@ -91,6 +91,16 @@ public class EntityManager : MonoBehaviour
         return controller != null && controller.AddBuff(buff);
     }
 
+    public void AddSkill(Controller controller, Skill skill)
+    {
+        if (controller == null || skill == null)
+        {
+            return;
+        }
+
+        skill.Enable(controller);
+    }
+
     private DamageResult CalculateDamage(Entity source)
     {
         float chance = source.stats.CriticalChance;

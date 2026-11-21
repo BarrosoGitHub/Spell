@@ -2,14 +2,21 @@ using UnityEngine;
 
 public sealed class SlowSkill : Skill
 {
-    public override public void Activate()
+    public BuffDefinition slowBuff;
+    private const float chance = 0.5f;
+    public override void Enable(Controller controller)
     {
-        // This skill is passive and does not have an active effect.
+        controller.OnHit += ApplySlow;
+    }
+
+    public override void Disable(Controller controller)
+    {
+        controller.OnHit -= ApplySlow;
     }
 
     private void ApplySlow(Controller target, InteractionContext context)
     {
-        if (target != null && slowBuff != null && Random.value < chance)
+        if (Random.value < chance)
             target.AddBuff(slowBuff);
     }
 }

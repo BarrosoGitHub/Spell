@@ -14,6 +14,9 @@ public sealed class StatProfile : ScriptableObject
     [Tooltip("Critical damage multiplier. A value of 1.5 means 1.5x damage.")]
     [SerializeField, Min(1f)] private float initialCriticalDamage = 1f;
 
+    [Tooltip("Each 100 guarantees an extra shot; the remainder is the chance for one more.")]
+    [SerializeField, Min(0f)] private float initialMultishotChance;
+
     public Stats CreateBaseStats()
     {
         return new Stats(
@@ -23,7 +26,8 @@ public sealed class StatProfile : ScriptableObject
             defense: initialDefense,
             movementSpeed: initialMovementSpeed,
             criticalChance: initialCriticalChance,
-            criticalDamage: initialCriticalDamage);
+            criticalDamage: initialCriticalDamage,
+            multishotChance: initialMultishotChance);
     }
 
     [Header("Stat Gains Per Level Above Level 1")]
@@ -36,6 +40,8 @@ public sealed class StatProfile : ScriptableObject
     [Tooltip("Added to the critical damage multiplier per level.")]
     [SerializeField, Min(0f)] private float criticalDamage;
 
+    [SerializeField] private float multishotChance;
+
     public Stats GetBonus(int level)
     {
         int increases = Mathf.Max(1, level) - 1;
@@ -45,6 +51,7 @@ public sealed class StatProfile : ScriptableObject
             defense: defense * increases,
             movementSpeed: movementSpeed * increases,
             criticalChance: criticalChance * increases,
-            criticalDamage: criticalDamage * increases);
+            criticalDamage: criticalDamage * increases,
+            multishotChance: multishotChance * increases);
     }
 }
