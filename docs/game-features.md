@@ -36,7 +36,8 @@ Default input bindings include WASD movement, Space (or gamepad south button) fo
 - Configurable weapon damage, fire rate, range, ammunition, reload duration, physical hit response.
 - Magazine consumption, automatic reload on empty, and a manual reload API. Reserve ammunition is unlimited.
 - Muzzle flash, moving tracer particles, and scenery impact sparks and dust.
-- Enemies currently use only directional attacks, damaging their living target once when execution begins, after preparation, if it is still inside the attack shape. Hits use the existing interaction flow, including attacker stats, critical hits, target defense, and health/death events. Cone and circular attack implementations remain available but are not selected by enemies.
+- Mutated enemies use `AttackJump`: a 0.9-second directional warning followed by a 0.75-second committed tackle, up to 7 units with a 1.5-unit arc. During preparation it tracks the target at 90 degrees/second (AttackJump’s PreparationTurnSpeed), then locks its direction at takeoff. The leap stops at NavMesh boundaries and damages its target at most once along the swept footprint. Completion and cancellation restore navigation; EndlessWaves allows mutants to attack from 7 units. The mutant prefab uses the added Jump Attack clip through its own Animator controller. Play Mode tuning remains required.
+- Normal enemies use directional attacks, damaging their living target once when execution begins, after preparation, if it is still inside the attack shape. Hits use the existing interaction flow, including attacker stats, critical hits, target defense, and health/death events. Cone and circular attack implementations remain available but are not selected by enemies.
 - Enemy attack preparation indicators with configurable materials, range, and fill.
 
 See [ice weapon](ice-weapon.md), [attack formula](attack-formula.md), and [weapon stats](weapon-stats.md).

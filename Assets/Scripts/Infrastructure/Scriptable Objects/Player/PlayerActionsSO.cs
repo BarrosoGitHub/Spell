@@ -14,5 +14,5 @@ public class PlayerActionsSO : ScriptableObject
     public ActionStats ClimbUp;
     public ActionStats ClimbEject;
     public ActionStats ClimbJump;
-    public ActionStats Dodge = new ActionStats { preparingTime = 0f, executingTime = 0.2f };
+    public ActionStats Dodge = new ActionStats { preparingTime = 0f, executingTime = 0.15f };
 }

@@ -26,4 +26,4 @@ MonoBehaviour:
     executingTime: 0
   Dodge:
     preparingTime: 0
-    executingTime: 0.2
+    executingTime: 0.15

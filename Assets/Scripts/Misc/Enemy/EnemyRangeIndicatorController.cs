@@ -176,6 +176,7 @@ public class EnemyRangeIndicatorController : MonoBehaviour
 
         if (fillTween != null) fillTween.Cancel();
         SetFill(1f);
+        if (actionInstance is AttackJump) Hide();
     }
 
     private void OnAttackComplete(ActionInstance actionInstance)

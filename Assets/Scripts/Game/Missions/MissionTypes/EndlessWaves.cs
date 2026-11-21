@@ -79,7 +79,8 @@ public sealed class EndlessWaves : Mission
         enemyManager.AddEnemyGroup(enemyGroup);
         enemyManager.AddEnemyGroup(new EnemyGroup(EnemyType.Mutated, player,
             maxNumberOfEnemies: 1, maxEngagementDistance: 15f,
-            maxNumberOfEnemiesThatCanEngageSimultaneously: 1, attackInterval: 1.5f));
+            maxNumberOfEnemiesThatCanEngageSimultaneously: 1, attackInterval: 3f,
+            attackRange: AttackJump.DefaultRange));
         waves = StartCoroutine(RunWaves());
     }
 

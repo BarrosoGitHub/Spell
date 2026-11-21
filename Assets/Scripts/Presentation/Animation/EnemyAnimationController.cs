@@ -54,7 +54,7 @@ public sealed class EnemyAnimationController : MonoBehaviour
         };
 
         enemyController.pursuingState.OnFixedUpdate += () =>
-        {
+        {       
             UpdateBodyPosition(heightOffset);
             UpdateBodyRotation();
         };
@@ -63,6 +63,17 @@ public sealed class EnemyAnimationController : MonoBehaviour
         {
             UpdateClimbingBodyRotation();
             UpdateClimbBodyPosition();
+        };
+
+        enemyController.ActionInstances[0].preparing.OnFixedUpdate += () =>
+        {
+            UpdateBodyPosition(heightOffset);
+            UpdateBodyRotation();
+        };
+        enemyController.ActionInstances[0].executing.OnFixedUpdate += () =>
+        {
+            UpdateBodyPosition(heightOffset);
+            UpdateBodyRotation();
         };
 
     }
@@ -144,6 +155,12 @@ public sealed class EnemyAnimationController : MonoBehaviour
 
     private void UpdateBodyRotation()
     {
+        if (enemyController.CurrentActionInstance is AttackJump)
+        {
+            transform.rotation = enemyController.transform.rotation;
+            return;
+        }
+
         Vector3 velocity = enemyController.navMeshAgent.velocity;
         if (velocity.sqrMagnitude > 0.01f)
         {

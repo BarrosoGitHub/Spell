@@ -133,7 +133,9 @@ public class EnemyController : Controller
     {
         ActionInstances = new List<ActionInstance>
         {
-            new AttackDirectional(this, 0.9f, 0.5f),
+            enemyType == EnemyType.Mutated
+                ? new AttackJump(this, 0.9f, 0.75f)
+                : new AttackDirectional(this, 0.9f, 0.5f),
             new GettingUp(this, 2f, 2f)
         };
     }
@@ -143,7 +145,7 @@ public class EnemyController : Controller
         if (State != idlingState && State != pursuingState) return;
         if (State == climbingState || navMeshAgent.isOnOffMeshLink) return;
         if (ActionInstances == null || ActionInstances.Count == 0) return;
-        // Directional attack is the first action; GettingUp is reserved for recovery.
+        // The primary attack is first; GettingUp is reserved for recovery.
         PerformAction(ActionInstances[0]);
     }
 
