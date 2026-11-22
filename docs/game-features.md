@@ -18,6 +18,7 @@ This is an overview of the current Unity prototype based on its scripts and proj
 - Camera-relative movement using the Unity Input System.
 - Rigidbody movement with spring-based ground support and configurable gravity.
 - `Dodge` uses the existing action lifecycle. Call `TryDodge()` to move in the input direction, falling back to facing when stationary. It sets horizontal velocity to 15 units/second, preserves collision and vertical movement, and stops horizontal movement on completion or cancellation. Duration comes from `PlayerActionsSO.Dodge`. The former jump input (Space or gamepad south button) triggers Dodge while moving. Cooldown and invulnerability are not provided.
+- DodgeIceEffect deposits ground-aligned cracked-ice VFX Graph patches every 0.3 units during dodge. A bounded pool of 48 stationary patches leaves a continuous frozen trail that fades after four scaled seconds. Disable clears the trail and destruction releases its objects. Visual validation in Unity remains pending.
 - Ledge detection, grabbing, and hanging.
 - Climbing onto ledges, jumping between holds, and ejecting away from a ledge.
 - Nearby hold selection and debug highlighting for usable holds.

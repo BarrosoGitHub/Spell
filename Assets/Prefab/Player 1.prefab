@@ -43,6 +43,7 @@ GameObject:
   - component: {fileID: 1815894476020583550}
   - component: {fileID: 2704533220009322641}
   - component: {fileID: 2730051286634281295}
+  - component: {fileID: 912345678000002}
   - component: {fileID: 1563351089147914490}
   - component: {fileID: 1413618686336848245}
   - component: {fileID: 6146028939581774910}
@@ -1331,3 +1332,17 @@ MonoBehaviour:
   targetRenderers: []
   durationSeconds: 0.12
   glowColor: {r: 0.03, g: 0, b: 0, a: 1}
+--- !u!114 &912345678000002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 373741526835933733}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4f04abd270d4e56a2abec9975279069, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::DodgeIceEffect
+  effectAsset: {fileID: 8926484042661614527, guid: 77cb58f68de74695acd9fd7a2f9f3ddc, type: 3}
+  patchSpacing: 0.3
