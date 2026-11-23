@@ -5,6 +5,8 @@ using UnityEngine.AI;
 
 public sealed class EndlessWaves : Mission
 {
+    public event System.Action<int> OnWaveStarted;
+
     [Header("Waves")]
     [SerializeField, Min(1)] private int enemiesPerWave = 5;
     [SerializeField, Min(0.1f)] private float waveInterval = 10f;
@@ -120,6 +122,8 @@ public sealed class EndlessWaves : Mission
                 }
                 livingEnemies.Add(enemy);
             }
+
+            OnWaveStarted?.Invoke(CurrentWave);
 
             float elapsed = 0f;
             while (livingEnemies.Count > 0 && elapsed < waveInterval)

@@ -4,6 +4,7 @@ using UnityEngine;
 
 public sealed class MissionManager : MonoBehaviour
 {
+    public event Action<Mission> OnMissionSelected;
     public Action OnMissionStarted;
     public Action OnMissionCompleted;
 
@@ -50,6 +51,7 @@ public sealed class MissionManager : MonoBehaviour
         missionObject.transform.SetParent(transform, false);
         selectedMission = (Mission)missionObject.AddComponent(missionType);
         selectedMission.OnStateChanged += HandleMissionChangedState;
+        OnMissionSelected?.Invoke(selectedMission);
         return true;
     }
 

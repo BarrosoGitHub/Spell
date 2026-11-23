@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 60a7a2aaa36d0e143b2c0c81cdc9bd4b
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 183370
+  packageName: Feel
+  packageVersion: 6.4
+  assetPath: Assets/Feel/Skills/feel-add-feedbacks/references/feedback-catalog.md
+  uploadId: 1056288

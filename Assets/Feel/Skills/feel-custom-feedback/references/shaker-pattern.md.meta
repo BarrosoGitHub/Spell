@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 5f1b1c46d0aab234ba48af48e451b30d
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 183370
+  packageName: Feel
+  packageVersion: 6.4
+  assetPath: Assets/Feel/Skills/feel-custom-feedback/references/shaker-pattern.md
+  uploadId: 1056288

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 4964b7d078b87774d99a58495a8ade7c
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 183370
+  packageName: Feel
+  packageVersion: 6.4
+  assetPath: Assets/Feel/Skills/feel-screen-shake/SKILL.md
+  uploadId: 1056288

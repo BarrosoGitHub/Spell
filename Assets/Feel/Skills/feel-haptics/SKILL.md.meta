@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 3a4dabee0e8ee4045b36226b536d7f09
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 183370
+  packageName: Feel
+  packageVersion: 6.4
+  assetPath: Assets/Feel/Skills/feel-haptics/SKILL.md
+  uploadId: 1056288

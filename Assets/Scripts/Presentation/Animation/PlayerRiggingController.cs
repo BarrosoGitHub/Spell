@@ -17,11 +17,14 @@ public class PlayerRiggingController : MonoBehaviour
     [SerializeField] private Rig aimRig;
 
     [Header("Shooting Aim")]
-    [SerializeField, Min(0f)] private float shootingPoseHoldTime = 0.2f;
-    [SerializeField, Min(0f)] private float shootingBlendTime = 0.1f;
+    [SerializeField, Min(0f)] private float shootingPoseHoldTime = 0.25f;
+    [SerializeField, Min(0f)] private float shootingBlendTime = 0.18f;
     [Tooltip("Additional rotation after aligning each hand from its rest pose.")]
     [SerializeField] private Vector3 shootingHandRotationOffset;
-    [SerializeField, Range(0.5f, 0.98f)] private float shootingArmExtension = 0.92f;
+    [SerializeField, Range(0.5f, 0.98f)] private float shootingArmExtension = 0.88f;
+    [SerializeField, Min(0f)] private float shootingBlendInTime = 0.12f;
+    [Tooltip("How quickly the shooting pose follows changes in aim, per second.")]
+    [SerializeField, Min(0f)] private float shootingAimFollowSpeed = 14f;
 
     private Sequence shootingReleaseSequence;
     private Interpolate shootingArmTween, shootingRigTween, shootingLookTween;
@@ -29,7 +32,7 @@ public class PlayerRiggingController : MonoBehaviour
     private TwoBoneIKConstraint shootingArm;
     private Quaternion leftHandAlignment, rightHandAlignment;
     private float leftArmLength, rightArmLength;
-    private Vector3 shootingAimPoint;
+    private Vector3 shootingAimPoint, smoothedShootingAimPoint;
 
     private void Awake()
     {
@@ -54,8 +57,11 @@ public class PlayerRiggingController : MonoBehaviour
 
     private void Update()
     {
-        if (shootingReleaseSequence != null && shootingArm)
-            UpdateShootingTarget(shootingArm, shootingAimPoint);
+        if (shootingReleaseSequence == null || !shootingArm) return;
+
+        float blend = 1f - Mathf.Exp(-shootingAimFollowSpeed * Time.deltaTime);
+        smoothedShootingAimPoint = Vector3.Lerp(smoothedShootingAimPoint, shootingAimPoint, blend);
+        UpdateShootingTarget(shootingArm, smoothedShootingAimPoint);
     }
 
     private void UpdateShootingTarget(TwoBoneIKConstraint arm, Vector3 aimPoint)
@@ -98,25 +104,28 @@ public class PlayerRiggingController : MonoBehaviour
         SetOnStateVariationUpdate();
     }
 
-    private (TwoBoneIKConstraint arm, Transform target) ChooseShootingArm(Vector3 aimPoint)
+    private (TwoBoneIKConstraint arm, Transform target) ChooseShootingArm(Vector3 aimPoint, bool aimingBackward)
     {
         // This component shares the animated model's transform and facing.
         Vector3 direction = aimPoint - transform.position;
-        return Vector3.Dot(transform.right, direction) > 0f
+        bool useRightArm = Vector3.Dot(transform.right, direction) > 0f;
+        if (aimingBackward) useRightArm = !useRightArm;
+        return useRightArm
             ? (RArmBoneIK, RArmTarget)
             : (LArmBoneIK, LArmTarget);
     }
 
     private void AimShootingArm(Weapon weapon, Vector3 aimPoint)
     {
-        var (arm, target) = ChooseShootingArm(aimPoint);
+        bool aimingBackward = Vector3.Dot(transform.forward, aimPoint - transform.position) < 0f;
+        var (arm, target) = ChooseShootingArm(aimPoint, aimingBackward);
         if (!arm || !target || !arm.data.root) return;
         Vector3 direction = aimPoint - arm.data.root.position;
         if (direction.sqrMagnitude <= Mathf.Epsilon) return;
 
         shootingAimPoint = aimPoint;
-        UpdateShootingTarget(arm, aimPoint);
-        bool aimingBackward = Vector3.Dot(transform.forward, aimPoint - transform.position) < 0f;
+        if (shootingReleaseSequence == null) smoothedShootingAimPoint = aimPoint;
+        UpdateShootingTarget(arm, smoothedShootingAimPoint);
         playerAnimationController?.SetMovingBackward(aimingBackward);
 
         if (shootingArmTween) shootingArmTween.Cancel();
@@ -129,9 +138,9 @@ public class PlayerRiggingController : MonoBehaviour
             otherArmTween = SetRigWeight(shootingArm, 0f, shootingBlendTime);
         }
         shootingArm = arm;
-        shootingArmTween = SetRigWeight(arm, 1f, 0.05f);
-        shootingRigTween = SetRigWeight(armsRig, 1f, 0.05f);
-        shootingLookTween = SetRigWeight(aimRig, 1f, 0.05f);
+        shootingArmTween = SetRigWeight(arm, 1f, shootingBlendInTime);
+        shootingRigTween = SetRigWeight(armsRig, 1f, shootingBlendInTime);
+        shootingLookTween = SetRigWeight(aimRig, 1f, shootingBlendInTime);
         shootingReleaseSequence?.Cancel();
         shootingReleaseSequence = new Sequence()
             .AppendInterval(shootingPoseHoldTime)

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 445360f52aabb4446be71f24e6576a72
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 183370
+  packageName: Feel
+  packageVersion: 6.4
+  assetPath: Assets/Feel/MMTools/Foundation/MMAchievements/Resources/AchievementDisplay.prefab
+  uploadId: 1056288

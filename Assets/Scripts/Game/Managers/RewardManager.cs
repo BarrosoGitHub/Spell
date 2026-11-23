@@ -5,6 +5,7 @@ using UnityEngine;
 public class RewardManager : MonoBehaviour
 {
     public event Action<Controller, IReadOnlyList<Equipment>> OnRewardsGenerated;
+    public event Action<Controller, Equipment> OnRewardSelected;
     private readonly Dictionary<Controller, Queue<Equipment[]>> pendingRewards =
         new Dictionary<Controller, Queue<Equipment[]>>();
 
@@ -50,6 +51,7 @@ public class RewardManager : MonoBehaviour
 
         entityManager.AddEquipment(controller, equipment);
         queue.Dequeue();
+        OnRewardSelected?.Invoke(controller, equipment);
         if (queue.Count == 0)
             pendingRewards.Remove(controller);
         else

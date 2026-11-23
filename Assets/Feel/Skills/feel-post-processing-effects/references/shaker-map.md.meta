@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 13b1db9dcd44caa4995f3adde512e783
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 183370
+  packageName: Feel
+  packageVersion: 6.4
+  assetPath: Assets/Feel/Skills/feel-post-processing-effects/references/shaker-map.md
+  uploadId: 1056288

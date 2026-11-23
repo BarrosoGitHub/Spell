@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 5c82129f7bc641c682ac9c972b69aa7d
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 183370
+  packageName: Feel
+  packageVersion: 6.4
+  assetPath: Assets/Feel/MMTools/Core/MMAudio/MMSoundManager/Events/MMSoundManagerTrackPitchFadeEvent.cs
+  uploadId: 1056288

@@ -161,4 +161,8 @@ Grouped enemy spawns enter Pursuing through the same group-assignment method as 
 
 Player locomotion has a `MovingBackward` Animator bool. Shooting rigging sets it from the aim direction; PlayerAnimationController exposes `SetMovingBackward`, and rigging resets it after the shooting hold delay. The base locomotion state blends between idle, Walk Back and Unarmed Run Back by horizontal speed while the bool is active, then returns to the existing forward locomotion tree.
 
-Shooting arm IK keeps the hand target at 92% of arm reach to preserve elbow bend. Each hand’s rotation is calibrated independently from its rest-pose bone axes in Awake; Shooting Hand Rotation Offset is an additional local adjustment. Targets follow the shoulder during the shooting hold and blend-out.
+Shooting arm IK keeps the hand target at 88% of arm reach to preserve elbow bend. Each hand’s rotation is calibrated independently from its rest-pose bone axes in Awake; Shooting Hand Rotation Offset is an additional local adjustment. Targets follow the shoulder during the shooting hold and blend-out.
+
+Player shooting blends in over 0.12 seconds and releases over 0.18 seconds after a 0.25-second hold. Aim changes are smoothed with scaled time. The Aim Rig evaluates chest before head, with weighted yaw up to 55 degrees for the chest and a 40-degree head limit, using world up to reduce roll. Arm IK evaluates after the torso/head rig; backward shooting keeps its reversed arm selection.
+
+Gameplay feedback uses the scene-owned EffectsManager and disposable player/combat/progression listeners, with editable Feel players for 12 triggers. Gameplay only publishes notifications. See [gameplay-effects.md](gameplay-effects.md) for setup and extension details.

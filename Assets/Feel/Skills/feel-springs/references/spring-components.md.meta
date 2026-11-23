@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 8f2323ebc2191764ab97dc136ae960e1
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 183370
+  packageName: Feel
+  packageVersion: 6.4
+  assetPath: Assets/Feel/Skills/feel-springs/references/spring-components.md
+  uploadId: 1056288

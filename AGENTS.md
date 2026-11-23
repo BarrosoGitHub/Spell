@@ -30,6 +30,12 @@ Follow the existing organization for new code. These folders are a guide for res
 - Pair subscriptions with unsubscriptions at matching lifecycle boundaries. Account for disable, destruction, scene changes, and repeated pool reuse; an object must not retain subscriptions or callbacks from a previous spawn.
 - Make ownership of coroutines, interpolation sequences, jobs, and pooled objects explicit. Cancel or complete outstanding work at the appropriate lifecycle boundary, and prevent callbacks from acting on despawned or replaced objects.
 
+## Gameplay feedback and effects
+
+- Keep effects modular and outside gameplay scripts. Use a scene-owned EffectsManager and focused event-listening modules to trigger Feel feedbacks.
+- Subscribe to existing gameplay events first. Modify original gameplay scripts only to expose a missing event or when integration is otherwise strictly necessary; do not embed feedback calls or Feel dependencies in controllers, weapons, missions, or stats.
+- Keep individual effects configurable and disableable, pair subscriptions with cleanup, and stop/reset feedback on disable or scene teardown. Preserve pooling behavior and avoid changing gameplay timing for cosmetic feedback.
+
 ## Runtime performance
 
 - Inspect the frequency and scale of changed code: per frame, physics tick, enemy, chunk, or hit. Avoid accidental quadratic work and repeated full-scene or full-collection scans.

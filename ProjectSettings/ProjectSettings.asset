@@ -843,7 +843,7 @@ PlayerSettings:
     PS4: 
     PS5: 
     QNX: 
-    Standalone: SENTIS_ANALYTICS_ENABLED;APP_UI_EDITOR_ONLY
+    Standalone: SENTIS_ANALYTICS_ENABLED;APP_UI_EDITOR_ONLY;MOREMOUNTAINS_NICEVIBRATIONS_INSTALLED
     VisionOS: 
     WebGL: 
     Windows Store Apps: 

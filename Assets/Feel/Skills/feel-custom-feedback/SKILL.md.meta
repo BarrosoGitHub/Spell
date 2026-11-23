@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 0945dc76a9280464fa99be543ff12911
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 183370
+  packageName: Feel
+  packageVersion: 6.4
+  assetPath: Assets/Feel/Skills/feel-custom-feedback/SKILL.md
+  uploadId: 1056288

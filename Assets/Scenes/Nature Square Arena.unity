@@ -6144,6 +6144,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3c190a89d9a66814699dba519e7c6bb9, type: 3}
+--- !u!114 &483351902 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2730051286634281295, guid: 3c190a89d9a66814699dba519e7c6bb9, type: 3}
+  m_PrefabInstance: {fileID: 483351901}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b1086536dd89dd4ea1383fbbddae104, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerController
 --- !u!1001 &487833262
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6331,6 +6342,7 @@ GameObject:
   - component: {fileID: 497693237}
   - component: {fileID: 497693236}
   - component: {fileID: 497693243}
+  - component: {fileID: 497693244}
   m_Layer: 0
   m_Name: Arena Camera
   m_TagString: Untagged
@@ -6575,6 +6587,30 @@ MonoBehaviour:
   zoomPerNotch: 2
   rotationPerPixel: 0.18
   zoomSmoothTime: 0.15
+--- !u!114 &497693244
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 497693235}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00b2d199b96b516448144ab30fb26aed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineImpulseListener
+  ApplyAfter: 2
+  ChannelMask: 1
+  Gain: 1
+  Use2DDistance: 0
+  UseCameraSpace: 1
+  SignalCombinationMode: 0
+  ReactionSettings:
+    m_SecondaryNoise: {fileID: 0}
+    AmplitudeGain: 1
+    FrequencyGain: 1
+    Duration: 1
+    m_NoiseOffsets: {x: 0, y: 0, z: 0}
 --- !u!1 &498451801
 GameObject:
   m_ObjectHideFlags: 0
@@ -12021,6 +12057,7 @@ MonoBehaviour:
   showPursuitIndicators: 1
   showEnemyLevels: 1
   showPlayerStats: 0
+  showAttackRange: 1
   showHoldHighlights: 0
   showTraversalRays: 0
   showGeometry: 0
@@ -16342,6 +16379,75 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5925433674301824424, guid: f593bc20677ebf14abd27a4853408c68, type: 3}
   m_PrefabInstance: {fileID: 1271814047}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1272698599
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 999902675454179014, guid: 351a18dd635a7418d956c855c688e000, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 483351902}
+    - target: {fileID: 999902675454179014, guid: 351a18dd635a7418d956c855c688e000, type: 3}
+      propertyPath: rewardManager
+      value: 
+      objectReference: {fileID: 900900006}
+    - target: {fileID: 999902675454179014, guid: 351a18dd635a7418d956c855c688e000, type: 3}
+      propertyPath: missionManager
+      value: 
+      objectReference: {fileID: 969947715}
+    - target: {fileID: 1440418173124775012, guid: 351a18dd635a7418d956c855c688e000, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1440418173124775012, guid: 351a18dd635a7418d956c855c688e000, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1440418173124775012, guid: 351a18dd635a7418d956c855c688e000, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1440418173124775012, guid: 351a18dd635a7418d956c855c688e000, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1440418173124775012, guid: 351a18dd635a7418d956c855c688e000, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1440418173124775012, guid: 351a18dd635a7418d956c855c688e000, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1440418173124775012, guid: 351a18dd635a7418d956c855c688e000, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1440418173124775012, guid: 351a18dd635a7418d956c855c688e000, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1440418173124775012, guid: 351a18dd635a7418d956c855c688e000, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1440418173124775012, guid: 351a18dd635a7418d956c855c688e000, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6014536016646377517, guid: 351a18dd635a7418d956c855c688e000, type: 3}
+      propertyPath: m_Name
+      value: ArenaEffects
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 351a18dd635a7418d956c855c688e000, type: 3}
 --- !u!1001 &1273252374
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -18468,6 +18574,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1399077244}
   - component: {fileID: 1399077245}
+  - component: {fileID: 1399077246}
   m_Layer: 0
   m_Name: 05 - Woodland color grade
   m_TagString: Untagged
@@ -18507,6 +18614,104 @@ MonoBehaviour:
   blendDistance: 0
   weight: 1
   sharedProfile: {fileID: 11400000, guid: c85b0ebfe230741388cee4a985205d84, type: 2}
+--- !u!114 &1399077246
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1399077243}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 485e02e02c638cf4b9ca8344fd6213a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MoreMountains.Tools::MoreMountains.FeedbacksForThirdParty.MMBloomShaker_URP
+  ChannelMode: 0
+  Channel: 0
+  MMChannelDefinition: {fileID: 0}
+  ShakeDuration: 0.2
+  PlayOnAwake: 0
+  PermanentShake: 0
+  Interruptible: 1
+  AlwaysResetTargetValuesAfterShake: 0
+  OnlyUseShakerValues: 0
+  CooldownBetweenShakes: 0
+  Shaking: 0
+  ForwardDirection: 1
+  TimescaleMode: 0
+  RelativeValues: 1
+  ModifyIntensity: 1
+  ShakeIntensity:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.5
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  RemapIntensityZero: 0
+  RemapIntensityOne: 1
+  ModifyThreshold: 1
+  ShakeThreshold:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.5
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  RemapThresholdZero: 0
+  RemapThresholdOne: 0
 --- !u!1001 &1402007976
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -26822,3 +27027,4 @@ SceneRoots:
   - {fileID: 1045292555}
   - {fileID: 1268934608}
   - {fileID: 1207794669}
+  - {fileID: 1272698599}
