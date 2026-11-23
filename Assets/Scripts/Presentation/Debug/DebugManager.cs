@@ -6,6 +6,7 @@ public sealed class DebugManager : MonoBehaviour
     [SerializeField] private bool showPursuitIndicators = true;
     [SerializeField] private bool showEnemyLevels = true;
     [SerializeField] private bool showPlayerStats = true;
+    [SerializeField] private bool showAttackRange = true;
     [SerializeField] private bool showHoldHighlights;
     [SerializeField] private bool showTraversalRays;
 
@@ -13,6 +14,7 @@ public sealed class DebugManager : MonoBehaviour
     [SerializeField] private bool logCombat;
     [SerializeField] private bool logMissionStates;
 
+    private readonly AttackRangeDebugModule attackRange = new AttackRangeDebugModule();
     private readonly GeometryDebugModule geometry = new GeometryDebugModule();
     private readonly GameplayLoggingDebugModule logging = new GameplayLoggingDebugModule();
     private EntityManager interactions;
@@ -48,6 +50,7 @@ public sealed class DebugManager : MonoBehaviour
         if (showGeometry) geometry.Draw();
         if (showPlayerStats) playerStats.Refresh(player);
         traversal.Refresh(player, showHoldHighlights, showTraversalRays);
+        attackRange.Refresh(player, showAttackRange);
     }
 
     private void OnGUI()
@@ -59,6 +62,7 @@ public sealed class DebugManager : MonoBehaviour
 
     private void OnDisable()
     {
+        attackRange.Clear();
         logging.Clear();
         traversal.Clear();
         enemyLabels.Clear();

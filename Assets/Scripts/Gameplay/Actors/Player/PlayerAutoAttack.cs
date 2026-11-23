@@ -68,7 +68,7 @@ public sealed class PlayerAutoAttack : MonoBehaviour
         Collider[] candidates;
         while (true)
         {
-            count = Physics.OverlapSphereNonAlloc(weapon.transform.position, weapon.Range,
+            count = Physics.OverlapSphereNonAlloc(playerController.transform.position, Mathf.Max(0f, playerController.entity.stats.Range),
                 overlapBuffer, targetMask, QueryTriggerInteraction.Ignore);
             if (count < overlapBuffer.Length)
             {
@@ -78,7 +78,7 @@ public sealed class PlayerAutoAttack : MonoBehaviour
             if (overlapBuffer.Length >= MaxRetainedQuerySize)
             {
                 // Rare overflow must still consider every enemy instead of silently dropping targets.
-                candidates = Physics.OverlapSphere(weapon.transform.position, weapon.Range,
+                candidates = Physics.OverlapSphere(playerController.transform.position, Mathf.Max(0f, playerController.entity.stats.Range),
                     targetMask, QueryTriggerInteraction.Ignore);
                 count = candidates.Length;
                 break;
@@ -111,7 +111,7 @@ public sealed class PlayerAutoAttack : MonoBehaviour
             return false;
 
         Vector3 point = targetCollider.bounds.center;
-        if ((point - weapon.transform.position).sqrMagnitude > weapon.Range * weapon.Range)
+        if (!playerController.entity.stats.IsInRange(playerController.transform.position, point))
             return false;
 
         Vector3 viewport = viewCamera.WorldToViewportPoint(point);

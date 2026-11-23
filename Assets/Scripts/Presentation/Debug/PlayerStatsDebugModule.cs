@@ -26,6 +26,7 @@ public sealed class PlayerStatsDebugModule
             $"Level   {entity.Level}\n" +
             $"Health   {entity.CurrentHealth:0.#} / {stats.MaxHealth:0.#}\n\n" +
             $"Ice damage   {damage:0.##}\n" +
+            $"Range   {stats.Range:0.##}\n" +
             $"Casts / second   {attackSpeed:0.##}\n" +
             $"Cast cooldown   {1f / attackSpeed:0.###} s\n" +
             $"Critical chance   {stats.CriticalChance:0.##}%\n" +

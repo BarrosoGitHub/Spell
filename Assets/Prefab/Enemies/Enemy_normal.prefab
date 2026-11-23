@@ -527,7 +527,7 @@ MonoBehaviour:
     accelerationTiltStrength: 0.12
     maxTiltAngle: 12
     tiltResponseSpeed: 4
-    heightOffset: -0.1
+    heightOffset: 1
     hangingPendulumLength: 0.9
     hangingForwardDamping: 0.35
     hangingSideDamping: 0.35

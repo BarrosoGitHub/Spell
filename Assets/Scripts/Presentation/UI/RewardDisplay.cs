@@ -234,6 +234,7 @@ public class RewardDisplay : MonoBehaviour
         AppendStat(text, "Defense", stats.Defense);
         AppendStat(text, "Critical chance", stats.CriticalChance, "%");
         AppendStat(text, "Multishot chance", stats.MultishotChance, "%");
+        AppendStat(text, "Range", stats.Range, "");
         AppendStat(text, "Critical damage", stats.CriticalDamage, "x");
         AppendStat(text, "Max health", stats.MaxHealthPerc * 100f, "%");
         AppendStat(text, "Damage", stats.BaseDamagePerc * 100f, "%");

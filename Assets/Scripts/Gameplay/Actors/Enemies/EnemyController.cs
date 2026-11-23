@@ -133,7 +133,9 @@ public class EnemyController : Controller
     {
         ActionInstances = new List<ActionInstance>
         {
-            enemyType == EnemyType.Mutated
+            enemyType == EnemyType.Boss
+                ? new AttackSummonSpike(this, GetComponent<BossSpikeEffect>())
+                : enemyType == EnemyType.Mutated
                 ? new AttackJump(this, 0.9f, 0.75f)
                 : new AttackDirectional(this, 0.9f, 0.5f),
             new GettingUp(this, 2f, 2f)

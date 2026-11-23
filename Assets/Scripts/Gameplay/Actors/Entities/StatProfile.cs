@@ -17,6 +17,9 @@ public sealed class StatProfile : ScriptableObject
     [Tooltip("Each 100 guarantees an extra shot; the remainder is the chance for one more.")]
     [SerializeField, Min(0f)] private float initialMultishotChance;
 
+    [Tooltip("Attack reach in world units, measured horizontally from the controller.")]
+    [SerializeField, Min(0f)] private float initialRange = 12f;
+
     public Stats CreateBaseStats()
     {
         return new Stats(
@@ -27,7 +30,8 @@ public sealed class StatProfile : ScriptableObject
             movementSpeed: initialMovementSpeed,
             criticalChance: initialCriticalChance,
             criticalDamage: initialCriticalDamage,
-            multishotChance: initialMultishotChance);
+            multishotChance: initialMultishotChance,
+            range: initialRange);
     }
 
     [Header("Stat Gains Per Level Above Level 1")]
@@ -42,6 +46,8 @@ public sealed class StatProfile : ScriptableObject
 
     [SerializeField] private float multishotChance;
 
+    [SerializeField] private float range;
+
     public Stats GetBonus(int level)
     {
         int increases = Mathf.Max(1, level) - 1;
@@ -52,6 +58,7 @@ public sealed class StatProfile : ScriptableObject
             movementSpeed: movementSpeed * increases,
             criticalChance: criticalChance * increases,
             criticalDamage: criticalDamage * increases,
-            multishotChance: multishotChance * increases);
+            multishotChance: multishotChance * increases,
+            range: range * increases);
     }
 }

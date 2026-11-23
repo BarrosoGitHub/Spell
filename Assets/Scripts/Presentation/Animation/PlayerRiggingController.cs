@@ -19,13 +19,62 @@ public class PlayerRiggingController : MonoBehaviour
     [Header("Shooting Aim")]
     [SerializeField, Min(0f)] private float shootingPoseHoldTime = 0.2f;
     [SerializeField, Min(0f)] private float shootingBlendTime = 0.1f;
-    [Tooltip("Rotation from the shot direction to the hand's local axes.")]
-    [SerializeField] private Vector3 shootingHandRotationOffset = new Vector3(0f, 90f, 0f);
+    [Tooltip("Additional rotation after aligning each hand from its rest pose.")]
+    [SerializeField] private Vector3 shootingHandRotationOffset;
+    [SerializeField, Range(0.5f, 0.98f)] private float shootingArmExtension = 0.92f;
 
     private Sequence shootingReleaseSequence;
     private Interpolate shootingArmTween, shootingRigTween, shootingLookTween;
     private Interpolate otherArmTween;
     private TwoBoneIKConstraint shootingArm;
+    private Quaternion leftHandAlignment, rightHandAlignment;
+    private float leftArmLength, rightArmLength;
+    private Vector3 shootingAimPoint;
+
+    private void Awake()
+    {
+        CacheShootingArm(LArmBoneIK, out leftArmLength, out leftHandAlignment);
+        CacheShootingArm(RArmBoneIK, out rightArmLength, out rightHandAlignment);
+    }
+
+    private void CacheShootingArm(TwoBoneIKConstraint arm, out float length, out Quaternion alignment)
+    {
+        length = 0f;
+        alignment = Quaternion.identity;
+        if (!arm || !arm.data.root || !arm.data.mid || !arm.data.tip) return;
+
+        var data = arm.data;
+        Vector3 forearm = data.tip.position - data.mid.position;
+        length = Vector3.Distance(data.root.position, data.mid.position) + forearm.magnitude;
+        if (forearm.sqrMagnitude <= Mathf.Epsilon) return;
+
+        // Capture each mirrored hand's bone axes before the Animator changes the rest pose.
+        alignment = Quaternion.Inverse(Quaternion.LookRotation(forearm, transform.up)) * data.tip.rotation;
+    }
+
+    private void Update()
+    {
+        if (shootingReleaseSequence != null && shootingArm)
+            UpdateShootingTarget(shootingArm, shootingAimPoint);
+    }
+
+    private void UpdateShootingTarget(TwoBoneIKConstraint arm, Vector3 aimPoint)
+    {
+        bool left = arm == LArmBoneIK;
+        Transform target = left ? LArmTarget : RArmTarget;
+        Vector3 direction = aimPoint - arm.data.root.position;
+        if (direction.sqrMagnitude <= Mathf.Epsilon) return;
+
+        // Leave a small elbow bend instead of solving against an unreachable enemy position.
+        float reach = (left ? leftArmLength : rightArmLength) * shootingArmExtension;
+        target.position = arm.data.root.position + direction.normalized * Mathf.Min(direction.magnitude, reach);
+        Vector3 up = Mathf.Abs(Vector3.Dot(direction.normalized, Vector3.up)) > 0.99f
+            ? transform.forward : Vector3.up;
+        target.rotation = Quaternion.LookRotation(direction, up)
+            * (left ? leftHandAlignment : rightHandAlignment)
+            * Quaternion.Euler(shootingHandRotationOffset);
+        if (AimTarget) AimTarget.position = aimPoint;
+    }
 
     [Header("Constraints")]
     [SerializeField] private MultiAimConstraint HeadConstraint;
@@ -65,12 +114,8 @@ public class PlayerRiggingController : MonoBehaviour
         Vector3 direction = aimPoint - arm.data.root.position;
         if (direction.sqrMagnitude <= Mathf.Epsilon) return;
 
-        target.position = aimPoint;
-        if (AimTarget) AimTarget.position = aimPoint;
-        Vector3 up = Mathf.Abs(Vector3.Dot(direction.normalized, Vector3.up)) > 0.99f
-            ? Vector3.forward : Vector3.up;
-        target.rotation = Quaternion.LookRotation(direction, up)
-            * Quaternion.Euler(shootingHandRotationOffset);
+        shootingAimPoint = aimPoint;
+        UpdateShootingTarget(arm, aimPoint);
         bool aimingBackward = Vector3.Dot(transform.forward, aimPoint - transform.position) < 0f;
         playerAnimationController?.SetMovingBackward(aimingBackward);
 

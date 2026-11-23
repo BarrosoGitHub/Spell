@@ -26,6 +26,8 @@ public sealed class BuffDefinition : ScriptableObject
     [Tooltip("Percentage points: 25 adds 25% extra-shot chance.")]
     [SerializeField] private float multishotChance;
 
+    [SerializeField] private float range;
+
     public BuffType Type => type;
     public float Duration => duration;
 
@@ -39,6 +41,7 @@ public sealed class BuffDefinition : ScriptableObject
             defense: defense,
             criticalChance: criticalChance,
             criticalDamage: criticalDamage,
-            multishotChance: multishotChance);
+            multishotChance: multishotChance,
+            range: range);
     }
 }

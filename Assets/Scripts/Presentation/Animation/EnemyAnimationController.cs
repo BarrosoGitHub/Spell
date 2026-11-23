@@ -7,13 +7,16 @@ public sealed class EnemyAnimationController : MonoBehaviour
     public EnemyController enemyController;
     [SerializeField] private Animator animator;
     [SerializeField] private PlayerAnimationData animationData = new();
+    [Header("Locomotion")]
+    [SerializeField, Min(0.1f)] private float locomotionAnimationSpeed = 1f;
+    [SerializeField] private bool faceTarget;
     [Header("Climbing wall contact")]
     [SerializeField] private LayerMask climbWallMask = Physics.DefaultRaycastLayers;
     [SerializeField, Min(0.01f)] private float climbCastRadius = 0.25f;
     [SerializeField, Min(0.01f)] private float climbCastDistance = 2f;
     [Tooltip("Distance from the wall surface to the animated body's pivot.")]
     [SerializeField, Min(0f)] private float climbWallOffset = 0.4f;
-    private Vector3 heightOffset = Vector3.up;
+    private Vector3 HeightOffset => Vector3.up * animationData.heightOffset;
     private Quaternion currentTilt = Quaternion.identity;
     private Quaternion climbingRotation;
     private bool hasClimbingRotation;
@@ -49,13 +52,13 @@ public sealed class EnemyAnimationController : MonoBehaviour
     {
         enemyController.idlingState.OnFixedUpdate += () =>
         {
-            UpdateBodyPosition(heightOffset);
+            UpdateBodyPosition(HeightOffset);
             UpdateBodyRotation();
         };
 
         enemyController.pursuingState.OnFixedUpdate += () =>
         {       
-            UpdateBodyPosition(heightOffset);
+            UpdateBodyPosition(HeightOffset);
             UpdateBodyRotation();
         };
 
@@ -67,12 +70,12 @@ public sealed class EnemyAnimationController : MonoBehaviour
 
         enemyController.ActionInstances[0].preparing.OnFixedUpdate += () =>
         {
-            UpdateBodyPosition(heightOffset);
+            UpdateBodyPosition(HeightOffset);
             UpdateBodyRotation();
         };
         enemyController.ActionInstances[0].executing.OnFixedUpdate += () =>
         {
-            UpdateBodyPosition(heightOffset);
+            UpdateBodyPosition(HeightOffset);
             UpdateBodyRotation();
         };
 
@@ -85,6 +88,9 @@ public sealed class EnemyAnimationController : MonoBehaviour
 
     private void UpdateAnimationFloatValues()
     {
+        bool locomotion = enemyController.State == enemyController.pursuingState ||
+                          enemyController.State == enemyController.idlingState;
+        animator.speed = locomotion ? locomotionAnimationSpeed : 1f;
         animator.SetFloat(HorizontalSpeed, new Vector3(enemyController.navMeshAgent.velocity.x, 0f, enemyController.navMeshAgent.velocity.z).magnitude);
     }
 
@@ -117,7 +123,7 @@ public sealed class EnemyAnimationController : MonoBehaviour
         if (enemyController.State != enemyController.climbingState || !hasClimbingRotation ||
             agent == null || !agent.enabled || !agent.isOnNavMesh || !agent.isOnOffMeshLink) return;
 
-        Vector3 targetPosition = enemyController.transform.position + heightOffset;
+        Vector3 targetPosition = enemyController.transform.position + HeightOffset;
         float radius = Mathf.Max(0.01f, climbCastRadius);
         // Start behind the desired body position so the sphere can approach the wall.
         float backoff = radius + climbWallOffset + 0.05f;
@@ -162,6 +168,9 @@ public sealed class EnemyAnimationController : MonoBehaviour
         }
 
         Vector3 velocity = enemyController.navMeshAgent.velocity;
+        if (faceTarget && enemyController.Target != null)
+            velocity = enemyController.Target.transform.position - enemyController.transform.position;
+        velocity.y = 0f;
         if (velocity.sqrMagnitude > 0.01f)
         {
             Quaternion targetRotation = Quaternion.LookRotation(velocity.normalized, Vector3.up);

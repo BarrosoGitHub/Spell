@@ -27,6 +27,7 @@ public sealed class EndlessWaves : Mission
     private readonly Plane[] cameraPlanes = new Plane[6];
     private NavMeshPath spawnPath;
     private Vector3[] spawnPositions;
+    private int spawnCount;
 
     protected override void Awake()
     {
@@ -58,7 +59,7 @@ public sealed class EndlessWaves : Mission
             Debug.LogWarning("EndlessWaves requires a MainCamera and a baked NavMesh.", this);
             return;
         }
-        spawnPositions = new Vector3[Mathf.Max(1, enemiesPerWave) + 1];
+        spawnPositions = new Vector3[Mathf.Max(1, enemiesPerWave) + 2];
         base.StartMission();
     }
 
@@ -81,6 +82,10 @@ public sealed class EndlessWaves : Mission
             maxNumberOfEnemies: 1, maxEngagementDistance: 15f,
             maxNumberOfEnemiesThatCanEngageSimultaneously: 1, attackInterval: 3f,
             attackRange: AttackJump.DefaultRange));
+        enemyManager.AddEnemyGroup(new EnemyGroup(EnemyType.Boss, player,
+            maxNumberOfEnemies: 10, maxEngagementDistance: 30f,
+            maxNumberOfEnemiesThatCanEngageSimultaneously: 1, attackInterval: 3f,
+            attackRange: AttackSummonSpike.Range));
         waves = StartCoroutine(RunWaves());
     }
 
@@ -89,6 +94,8 @@ public sealed class EndlessWaves : Mission
         var retrySpawn = new WaitForSeconds(1f);
         while (State == RunningState)
         {
+            bool bossWave = (CurrentWave + 1) % 5 == 0;
+            spawnCount = spawnPositions.Length - (bossWave ? 0 : 1);
             // Prepare the entire batch before activating any enemies.
             if (!TryFindSpawnPositions())
             {
@@ -98,10 +105,11 @@ public sealed class EndlessWaves : Mission
 
             livingEnemies.Clear();
             CurrentWave++;
-            EnemiesInWave = spawnPositions.Length;
+            EnemiesInWave = spawnCount;
             for (int i = 0; i < EnemiesInWave; i++)
             {
-                EnemyType type = i == EnemiesInWave - 1 ? EnemyType.Mutated : EnemyType.Normal;
+                EnemyType type = i < spawnPositions.Length - 2 ? EnemyType.Normal
+                    : i == spawnPositions.Length - 2 ? EnemyType.Mutated : EnemyType.Boss;
                 Controller enemy = enemyManager.SpawnEnemy(type,
                     spawnPositions[i], Quaternion.identity, CurrentWave);
                 if (enemy == null)
@@ -129,7 +137,7 @@ public sealed class EndlessWaves : Mission
         if (!NavMesh.SamplePosition(player.transform.position, out NavMeshHit target, 3f, NavMesh.AllAreas))
             return false;
 
-        for (int i = 0; i < spawnPositions.Length; i++)
+        for (int i = 0; i < spawnCount; i++)
         {
             float closestDistanceSquared = float.PositiveInfinity;
             for (int attempt = 0; attempt < 256; attempt++)

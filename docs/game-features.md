@@ -13,6 +13,7 @@ This is an overview of the current Unity prototype based on its scripts and proj
 
 ## Player movement and traversal
 
+- Player 1 uses its model’s original bone transforms and mesh bindings, with arm/leg IK and head/chest constraints mapped through its validated Humanoid Avatar.
 - Player 1 uses the Hooded Shadowwalker skinned mesh and Humanoid avatar, with its embedded color, metallic and roughness textures configured for URP. The existing Void Sentinel animation takes supply idle, forward and backward locomotion, and the rising airborne state. The existing fall, dodge and climbing motions still drive their respective states through the same player controller.
 
 - Camera-relative movement using the Unity Input System.
@@ -27,6 +28,8 @@ This is an overview of the current Unity prototype based on its scripts and proj
 Default input bindings include WASD movement, Space (or gamepad south button) for dodging, Shift for parkour, and mouse input for attacks and aiming. Action behavior depends on the player's current state.
 
 ## Combat and weapons
+
+- Range is an additive stat in horizontal world units, initially 12 on PlayerStats. Profiles, per-level gains, buffs and equipment can provide it. Player auto-attack acquisition, IceWeapon casts, delayed multishots and hit confirmation enforce it. DebugManager’s Show Attack Range toggle draws a cyan ground circle using the current stat, and the stats panel displays it.
 
 - MultishotChance is an additive stat measured in percentage points (25 = 25%). Profiles, level gains, buffs and equipment/rune rolls can supply it. Each full 100 guarantees an extra projectile and the remainder rolls for one more (250 = two guaranteed extras plus a 50% chance of a third). IceWeapon fires extras at 0.1-scaled-second intervals, using the latest aim point supplied by shooting requests before each shot, without another cooldown or recursive roll. Airborne ice projectiles steer toward the weapon’s latest aim point at a configurable 1080 degrees/second, retaining projectile speed and lifetime. Auto-attack refreshes this point while tracking a visible enemy. Existing profiles default to zero. Rune drops can roll multishot bonuses: Common 5–10, Uncommon 10–15, Rare 15–25, Epic 25–35, and Legendary 35–50 percentage points.
 
@@ -60,6 +63,8 @@ See [ice weapon](ice-weapon.md), [attack formula](attack-formula.md), and [weapo
 See [ragdoll details](ragdoll-manager.md).
 
 ## Enemy AI and spawning
+
+- EnemyAnimationController uses Animation Data → Height Offset as its vertical model offset in world units (editable during Play Mode). Normal and mutated enemies retain a 1-unit offset. Runeheart Colossus uses its own validated Humanoid Avatar, boss rest pose and mesh bone bindings for retargeting the shared enemy clips. Its BossAnimator override uses the looping Humanoid Boss Walking clip for locomotion at 1.6x playback. EnemyAnimationController exposes Locomotion Animation Speed and Face Target; the boss faces the player during pursuit and its primary attack. Runeheart Colossus has a 1.75-unit offset and is scaled to 1.75 times its original size and uses the Boss enemy type and the normal enemy skeleton/animations. EndlessWaves adds one boss on waves 5, 10, 15, etc., alongside the normal and mutated enemies, at the wave’s level. BossStats starts at 50 health and gains 10 per level. Its primary attack marks a 1.5-unit ground radius for 1.2 seconds, then raises the supplied Meshy spike, applying one normal stat-based hit if the target remains inside. Spike visuals reset on cancellation, death and pool reuse.
 
 - Normal enemies blend in a head aim constraint while pursuing a target. The constraint tracks the target at a configurable height and blends out when pursuit ends. With animation LOD enabled, the rig is evaluated at the same cadence as the Animator.
 
@@ -101,6 +106,7 @@ The enemy type enum contains Normal, Tank, and Boss. These identifiers alone do 
 | --- | --- |
 | Exterminate | Spawns 100 normal enemies for profiling, using a grid projected onto the NavMesh near world origin. Grid points that miss the NavMesh use the sampled center. The combat group recruits up to 3 enemies within 15 units and allows 1 simultaneous attacker. Failure and abort clean up the crowd. |
 | EndlessWaves | Infinite waves of five enemies, spawned together outside the main camera frustum on reachable NavMesh positions. The next wave starts after ten scaled seconds or immediately when the newest wave is cleared. Earlier survivors stay alive. If no valid offscreen batch fits, spawning retries every second. Inspector settings control count, interval and clearance. Failure, abort, completion or disable clean up the run. |
+| MobTest | Manual mob sandbox. Select type, level and summon count and press Spawn Mob in the selected mission Inspector during Play Mode. Spawns on nearby reachable NavMesh (default 5 units), uses configured combat groups, and supports Clear Test Mobs. End, failure, completion, disable and mission switching clean up spawned mobs. Mission settings and spawn buttons appear on the MobTest component Inspector; MissionManager provides mission selection and lifecycle controls. |
 | Survival | Tracks time while running, resolves the player reference from `GameManager` if needed, and reacts to player death or a missing player with an unsuccessful result. |
 
 ### Mission work still needed
@@ -154,3 +160,5 @@ This document describes the source available on the review date. No gameplay tes
 Grouped enemy spawns enter Pursuing through the same group-assignment method as recruited enemies. Exterminate recruits within 15 units, beyond the idle stopping distance of 3 units, so idle enemies can approach into recruitment range.
 
 Player locomotion has a `MovingBackward` Animator bool. Shooting rigging sets it from the aim direction; PlayerAnimationController exposes `SetMovingBackward`, and rigging resets it after the shooting hold delay. The base locomotion state blends between idle, Walk Back and Unarmed Run Back by horizontal speed while the bool is active, then returns to the existing forward locomotion tree.
+
+Shooting arm IK keeps the hand target at 92% of arm reach to preserve elbow bend. Each hand’s rotation is calibrated independently from its rest-pose bone axes in Awake; Shooting Hand Rotation Offset is an additional local adjustment. Targets follow the shoulder during the shooting hold and blend-out.

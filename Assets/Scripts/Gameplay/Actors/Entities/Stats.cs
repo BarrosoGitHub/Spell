@@ -10,6 +10,7 @@ public class Stats
     public float CriticalChance { get; private set; }
     public float CriticalDamage { get; private set; }
     public float MultishotChance { get; private set; }
+    public float Range { get; private set; }
 
     public float MaxHealthPerc { get; private set; }
     public float BaseDamagePerc { get; private set; }
@@ -31,13 +32,15 @@ public class Stats
                  float attackSpeedPerc = 0,
                  float defensePerc = 0,
                  float movementSpeed = 0,
-                 float multishotChance = 0)
+                 float multishotChance = 0,
+                 float range = 0)
     {
         MaxHealth = maxHealth;
         BaseDamage = baseDamage;
         AttackSpeed = attackSpeed;
         MovementSpeed = movementSpeed;
         MultishotChance = multishotChance;
+        Range = range;
         Defense = defense;
         CriticalChance = criticalChance;
         CriticalDamage = criticalDamage;
@@ -45,6 +48,13 @@ public class Stats
         BaseDamagePerc = baseDamagePerc;
         AttackSpeedPerc = attackSpeedPerc;
         DefensePerc = defensePerc;
+    }
+
+    public bool IsInRange(Vector3 origin, Vector3 target)
+    {
+        Vector3 offset = target - origin;
+        offset.y = 0f;
+        return Range > 0f && offset.sqrMagnitude <= Range * Range;
     }
 
     public float GetDamage(bool isCritical)
@@ -71,7 +81,8 @@ public class Stats
             AttackSpeedPerc + other.AttackSpeedPerc,
             DefensePerc + other.DefensePerc,
             MovementSpeed + other.MovementSpeed,
-            MultishotChance + other.MultishotChance
+            MultishotChance + other.MultishotChance,
+            Range + other.Range
         );
     }
 }
