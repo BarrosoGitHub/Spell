@@ -221,6 +221,7 @@ public class PlayerController : Controller
 
     private void ManageHover()
     {
+        if (rb.isKinematic) return;
         bool hasGround = Physics.SphereCast(
             transform.position,
             hoverData.groundCheckRadius,

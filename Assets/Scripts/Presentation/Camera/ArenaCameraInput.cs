@@ -12,6 +12,9 @@ public class ArenaCameraInput : MonoBehaviour
     [SerializeField, Min(0f)] private float rotationPerPixel = 0.18f;
     [SerializeField, Min(0.01f)] private float zoomSmoothTime = 0.15f;
 
+    [SerializeField, Min(0.01f)] private float rotationSmoothTime = 0.12f;
+    private float targetYaw;
+    private float yawVelocity;
     private float targetDistance;
     private float zoomVelocity;
 
@@ -25,6 +28,8 @@ public class ArenaCameraInput : MonoBehaviour
     {
         targetDistance = Mathf.Clamp(orbitalFollow.Radius, minimumDistance, maximumDistance);
         zoomVelocity = 0f;
+        targetYaw = orbitalFollow.HorizontalAxis.Value;
+        yawVelocity = 0f;
     }
 
     private void Update()
@@ -35,9 +40,11 @@ public class ArenaCameraInput : MonoBehaviour
         // Keep aiming independent of orbiting; right mouse remains available for slow motion.
         if (mouse.middleButton.isPressed)
         {
-            float yaw = orbitalFollow.HorizontalAxis.Value + mouse.delta.ReadValue().x * rotationPerPixel;
-            orbitalFollow.HorizontalAxis.Value = Mathf.Repeat(yaw + 180f, 360f) - 180f;
+            targetYaw = Mathf.Repeat(targetYaw + mouse.delta.ReadValue().x * rotationPerPixel + 180f, 360f) - 180f;
         }
+
+        orbitalFollow.HorizontalAxis.Value = Mathf.SmoothDampAngle(orbitalFollow.HorizontalAxis.Value, targetYaw,
+            ref yawVelocity, rotationSmoothTime, Mathf.Infinity, Time.unscaledDeltaTime);
 
         targetDistance = Mathf.Clamp(targetDistance - mouse.scroll.ReadValue().y / 120f * zoomPerNotch,
             minimumDistance, maximumDistance);

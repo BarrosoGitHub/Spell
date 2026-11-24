@@ -11,6 +11,48 @@ using UnityEngine.Rendering.Universal;
 
 public static class ArenaEffectsSetup
 {
+    [MenuItem("Tools/Effects/Set Up Ice Cross Hit")]
+    public static void SetUpIceCross()
+    {
+        if (Application.isPlaying) throw new InvalidOperationException("Exit Play Mode before editing effects.");
+        AssetDatabase.ImportAsset("Assets/Shaders/IceCrossImpact.shader", ImportAssetOptions.ForceSynchronousImport);
+        string path = AssetFolder + "/IceCrossImpact.mat";
+        Material material = AssetDatabase.LoadAssetAtPath<Material>(path);
+        if (!material)
+        {
+            material = new Material(Shader.Find("Spell/Ice Cross Impact"));
+            AssetDatabase.CreateAsset(material, path);
+        }
+        GameObject root = PrefabUtility.LoadPrefabContents(PrefabPath);
+        try
+        {
+            foreach (GameplayEffect trigger in new[] { GameplayEffect.Hit, GameplayEffect.CriticalHit })
+            {
+                MMF_Player feedback = root.transform.Find(trigger.ToString()).GetComponent<MMF_Player>();
+                if (feedback.transform.Find("Ice cross impact")) continue;
+                bool critical = trigger == GameplayEffect.CriticalHit;
+                ParticleSystem cross = AddLayer(feedback, "Ice cross impact", material, Color.white,
+                    1, 0.16f, 0.26f, critical ? 0.85f : 0.6f, critical ? 1.35f : 1f, 0f, 0f);
+                var main = cross.main;
+                main.startRotation = new ParticleSystem.MinMaxCurve(-Mathf.PI, Mathf.PI);
+                var shape = cross.shape;
+                shape.enabled = false;
+                var size = cross.sizeOverLifetime;
+                size.size = new ParticleSystem.MinMaxCurve(1f, new AnimationCurve(
+                    new Keyframe(0f, 0.45f), new Keyframe(0.12f, 1f), new Keyframe(1f, 1.15f)));
+                var fade = cross.colorOverLifetime;
+                var gradient = new Gradient();
+                gradient.SetKeys(new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+                    new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0.8f, 0.2f), new GradientAlphaKey(0f, 1f) });
+                fade.color = gradient;
+                EditorUtility.SetDirty(feedback);
+            }
+            PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
+        }
+        finally { PrefabUtility.UnloadPrefabContents(root); }
+        AssetDatabase.SaveAssets();
+    }
+
     private const string AssetFolder = "Assets/Prefab/Effects";
     private const string MaterialPath = AssetFolder + "/FeedbackParticles.mat";
     private const string PrefabPath = AssetFolder + "/ArenaEffects.prefab";
@@ -79,7 +121,7 @@ public static class ArenaEffectsSetup
 
             string sound = trigger switch
             {
-                GameplayEffect.Shot => "SoundFX/IceCubes1",
+                GameplayEffect.Shot => null,
                 GameplayEffect.Hit => "Objects/Hammer1",
                 GameplayEffect.CriticalHit => "Objects/Hammer2",
                 GameplayEffect.Kill => "SoundFX/Crumbling1",
@@ -93,7 +135,7 @@ public static class ArenaEffectsSetup
                 _ => "ApplicationUX/Award1"
             };
             AudioClip clip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Feel/NiceVibrations/HapticSamples/" + sound + ".wav");
-            if (clip)
+            if (clip && trigger != GameplayEffect.Shot)
                 feedback.AddFeedback(new MMF_Sound
                 {
                     Label = "Feedback sound", Sfx = clip, PlayMethod = MMF_Sound.PlayMethods.Pool, PoolSize = 3,
@@ -135,6 +177,7 @@ public static class ArenaEffectsSetup
         serialized.ApplyModifiedPropertiesWithoutUndo();
         GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
         UnityEngine.Object.DestroyImmediate(root);
+        UpgradeVisuals();
         root = (GameObject)PrefabUtility.InstantiatePrefab(prefab, scene);
         serialized = new SerializedObject(root.GetComponent<EffectsManager>());
         serialized.FindProperty("player").objectReferenceValue = UnityEngine.Object.FindFirstObjectByType<PlayerController>();
@@ -161,6 +204,156 @@ public static class ArenaEffectsSetup
         AssetDatabase.SaveAssets();
         Selection.activeGameObject = root;
         Debug.Log("Arena Feel setup complete: 12 event-driven feedback players, Cinemachine impulse and bloom receiver.");
+    }
+
+    [MenuItem("Tools/Effects/Upgrade Arena Visual Feedback")]
+    public static void UpgradeVisuals()
+    {
+        if (Application.isPlaying) throw new InvalidOperationException("Exit Play Mode before editing feedback assets.");
+        const string pack = "Assets/UnityTechnologies/ParticlePack/EffectExamples/";
+        Material ice = CreateSurface("IceFragments", "Universal Render Pipeline/Particles/Lit",
+            pack + "Magic Effects/Textures/IceGrey.png");
+        ice.SetFloat("_Smoothness", 0.88f);
+        ice.SetColor("_BaseColor", new Color(0.78f, 0.88f, 0.92f, 1f));
+        ice.SetTexture("_BumpMap", AssetDatabase.LoadAssetAtPath<Texture2D>(pack + "Magic Effects/Textures/IceNormals.tif"));
+        ice.EnableKeyword("_NORMALMAP");
+        ice.SetFloat("_BumpScale", 0.35f);
+        Material mist = CreateSurface("ColdMist", "Universal Render Pipeline/Particles/Unlit",
+            pack + "Smoke & Steam Effects/Textures/SmokePuff.png");
+        Material frost = CreateSurface("GroundFrost", "Universal Render Pipeline/Particles/Unlit", "Assets/VFX/FrostPatch.png");
+        Mesh shard = null;
+        foreach (UnityEngine.Object asset in AssetDatabase.LoadAllAssetsAtPath(pack + "Magic Effects/Models/IceShard.FBX"))
+            if (asset is Mesh mesh) { shard = mesh; break; }
+        if (!shard) throw new InvalidOperationException("ParticlePack IceShard mesh is missing.");
+        float meshSize = Mathf.Max(shard.bounds.size.x, shard.bounds.size.y, shard.bounds.size.z);
+        GameObject root = PrefabUtility.LoadPrefabContents(PrefabPath);
+        try
+        {
+            foreach (MMF_Player feedback in root.GetComponentsInChildren<MMF_Player>(true))
+            {
+                if (!Enum.TryParse(feedback.name, out GameplayEffect trigger)) continue;
+                // Rebuild only visual layers; keep authored sound and camera feedback.
+                feedback.FeedbacksList.RemoveAll(effect => effect is MMF_Particles);
+                foreach (ParticleSystem old in feedback.GetComponentsInChildren<ParticleSystem>(true))
+                    UnityEngine.Object.DestroyImmediate(old.gameObject);
+                foreach (MMF_Feedback effect in feedback.FeedbacksList)
+                    if (effect is MMF_Bloom_URP) effect.Active = false;
+                bool shot = trigger == GameplayEffect.Shot;
+                bool ground = trigger == GameplayEffect.Dodge || trigger == GameplayEffect.Landing;
+                bool impact = trigger == GameplayEffect.Hit || trigger == GameplayEffect.CriticalHit || trigger == GameplayEffect.Kill;
+                bool strong = trigger == GameplayEffect.CriticalHit || trigger == GameplayEffect.Kill;
+                bool celebration = trigger == GameplayEffect.LevelUp || trigger == GameplayEffect.RewardSelected || trigger == GameplayEffect.MissionComplete;
+                Color tint = celebration ? new Color(0.75f, 0.65f, 0.42f) : new Color(0.7f, 0.82f, 0.88f);
+                if (trigger == GameplayEffect.PlayerDamage || trigger == GameplayEffect.BossWave)
+                    tint = new Color(0.46f, 0.36f, 0.32f);
+                if (shot || impact || ground)
+                {
+                    ParticleSystem fragments = AddLayer(feedback, "Ice fragments", ice, Color.white,
+                        strong ? 22 : ground ? 14 : shot ? 4 : 12, 0.45f, strong ? 1.05f : 0.8f,
+                        0.12f / meshSize, (strong ? 0.5f : 0.3f) / meshSize, shot ? 0.4f : 1.2f, strong ? 4.5f : 2.8f);
+                    var renderer = fragments.GetComponent<ParticleSystemRenderer>();
+                    renderer.renderMode = ParticleSystemRenderMode.Mesh;
+                    renderer.mesh = shard;
+                    var main = fragments.main;
+                    main.gravityModifier = 0.75f;
+                    main.startRotation3D = true;
+                    main.startRotationX = new ParticleSystem.MinMaxCurve(-Mathf.PI, Mathf.PI);
+                    main.startRotationY = new ParticleSystem.MinMaxCurve(-Mathf.PI, Mathf.PI);
+                    var rotation = fragments.rotationOverLifetime;
+                    rotation.enabled = true;
+                    rotation.z = new ParticleSystem.MinMaxCurve(-5f, 5f);
+                    var limit = fragments.limitVelocityOverLifetime;
+                    limit.enabled = true;
+                    limit.limit = 2.5f;
+                    limit.dampen = 0.3f;
+                    if (ground)
+                    {
+                        var shape = fragments.shape;
+                        shape.shapeType = ParticleSystemShapeType.Hemisphere;
+                        shape.rotation = new Vector3(-90f, 0f, 0f);
+                    }
+                }
+                ParticleSystem vapor = AddLayer(feedback, "Cold vapor", mist, new Color(tint.r, tint.g, tint.b, shot ? 0.15f : 0.38f),
+                    shot ? 2 : strong ? 9 : 6, 0.35f, shot ? 0.5f : 1.25f, shot ? 0.2f : 0.5f,
+                    strong ? 1.6f : 0.9f, 0.12f, ground ? 1.1f : 0.65f);
+                var vaporMain = vapor.main;
+                vaporMain.gravityModifier = -0.015f;
+                var vaporSize = vapor.sizeOverLifetime;
+                vaporSize.size = new ParticleSystem.MinMaxCurve(1f, AnimationCurve.EaseInOut(0f, 0.35f, 1f, 1.4f));
+                var drift = vapor.noise;
+                drift.enabled = true;
+                drift.strength = 0.18f;
+                drift.frequency = 0.7f;
+                drift.scrollSpeed = 0.25f;
+                if (impact && frost.GetTexture("_BaseMap"))
+                {
+                    AddLayer(feedback, "Crystal fracture", frost, new Color(0.82f, 0.92f, 1f, 0.55f),
+                        1, 0.16f, 0.22f, strong ? 1.3f : 0.8f, strong ? 1.6f : 1f, 0f, 0f);
+                }
+                if (ground && frost.GetTexture("_BaseMap"))
+                {
+                    ParticleSystem patch = AddLayer(feedback, "Settled frost", frost, new Color(0.8f, 0.88f, 0.9f, 0.65f),
+                        1, 1.6f, 2f, 1.3f, 1.8f, 0f, 0f);
+                    var shape = patch.shape;
+                    shape.enabled = false;
+                    patch.GetComponent<ParticleSystemRenderer>().renderMode = ParticleSystemRenderMode.HorizontalBillboard;
+                }
+                EditorUtility.SetDirty(feedback);
+            }
+            PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
+        }
+        finally { PrefabUtility.UnloadPrefabContents(root); }
+        EditorUtility.SetDirty(ice);
+        AssetDatabase.SaveAssets();
+        Debug.Log("Arena visuals rebuilt with lit ice fragments, cold vapor and settled frost; arcade rings removed.");
+    }
+
+    private static Material CreateSurface(string name, string shaderName, string texturePath)
+    {
+        string path = AssetFolder + "/" + name + ".mat";
+        Material material = AssetDatabase.LoadAssetAtPath<Material>(path);
+        if (!material)
+        {
+            material = new Material(Shader.Find(shaderName));
+            AssetDatabase.CreateAsset(material, path);
+        }
+        material.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>(texturePath));
+        material.SetColor("_BaseColor", Color.white);
+        material.SetFloat("_Surface", 1f);
+        material.SetFloat("_Blend", 0f);
+        material.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
+        material.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
+        material.SetFloat("_ZWrite", 0f);
+        material.SetFloat("_Cull", 0f);
+        material.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+        material.renderQueue = 3000;
+        EditorUtility.SetDirty(material);
+        return material;
+    }
+
+    private static ParticleSystem AddLayer(MMF_Player feedback, string name, Material material, Color color,
+        int count, float minLife, float maxLife, float minSize, float maxSize, float minSpeed, float maxSpeed)
+    {
+        ParticleSystem system = CreateParticles(feedback.transform, material, color, maxLife, false);
+        system.name = name;
+        var main = system.main;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(minLife, maxLife);
+        main.startSize = new ParticleSystem.MinMaxCurve(minSize, maxSize);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(minSpeed, maxSpeed);
+        main.startRotation = new ParticleSystem.MinMaxCurve(-Mathf.PI, Mathf.PI);
+        main.gravityModifier = 0f;
+        main.maxParticles = 128;
+        var fade = system.colorOverLifetime;
+        var gradient = new Gradient();
+        gradient.SetKeys(new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+            new[] { new GradientAlphaKey(0f, 0f), new GradientAlphaKey(1f, 0.06f), new GradientAlphaKey(0.7f, 0.45f), new GradientAlphaKey(0f, 1f) });
+        fade.color = gradient;
+        feedback.AddFeedback(new MMF_Particles
+        {
+            Label = name, BoundParticleSystem = system, Mode = MMF_Particles.Modes.Emit,
+            MoveToPosition = true, EmitCount = count, DeclaredDuration = maxLife
+        });
+        return system;
     }
 
     private static ParticleSystem CreateParticles(Transform parent, Material material, Color color, float lifetime, bool ring)

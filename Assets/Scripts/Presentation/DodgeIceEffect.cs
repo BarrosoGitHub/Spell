@@ -78,7 +78,7 @@ public sealed class DodgeIceEffect : MonoBehaviour
         VisualEffect patch = patches[nextPatch];
         nextPatch = (nextPatch + 1) % patches.Length;
         patch.transform.SetPositionAndRotation(hit.point + hit.normal * 0.025f,
-            Quaternion.FromToRotation(Vector3.forward, hit.normal));
+            Quaternion.FromToRotation(Vector3.forward, hit.normal) * Quaternion.AngleAxis(nextPatch * 137.5f, Vector3.forward));
         patch.Reinit();
         patch.Play();
     }

@@ -7,6 +7,7 @@ public sealed class DebugManager : MonoBehaviour
     [SerializeField] private bool showEnemyLevels = true;
     [SerializeField] private bool showPlayerStats = true;
     [SerializeField] private bool showAttackRange = true;
+    [SerializeField] private bool showDamageNumbers = true;
     [SerializeField] private bool showHoldHighlights;
     [SerializeField] private bool showTraversalRays;
 
@@ -14,6 +15,7 @@ public sealed class DebugManager : MonoBehaviour
     [SerializeField] private bool logCombat;
     [SerializeField] private bool logMissionStates;
 
+    private readonly DamageNumbersDebugModule damageNumbers = new DamageNumbersDebugModule();
     private readonly AttackRangeDebugModule attackRange = new AttackRangeDebugModule();
     private readonly GeometryDebugModule geometry = new GeometryDebugModule();
     private readonly GameplayLoggingDebugModule logging = new GameplayLoggingDebugModule();
@@ -40,10 +42,12 @@ public sealed class DebugManager : MonoBehaviour
             nextDiscovery = Time.unscaledTime + 1f;
             player = GameManager.Instance != null ? GameManager.Instance.playerController : null;
             viewCamera = Camera.main;
+            if (!interactions) interactions = EntityManager.Instance;
             if (missions == null) missions = FindAnyObjectByType<MissionManager>();
             if (showPursuitIndicators || showEnemyLevels) enemyLabels.Refresh();
         }
         if (!showPursuitIndicators && !showEnemyLevels) enemyLabels.Clear();
+        damageNumbers.Bind(showDamageNumbers ? interactions : null, viewCamera, transform);
         logging.LogCombat = logCombat;
         logging.LogMissions = logMissionStates;
         logging.Bind(interactions, missions != null ? missions.selectedMission : null);
@@ -62,6 +66,7 @@ public sealed class DebugManager : MonoBehaviour
 
     private void OnDisable()
     {
+        damageNumbers.Clear();
         attackRange.Clear();
         logging.Clear();
         traversal.Clear();
