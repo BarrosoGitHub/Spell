@@ -11,6 +11,12 @@
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
 .utmp/
+# Local OS metadata and Unity Version Control private copies
+.DS_Store
+*.private
+*.private.meta
+*.private.[0-9]*
+
 /CleanupArchive/
 /[Ll]ibrary/
 /[Tt]emp/
