@@ -143,6 +143,7 @@ See [building navigation](building-navmesh.md) and the [foot placement component
 
 ## Supporting systems and prototype foundations
 
+- `Currency` is an abstract, serializable DTO containing a `Balance` field. `EssenceCurrency` is its first concrete type, intended for persistent stat upgrades. `CurrencyManager` holds the currencies, currently exposing its Inspector-configurable Essence DTO through `Essence`. Earning, spending, validation, persistence, and upgrade purchases are not implemented; the manager is not wired into scenes yet.
 - DebugManager's **Show Persistent Stat Levels** toggle displays a test panel for all persistent levels, with plus/minus and a single-save reset. Assign its Persistent Stat Manager reference. The panel can authenticate/load the player and blocks overlapping button operations; Play Mode validation remains pending.
 - `CloudSavePersistentStatStorage` can be assigned to `PersistentStatManager` to save authenticated player levels under one Cloud Save key. Authentication is required before loading. Scene setup and live round-trip validation remain pending. See [Cloud Save](cloud-save.md).
 - `GameManager` starts anonymous Unity Authentication through its owned `PlayerAuthentication` service. Online callers can await sign-in and read the player ID; gameplay continues if authentication fails. Package resolution and live sign-in validation remain pending. See [authentication](authentication.md).
