@@ -7,6 +7,8 @@ public class GameManager : MonoBehaviour
 
     public static GameManager Instance;
 
+    public PlayerAuthentication Authentication { get; } = new PlayerAuthentication();
+
     [SerializeField]
     private GameState gameState;
     public GameState GameState
@@ -34,14 +36,32 @@ public class GameManager : MonoBehaviour
         else
         {
             Destroy(gameObject);
+            return;
         }
         GetPlayerController();
 
     }
 
-    void Start()
+    private async void Start()
     {
+        if (Instance != this)
+            return;
+
         GameState = GameState.Playing;
+
+        try
+        {
+            await Authentication.SignInAsync();
+        }
+        catch (Exception exception)
+        {
+            if (this != null)
+            {
+                Debug.LogError("Unity Authentication failed. Check the Services project link and network connection. " +
+                    "Call Authentication.SignInAsync() to retry.", this);
+                Debug.LogException(exception, this);
+            }
+        }
     }
 
     private void GetPlayerController()

@@ -143,6 +143,8 @@ See [building navigation](building-navmesh.md) and the [foot placement component
 
 ## Supporting systems and prototype foundations
 
+- `CloudSavePersistentStatStorage` can be assigned to `PersistentStatManager` to save authenticated player levels under one Cloud Save key. Authentication is required before loading. Scene setup and live round-trip validation remain pending. See [Cloud Save](cloud-save.md).
+- `GameManager` starts anonymous Unity Authentication through its owned `PlayerAuthentication` service. Online callers can await sign-in and read the player ID; gameplay continues if authentication fails. Package resolution and live sign-in validation remain pending. See [authentication](authentication.md).
 - A persistent `GameManager` tracks MainMenu, Playing, and Paused states and locates the player. It currently enters Playing during startup; this is not a complete menu or pause flow.
 - A wave manager generates group specifications and enemy counts, advances timed wave phases, and publishes events. The current completion timer is a fixed three seconds, and enemy spawning is not performed by the wave manager itself.
 - A network ownership component enables the local owner's controller. This is groundwork, not a complete multiplayer session, movement replication, or mission synchronization system.

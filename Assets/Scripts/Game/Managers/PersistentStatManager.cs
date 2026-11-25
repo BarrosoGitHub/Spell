@@ -24,13 +24,8 @@ public sealed class PersistentStatManager : MonoBehaviour
             throw new ArgumentNullException(nameof(target));
 
         PersistentStatData loadedLevels = await storage.LoadAsync(id);
-        RemoveModifier();
-
         playerId = id;
-        entity = target;
-        Levels = loadedLevels ?? new PersistentStatData();
-        ApplyModifier();
-        OnLevelsChanged?.Invoke(Levels);
+        ApplyLevels(loadedLevels ?? new PersistentStatData(), target);
     }
 
     public async Task SetLevelAsync(PersistentStatType stat, int level)
@@ -41,16 +36,17 @@ public sealed class PersistentStatManager : MonoBehaviour
         PersistentStatData updatedLevels = Levels.WithLevel(stat, level);
         await storage.SaveAsync(playerId, updatedLevels);
 
-        Levels = updatedLevels;
-        RemoveModifier();
-        ApplyModifier();
-        OnLevelsChanged?.Invoke(Levels);
+        ApplyLevels(updatedLevels, entity);
     }
 
-    private void ApplyModifier()
+    private void ApplyLevels(PersistentStatData levels, Entity target)
     {
+        RemoveModifier();
+        entity = target;
+        Levels = levels;
         modifier = new PersistentStat(profile, Levels);
         entity.AddStatModifier(modifier);
+        OnLevelsChanged?.Invoke(Levels);
     }
 
     private void RemoveModifier()

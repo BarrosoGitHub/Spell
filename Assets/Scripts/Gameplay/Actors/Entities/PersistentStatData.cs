@@ -55,28 +55,24 @@ public sealed class PersistentStatData
             throw new ArgumentOutOfRangeException(nameof(level));
 
         PersistentStatData copy = (PersistentStatData)MemberwiseClone();
-        copy.SetLevel(stat, level);
-        return copy;
-    }
-
-    private void SetLevel(PersistentStatType stat, int level)
-    {
         switch (stat)
         {
-            case PersistentStatType.MaxHealth: maxHealth = level; break;
-            case PersistentStatType.BaseDamage: baseDamage = level; break;
-            case PersistentStatType.AttackSpeed: attackSpeed = level; break;
-            case PersistentStatType.MovementSpeed: movementSpeed = level; break;
-            case PersistentStatType.Defense: defense = level; break;
-            case PersistentStatType.CriticalChance: criticalChance = level; break;
-            case PersistentStatType.CriticalDamage: criticalDamage = level; break;
-            case PersistentStatType.MultishotChance: multishotChance = level; break;
-            case PersistentStatType.Range: range = level; break;
-            case PersistentStatType.MaxHealthPercentage: maxHealthPercentage = level; break;
-            case PersistentStatType.BaseDamagePercentage: baseDamagePercentage = level; break;
-            case PersistentStatType.AttackSpeedPercentage: attackSpeedPercentage = level; break;
-            case PersistentStatType.DefensePercentage: defensePercentage = level; break;
+            case PersistentStatType.MaxHealth: copy.maxHealth = level; break;
+            case PersistentStatType.BaseDamage: copy.baseDamage = level; break;
+            case PersistentStatType.AttackSpeed: copy.attackSpeed = level; break;
+            case PersistentStatType.MovementSpeed: copy.movementSpeed = level; break;
+            case PersistentStatType.Defense: copy.defense = level; break;
+            case PersistentStatType.CriticalChance: copy.criticalChance = level; break;
+            case PersistentStatType.CriticalDamage: copy.criticalDamage = level; break;
+            case PersistentStatType.MultishotChance: copy.multishotChance = level; break;
+            case PersistentStatType.Range: copy.range = level; break;
+            case PersistentStatType.MaxHealthPercentage: copy.maxHealthPercentage = level; break;
+            case PersistentStatType.BaseDamagePercentage: copy.baseDamagePercentage = level; break;
+            case PersistentStatType.AttackSpeedPercentage: copy.attackSpeedPercentage = level; break;
+            case PersistentStatType.DefensePercentage: copy.defensePercentage = level; break;
             default: throw new ArgumentOutOfRangeException(nameof(stat), stat, null);
         }
+
+        return copy;
     }
 }
