@@ -24,6 +24,8 @@ public sealed class PersistentStatManager : MonoBehaviour
             throw new ArgumentNullException(nameof(target));
 
         PersistentStatData loadedLevels = await storage.LoadAsync(id);
+        if (this == null || target == null)
+            return;
         playerId = id;
         ApplyLevels(loadedLevels ?? new PersistentStatData(), target);
     }
@@ -36,7 +38,21 @@ public sealed class PersistentStatManager : MonoBehaviour
         PersistentStatData updatedLevels = Levels.WithLevel(stat, level);
         await storage.SaveAsync(playerId, updatedLevels);
 
+        if (this == null || entity == null)
+            return;
         ApplyLevels(updatedLevels, entity);
+    }
+
+    public async Task ResetAsync()
+    {
+        if (!IsLoaded)
+            throw new InvalidOperationException("Load the player's persistent stats first.");
+
+        PersistentStatData resetLevels = new PersistentStatData();
+        await storage.SaveAsync(playerId, resetLevels);
+        if (this == null || entity == null)
+            return;
+        ApplyLevels(resetLevels, entity);
     }
 
     private void ApplyLevels(PersistentStatData levels, Entity target)

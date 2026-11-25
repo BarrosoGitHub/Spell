@@ -6,6 +6,8 @@ public sealed class DebugManager : MonoBehaviour
     [SerializeField] private bool showPursuitIndicators = true;
     [SerializeField] private bool showEnemyLevels = true;
     [SerializeField] private bool showPlayerStats = true;
+    [SerializeField] private bool showPersistentStatLevels;
+    [SerializeField] private PersistentStatManager persistentStatManager;
     [SerializeField] private bool showAttackRange = true;
     [SerializeField] private bool showDamageNumbers = true;
     [SerializeField] private bool showHoldHighlights;
@@ -24,6 +26,7 @@ public sealed class DebugManager : MonoBehaviour
 
     private readonly EnemyLabelsDebugModule enemyLabels = new EnemyLabelsDebugModule();
     private readonly PlayerStatsDebugModule playerStats = new PlayerStatsDebugModule();
+    private readonly PersistentStatLevelsDebugModule persistentStatLevels = new PersistentStatLevelsDebugModule();
     private readonly TraversalDebugModule traversal = new TraversalDebugModule();
     private PlayerController player;
     private Camera viewCamera;
@@ -59,6 +62,13 @@ public sealed class DebugManager : MonoBehaviour
 
     private void OnGUI()
     {
+        if (showPersistentStatLevels)
+        {
+            GameManager game = GameManager.Instance;
+            persistentStatLevels.Draw(persistentStatManager,
+                game != null ? game.Authentication : null,
+                player != null ? player.entity : null);
+        }
         if (showPlayerStats) playerStats.Draw();
         if (showPursuitIndicators || showEnemyLevels)
             enemyLabels.Draw(viewCamera, showPursuitIndicators, showEnemyLevels);

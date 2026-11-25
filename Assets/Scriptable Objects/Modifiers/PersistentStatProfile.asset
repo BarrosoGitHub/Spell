@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 770556af62e04bf2a2c3d45d020383fa, type: 3}
+  m_Name: PersistentStatProfile
+  m_EditorClassIdentifier: Assembly-CSharp::PersistentStatProfile
+  maxHealth: 1
+  baseDamage: 1
+  attackSpeed: 1
+  movementSpeed: 1
+  defense: 1
+  criticalChance: 1
+  criticalDamage: 1
+  multishotChance: 1
+  range: 1
+  maxHealthPercentage: 1
+  baseDamagePercentage: 1
+  attackSpeedPercentage: 1
+  defensePercentage: 1

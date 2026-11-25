@@ -6018,7 +6018,7 @@ PrefabInstance:
     - target: {fileID: 2613164055846521571, guid: 3c190a89d9a66814699dba519e7c6bb9, type: 3}
       propertyPath: m_Data.m_ConstrainedObject
       value: 
-      objectReference: {fileID: 1982935105}
+      objectReference: {fileID: 0}
     - target: {fileID: 2613164055846521571, guid: 3c190a89d9a66814699dba519e7c6bb9, type: 3}
       propertyPath: m_Data.m_SourceObjects.m_Item0.weight
       value: 0.5
@@ -6587,6 +6587,7 @@ MonoBehaviour:
   zoomPerNotch: 2
   rotationPerPixel: 0.18
   zoomSmoothTime: 0.15
+  rotationSmoothTime: 0.12
 --- !u!114 &497693244
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12057,7 +12058,10 @@ MonoBehaviour:
   showPursuitIndicators: 1
   showEnemyLevels: 1
   showPlayerStats: 0
+  showPersistentStatLevels: 0
+  persistentStatManager: {fileID: 969947719}
   showAttackRange: 1
+  showDamageNumbers: 1
   showHoldHighlights: 0
   showTraversalRays: 0
   showGeometry: 0
@@ -12719,6 +12723,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b1ecd2197d84f5b90fb021acea7229a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MissionManager
+--- !u!114 &969947718
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 969947704}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d8acd776a5a4d8da714212810de858c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CloudSavePersistentStatStorage
+--- !u!114 &969947719
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 969947704}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bcaf152908d4cae979cb6cc44f2a024, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PersistentStatManager
+  profile: {fileID: 11400000, guid: 8fb897a7d2d0a41fd8740703dda3b96b, type: 2}
+  storage: {fileID: 969947718}
 --- !u!1001 &971466287
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -25452,11 +25482,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5381386135662447605, guid: 21a364ddeffc797439f2a5721660b0e6, type: 3}
   m_PrefabInstance: {fileID: 1973748381}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &1982935105 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 320922132769512960, guid: 3c190a89d9a66814699dba519e7c6bb9, type: 3}
-  m_PrefabInstance: {fileID: 483351901}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1982946056
 GameObject:
   m_ObjectHideFlags: 0
@@ -26110,6 +26135,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8593854198329142494, guid: d852dcf5045f1a944b358f10ed49ce68, type: 3}
       insertIndex: -1
       addedObject: {fileID: 969947715}
+    - targetCorrespondingSourceObject: {fileID: 8593854198329142494, guid: d852dcf5045f1a944b358f10ed49ce68, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 969947719}
+    - targetCorrespondingSourceObject: {fileID: 8593854198329142494, guid: d852dcf5045f1a944b358f10ed49ce68, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 969947718}
   m_SourcePrefab: {fileID: 100100000, guid: d852dcf5045f1a944b358f10ed49ce68, type: 3}
 --- !u!1001 &2085723193
 PrefabInstance:

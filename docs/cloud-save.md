@@ -16,7 +16,9 @@ await persistentStatManager.LoadAsync(authentication.PlayerId, playerEntity);
 
 Call these APIs on Unity's main thread. The storage provider checks that services are initialized, a player is signed in, and the requested ID matches the signed-in player. It does not sign in or discover GameManager itself.
 
-Updates continue through `await persistentStatManager.SetLevelAsync(stat, level)`. The manager applies an upgrade and emits its notification only after the save succeeds. Caller-owned setup should stop using a target if its scene is torn down while loading; the existing manager does not cancel pending operations.
+Updates continue through `await persistentStatManager.SetLevelAsync(stat, level)`. The manager applies an upgrade and emits its notification only after the save succeeds. ResetAsync saves zero levels in one request before applying them. Completed requests do not apply modifiers if the manager or target has been destroyed; SDK requests themselves are not cancelled.
+
+For the test panel, enable **Show Persistent Stat Levels** on DebugManager and assign its **Persistent Stat Manager** field. The single PersistentStatLevelsDebugModule draws all 13 levels with plus/minus controls and a reset button. If levels are not loaded, use **Load player levels** to authenticate and load the current player. Each click writes through the assigned storage provider, including Cloud Save. Controls are disabled during a pending request; levels cannot go below zero or overflow. Disabling the toggle or DebugManager hides the panel; an already submitted request finishes and remains tracked if the panel is shown again. No test UI GameObjects or subscriptions are retained.
 
 ## Data and failure behavior
 

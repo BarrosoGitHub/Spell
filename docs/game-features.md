@@ -143,6 +143,7 @@ See [building navigation](building-navmesh.md) and the [foot placement component
 
 ## Supporting systems and prototype foundations
 
+- DebugManager's **Show Persistent Stat Levels** toggle displays a test panel for all persistent levels, with plus/minus and a single-save reset. Assign its Persistent Stat Manager reference. The panel can authenticate/load the player and blocks overlapping button operations; Play Mode validation remains pending.
 - `CloudSavePersistentStatStorage` can be assigned to `PersistentStatManager` to save authenticated player levels under one Cloud Save key. Authentication is required before loading. Scene setup and live round-trip validation remain pending. See [Cloud Save](cloud-save.md).
 - `GameManager` starts anonymous Unity Authentication through its owned `PlayerAuthentication` service. Online callers can await sign-in and read the player ID; gameplay continues if authentication fails. Package resolution and live sign-in validation remain pending. See [authentication](authentication.md).
 - A persistent `GameManager` tracks MainMenu, Playing, and Paused states and locates the player. It currently enters Playing during startup; this is not a complete menu or pause flow.
