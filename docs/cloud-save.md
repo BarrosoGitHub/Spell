@@ -1,6 +1,6 @@
 # Cloud Save persistent stats
 
-CloudSavePersistentStatStorage implements the existing PersistentStatStorage contract using Unity Cloud Save Player Data (default access class). The authenticated player can read and write their levels. This is client-authoritative prototype storage; validated upgrades through Cloud Code and protected data are not implemented.
+CloudSavePersistentStatStorage implements the existing PersistentStatStorage contract using Unity Cloud Save Player Data (default access class). The authenticated player can read and write their levels. This remains client-authoritative prototype storage. The separate [cloud transaction path](transactions.md) uses protected data for currency and skill levels; it does not yet migrate or validate these persistent stat levels.
 
 ## Setup and usage
 
